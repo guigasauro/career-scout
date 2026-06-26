@@ -85,6 +85,10 @@
   /* Badges */
   .badge { display:inline-block; padding:1px 7px; border-radius:4px; font-size:11px; font-weight:700; }
   .badge-pos  { background:var(--green);  color:#000; }
+  .badge-pos-gk  { background:var(--yellow); color:#000; }
+  .badge-pos-def { background:var(--blue);   color:#000; }
+  .badge-pos-mid { background:var(--green);  color:#000; }
+  .badge-pos-att { background:var(--red);    color:#fff; }
   .badge-freq { background:var(--yellow); color:#000; }
   .badge-perm { background:#1e3a2a; color:var(--green); border:1px solid #2a5a3a; }
   .badge-loan { background:#1e2a3a; color:var(--blue);  border:1px solid #2a3a5a; }
@@ -143,7 +147,7 @@
       </div>
     </div>
     <div class="form-footer">
-      <label>Histórico (anos)<input type="number" id="inp-history" value="7" min="2" max="15" disabled></label>
+      <label>Histórico (temporadas)<input type="number" id="inp-history" value="5" min="2" max="15" disabled></label>
       <label>Jogadores por posição<input type="number" id="inp-topn" value="20" min="5" max="50" disabled></label>
       <button id="btn-scout" disabled onclick="runScout()">Gerar candidatos</button>
       <span class="hint" id="hint"></span>
@@ -273,6 +277,59 @@ function fmt(v, dec = 1) {
 }
 function fmtAge(v) { return v != null ? `${v}` : '—'; }
 function pct(v, total) { return total ? Math.round(v / total * 100) : 0; }
+function arrivalRowHtml(t) {
+  return `<tr>
+    <td class="muted">${arrivalDate(t)}</td>
+    <td>${typeLabel(t.transfer_type)}</td>
+    <td style="font-weight:600">${t.player_name}</td>
+    <td><span class="badge ${posBadge(t.position_norm, false)}">${t.position_norm || '?'}</span></td>
+    <td>${fmt(t.fee)}</td>
+    <td>${t.age ?? '—'}</td>
+    <td>${t.nationality || '—'}</td>
+    <td class="trunc muted" title="${(t.from_club||'').replace(/"/g,'&quot;')}">${t.from_club || '—'}</td>
+    <td class="trunc muted" title="${(t.from_league||'').replace(/"/g,'&quot;')}">${t.from_league || '—'}</td>
+    <td><a href="${t.player_url}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
+  </tr>`;
+}
+function loadAllArrivals(key, btn) {
+  const tbody = document.getElementById(key);
+  if (!tbody) return;
+  tbody.innerHTML = (window._arrivals[key] || []).map(arrivalRowHtml).join('');
+  btn.remove();
+}
+function posBadge(pos, isFreq) {
+  if (isFreq) return 'badge-freq';
+  const p = pos || '';
+  if (p === 'GK') return 'badge-pos-gk';
+  if (['CB','LB','RB','LWB','RWB'].includes(p)) return 'badge-pos-def';
+  if (['CDM','CM','CAM','LM','RM'].includes(p)) return 'badge-pos-mid';
+  if (['LW','RW','CF','ST','ATT'].includes(p)) return 'badge-pos-att';
+  if (['DEF'].includes(p)) return 'badge-pos-def';
+  if (['MID'].includes(p)) return 'badge-pos-mid';
+  return 'badge-pos';
+}
+function typeLabel(t) {
+  if (t === 'permanent') return '<span class="badge badge-perm">perm</span>';
+  if (t === 'loan')      return '<span class="badge badge-loan">loan</span>';
+  return '<span class="badge badge-free">free</span>';
+}
+function arrivalDate(t) {
+  if (t.window === 'Winter') return `Jan ${t.season + 1}`;
+  if (t.window === 'Summer') return `Jul ${t.season}`;
+  return String(t.season);
+}
+function countBy(arr, fn) {
+  const c = {};
+  arr.forEach(x => { const k = fn(x); if (k) c[k] = (c[k] || 0) + 1; });
+  return c;
+}
+function togglePosDetail(id, btn) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : '';
+  btn.textContent = open ? 'ver mais ▾' : 'ver menos ▴';
+}
 
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
@@ -340,64 +397,95 @@ function renderOverview(d) {
     <div class="chip"><div class="label">Permanentes</div><div class="value green">${d.n_permanent}</div></div>
     <div class="chip"><div class="label">Empréstimos</div><div class="value blue">${d.n_loan}</div></div>
     <div class="chip"><div class="label">Free</div><div class="value yellow">${d.n_free}</div></div>
-    <div class="chip"><div class="label">Fee média (perm.)</div><div class="value">${fmt(f.perm_mean)}</div></div>
-    <div class="chip"><div class="label">Fee mediana (perm.)</div><div class="value">${fmt(f.perm_median)}</div></div>
-    <div class="chip"><div class="label">Fee máxima</div><div class="value">${fmt(f.max)}</div></div>
-    <div class="chip"><div class="label">Fee total gasta</div><div class="value purple">${fmt(f.total)}</div></div>
+    <div class="chip"><div class="label">Valor médio pago (perm.)</div><div class="value">${fmt(f.perm_mean)}</div></div>
+    <div class="chip"><div class="label">Valor máximo pago</div><div class="value">${fmt(f.max)}</div></div>
+    <div class="chip"><div class="label">Total gasto</div><div class="value purple">${fmt(f.total)}</div></div>
     <div class="chip"><div class="label">Idade média</div><div class="value">${a.mean ?? '—'}</div></div>
     <div class="chip"><div class="label">Faixa de idade</div><div class="value">${a.min ?? '—'}–${a.max ?? '—'}</div></div>
   </div>`;
 
-  // últimas 5 temporadas (by_season já vem ordenado do mais recente)
-  const last5seasons = Object.fromEntries(Object.entries(d.by_season).slice(0, 5));
+  // all seasons com label "2012/13"
+  const seasonLabel = y => `${y}/${String(Number(y)+1).slice(2)}`;
+  const bySeasonLabeled = Object.fromEntries(Object.entries(d.by_season).map(([y,n]) => [seasonLabel(y), n]));
 
   const dist = `<div class="dist-grid">
-    ${distBlock('Últimas temporadas', last5seasons, total, 'var(--blue)', 5)}
+    ${distBlock('Últimas temporadas', bySeasonLabeled, total, 'var(--blue)', 5)}
     ${distBlock('Posições mais contratadas', d.by_position, total, 'var(--green)', 5)}
     ${distBlock('Nacionalidades', d.by_nationality, total, 'var(--purple)', 5)}
     ${distBlock('Ligas de origem', d.by_from_league, total, 'var(--yellow)', 5)}
     ${distBlock('Clubes de origem', d.by_from_club, total, 'var(--muted)', 5)}
   </div>`;
 
-  const profileRows = d.profiles.map(p => `<tr>
-    <td><span class="badge ${p.is_most_frequent ? 'badge-freq' : 'badge-pos'}">${p.position_norm}</span></td>
-    <td>${p.n}</td><td>${p.n_permanent}</td>
-    <td>${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
-    <td>${fmt(p.fee_mean)}</td>
-    <td>${p.nationality_mode || '<span class="muted">—</span>'}</td>
-    <td class="trunc muted" title="${p.from_league_mode || ''}">${p.from_league_mode || '—'}</td>
-    <td class="trunc muted" title="${p.from_club_mode || ''}">${p.from_club_mode || '—'}</td>
-  </tr>`).join('');
+  const LINE_MEMBERS = {
+    ATT: ['LW','RW','CF','ST'],
+    DEF: ['CB','LB','RB','LWB','RWB'],
+    MID: ['CDM','CM','CAM','LM','RM'],
+    GK:  ['GK'],
+  };
+  const posSet = pos => new Set(LINE_MEMBERS[pos] || [pos]);
+
+  const profileRows = d.profiles.map((p, i) => {
+    const detailId = `pd-${i}-${Date.now()}`;
+    const members = posSet(p.position_norm);
+    const pa = d.arrivals.filter(t => members.has(t.position_norm));
+    const byNat    = countBy(pa, t => t.nationality);
+    const byLeague = countBy(pa, t => t.from_league);
+    const byClub   = countBy(pa, t => t.from_club);
+    const playerRows = pa.map(t => `<tr>
+      <td class="muted">${arrivalDate(t)}</td>
+      <td>${typeLabel(t.transfer_type)}</td>
+      <td style="font-weight:600">${t.player_name}</td>
+      <td>${fmt(t.fee)}</td>
+      <td>${t.age ?? '—'}</td>
+      <td>${t.nationality || '—'}</td>
+      <td class="trunc muted" title="${(t.from_club||'').replace(/"/g,'&quot;')}">${t.from_club || '—'}</td>
+      <td class="trunc muted" title="${(t.from_league||'').replace(/"/g,'&quot;')}">${t.from_league || '—'}</td>
+    </tr>`).join('');
+    return `<tr>
+      <td><span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span></td>
+      <td>${p.n}</td><td>${p.n_permanent}</td>
+      <td>${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
+      <td>${fmt(p.fee_mean)}</td>
+      <td>${p.nationality_mode || '<span class="muted">—</span>'}</td>
+      <td class="trunc muted" title="${p.from_league_mode || ''}">${p.from_league_mode || '—'}</td>
+      <td class="trunc muted" title="${p.from_club_mode || ''}">${p.from_club_mode || '—'}</td>
+      <td><span class="see-all" onclick="togglePosDetail('${detailId}',this)">ver mais ▾</span></td>
+    </tr>
+    <tr id="${detailId}" style="display:none"><td colspan="9" style="padding:0">
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:14px;background:#13141f;border-top:1px solid var(--border)">
+        <div class="dist-grid" style="grid-template-columns:repeat(3,1fr)">
+          ${distBlock('Nacionalidades', byNat, pa.length, 'var(--purple)', 5)}
+          ${distBlock('Ligas de origem', byLeague, pa.length, 'var(--yellow)', 5)}
+          ${distBlock('Clubes de origem', byClub, pa.length, 'var(--blue)', 5)}
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Data</th><th>Tipo</th><th>Jogador</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th></tr></thead>
+          <tbody>${playerRows}</tbody>
+        </table></div>
+      </div>
+    </td></tr>`;
+  }).join('');
 
   const profilesTable = `<div class="table-wrap"><table>
-    <thead><tr><th>Posição</th><th>n</th><th>n perm.</th><th>Idade média</th><th>Fee média</th><th>Nac. (moda)</th><th>Liga (moda)</th><th>Clube (moda)</th></tr></thead>
+    <thead><tr><th>Posição</th><th>n</th><th>n perm.</th><th>Idade média</th><th>Valor médio pago</th><th>Nac. (moda)</th><th>Liga (moda)</th><th>Clube (moda)</th><th></th></tr></thead>
     <tbody>${profileRows}</tbody>
   </table></div>`;
 
-  const typeLabel = t => {
-    if (t === 'permanent') return '<span class="badge badge-perm">perm</span>';
-    if (t === 'loan')      return '<span class="badge badge-loan">loan</span>';
-    return '<span class="badge badge-free">free</span>';
-  };
-  const arrivalRows = d.arrivals.map(t => `<tr>
-    <td class="muted">${t.season}/${String(t.season+1).slice(2)}</td>
-    <td class="muted">${t.window}</td>
-    <td>${typeLabel(t.transfer_type)}</td>
-    <td style="font-weight:600">${t.player_name}</td>
-    <td><span class="badge badge-pos">${t.position_norm || '?'}</span></td>
-    <td class="muted">${t.position_raw || '—'}</td>
-    <td>${t.age ?? '—'}</td>
-    <td>${t.nationality || '—'}</td>
-    <td class="trunc muted" title="${t.from_club || ''}">${t.from_club || '—'}</td>
-    <td class="trunc muted" title="${t.from_league || ''}">${t.from_league || '—'}</td>
-    <td>${fmt(t.fee)}</td>
-    <td><a href="${t.player_url}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
-  </tr>`).join('');
+  const arrivalRow = t => arrivalRowHtml(t);
+
+  const PAGE = 20;
+  const arrivals = d.arrivals;
+  const key = 'arr_' + Date.now();
+  window._arrivals = window._arrivals || {};
+  window._arrivals[key] = arrivals;
+  const initialRows = arrivals.slice(0, PAGE).map(arrivalRow).join('');
+  const hasMore = arrivals.length > PAGE;
 
   const arrivalsTable = `<div class="table-wrap"><table>
-    <thead><tr><th>Temporada</th><th>Janela</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Pos. raw</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th>Fee</th><th></th></tr></thead>
-    <tbody>${arrivalRows}</tbody>
-  </table></div>`;
+    <thead><tr><th>Data</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th></th></tr></thead>
+    <tbody id="${key}">${initialRows}</tbody>
+  </table></div>
+  ${hasMore ? `<span class="see-all" onclick="loadAllArrivals('${key}', this)">carregar mais (${arrivals.length - PAGE} restantes)</span>` : ''}`;
 
   return `
     <div class="card">
@@ -465,9 +553,9 @@ function renderPosition({ profile: p, candidates }) {
 
   return `<div class="card">
     <div class="card-header">
-      <span class="badge ${p.is_most_frequent ? 'badge-freq' : 'badge-pos'}">${p.position_norm}</span>
+      <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span>
       <span style="font-size:12px;color:var(--muted)">
-        n=${p.n} &nbsp;|&nbsp; idade ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; fee ${fmt(p.fee_mean)}
+        n=${p.n} &nbsp;|&nbsp; idade ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; valor pago ${fmt(p.fee_mean)}
         &nbsp;|&nbsp; nac. ${p.nationality_mode ?? '—'} &nbsp;|&nbsp; liga ${p.from_league_mode ?? '—'}
       </span>
     </div>

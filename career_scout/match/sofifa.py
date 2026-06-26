@@ -7,6 +7,14 @@ from typing import Optional
 from career_scout.models import PositionProfile
 
 # Pesos padrão (configuráveis via CLI)
+# Expande posições de linha (fallback do estágio 2) para posições finas do SoFIFA
+_LINE_MEMBERS: dict[str, list[str]] = {
+    "ATT": ["ST", "LW", "RW", "CF"],
+    "DEF": ["CB", "LB", "RB", "LWB", "RWB"],
+    "MID": ["CDM", "CM", "CAM", "LM", "RM"],
+    "GK":  ["GK"],
+}
+
 DEFAULT_WEIGHTS = {
     "value":       0.40,
     "age":         0.30,
@@ -61,10 +69,12 @@ def rank_candidates(
 ) -> list[Candidate]:
     w = weights or DEFAULT_WEIGHTS
 
-    # candidatos que jogam na posição do perfil, excluindo jogadores do próprio clube
+    # expande linha (ATT/DEF/MID) para as posições finas equivalentes
+    target_positions = set(_LINE_MEMBERS.get(profile.position_norm, [profile.position_norm]))
+
     pool = [
         p for p in players
-        if profile.position_norm in _parse_positions(p.get("player_positions", ""))
+        if target_positions & set(_parse_positions(p.get("player_positions", "")))
         and p.get("club_name") != exclude_club
     ]
     if not pool:

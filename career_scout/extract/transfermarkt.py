@@ -62,9 +62,9 @@ def _parse_value(text: str) -> float | None:
 def _classify_transfer(text: str) -> tuple[str, float | None]:
     """Retorna (transfer_type, fee). transfer_type: 'permanent' | 'loan' | 'free'."""
     t = text.strip().lower()
-    # "End of loan" pode ter data colada (ex.: "End of loan30/06/2014") — sempre fee=0
+    # "End of loan": retorno de empréstimo ao clube-pai — não é contratação, descartar
     if "end of loan" in t:
-        return "loan", 0.0
+        return "loan_return", 0.0
     if "loan fee:" in t or "loan transfer" in t:
         return "loan", _parse_value(text)
     if "loan" in t:
@@ -140,6 +140,8 @@ def parse_arrivals(html: str, club_name: str, season: int, window: str) -> list[
 
         if not player_name:
             continue
+        if transfer_type == "loan_return":
+            continue
 
         transfers.append(Transfer(
             club_name=club_name,
@@ -157,6 +159,37 @@ def parse_arrivals(html: str, club_name: str, season: int, window: str) -> list[
             fee=fee,
         ))
     return transfers
+
+
+def _dedup_arrivals(transfers: list[Transfer], club_name: str) -> list[Transfer]:
+    """Remove duplicatas e entradas irrelevantes.
+
+    - Promoções internas (from_club é base do próprio clube) → descartadas.
+    - Mesmo jogador em temporadas diferentes (ex.: loan 2013 + permanent 2015)
+      → mantém só a entrada mais relevante: permanent > free > loan;
+        em empate de tipo, mantém a temporada mais recente.
+    """
+    _priority = {"permanent": 0, "free": 1, "loan": 2}
+    seen: dict[str, Transfer] = {}
+    _YOUTH_MARKERS = ("u16", "u17", "u18", "u19", "u20", "u21", "u23",
+                      "primavera", "youth", "reserve", "b team", "ii", " b)")
+    club_lower = club_name.lower().removeprefix("ac ").removeprefix("fc ").removeprefix("as ")
+    for t in transfers:
+        fc = (t.from_club or "").lower()
+        if fc and (club_lower in fc or any(m in fc for m in _YOUTH_MARKERS)):
+            continue
+        key = t.player_name
+        if key not in seen:
+            seen[key] = t
+        else:
+            current = seen[key]
+            p_new, p_cur = _priority[t.transfer_type], _priority[current.transfer_type]
+            if p_new < p_cur or (p_new == p_cur and t.season > current.season):
+                seen[key] = t
+            elif _priority[t.transfer_type] == _priority[current.transfer_type]:
+                if (t.fee or 0) > (current.fee or 0):
+                    seen[key] = t
+    return list(seen.values())
 
 
 def get_arrivals(
@@ -179,4 +212,4 @@ def get_arrivals(
         transfers = parse_arrivals(html, club_name, season, window="Summer+Winter")
         all_transfers.extend(transfers)
         time.sleep(delay)
-    return all_transfers
+    return _dedup_arrivals(all_transfers, club_name)

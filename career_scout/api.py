@@ -173,7 +173,7 @@ class ScoutRequest(BaseModel):
     club_slug: str
     club_name: str
     fifa_edition: int   # ex.: 22 para FIFA 22; mapeia para players_22.csv e seasons até 2021
-    history: int = 7
+    history: int = 5
     top_n: int = 20
 
 
@@ -193,7 +193,7 @@ def _extract_or_load(req: ScoutRequest) -> list[Transfer]:
     if arrivals_path.exists():
         return load_transfers(arrivals_path)
     season_ceil = 2000 + req.fifa_edition - 1
-    seasons = list(range(season_ceil - req.history, season_ceil + 1))
+    seasons = list(range(season_ceil - req.history + 1, season_ceil + 1))
     transfers = get_arrivals(
         club_slug=req.club_slug,
         club_id=req.club_id,

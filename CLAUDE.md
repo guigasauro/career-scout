@@ -2,7 +2,7 @@
 
 > Título de trabalho: **career-scout**. Ferramenta de scouting para o Modo Carreira do FIFA/EA FC.
 > Esta é a fonte de verdade do projeto. Leia tudo antes de escrever ou alterar código.
-> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
+> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
 
 ---
 
@@ -307,7 +307,9 @@ para cada perfil de posição:
 4. ✅ **Estágio 3** — matching via dataset Kaggle `players_{year}.csv`. `league_name` disponível. `_normalize_league` mapeia nomes TM → Kaggle.
 5. ✅ **API FastAPI + frontend** — `career_scout/api.py` expõe os 3 estágios. `index.html` com fluxo FIFA → País → Liga → Clube → overview → candidatos.
 6. ✅ **Mapeamento TM ↔ SoFIFA** — `seed_clubs.py` raspa busca do TM para cada clube dos CSVs Kaggle, salva `data/club_mapping.json`. 150 clubes das 5 grandes ligas mapeados + correções manuais para mismatches do primeiro resultado de busca.
-7. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
+7. ✅ **Limpeza de chegadas** — `_dedup_arrivals`: descarte de retornos de empréstimo ("End of loan"), promoções internas (base própria) e dedup cross-season por jogador (permanent > free > loan, temporada mais recente em empate).
+8. ✅ **Frontend refinado** — cores por linha de posição, "ver mais" expansível por posição com distribuições + lista de jogadores, paginação de chegadas (20 + carregar mais), nomenclatura "Valor pago", janela → data aproximada (Jul/Jan + ano).
+9. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
 8. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback).
 
 ---
@@ -319,9 +321,9 @@ para cada perfil de posição:
 | **D1** — scraper TM | `requests` + BeautifulSoup direto (ScraperFC não tem método de transfers por clube) |
 | **D2** — eixo de valor | **Fee paga** (não valor de mercado). `market_value` removido do schema. A busca no SoFIFA usará `value_eur` um pouco menor que a média de fee das contratações definitivas. |
 | **D3** — granularidade | Posição fina com fallback para linha (config `min_sample`, default 3) |
-| **D5** — janela | 7 anos de histórico (configurável via `--history`) |
+| **D5** — janela | **5 temporadas** de histórico (configurável via `--history`). Fórmula: `range(season_ceil - history + 1, season_ceil + 1)` onde `season_ceil = 2000 + fifa_edition - 1`. FIFA 17 → temporadas 2012/13–2016/17. |
 | **D6** — SoFIFA | **Dataset Kaggle `players_{year}.csv`** para FIFA 15–22 (baixado em `data/raw/`). `sofifa_scraper.py` como fallback para FC 24+. Liga disponível via `league_name` no Kaggle — `_normalize_league` faz o mapeamento TM → Kaggle (ex.: "Ligue 1" → "French Ligue 1", "Eredivisie" → "Holland Eredivisie"). |
-| **transfer_type** | Campo adicionado: `"permanent"` \| `"loan"` \| `"free"`. `fee_mean` no Estágio 2 considera só permanent+free onde fee não é None. |
+| **transfer_type** | Campo adicionado: `"permanent"` \| `"loan"` \| `"free"`. `fee_mean` no Estágio 2 considera só permanent+free onde fee não é None. `"loan_return"` é descartado no parser (retornos de empréstimo — "End of loan" no TM). |
 
 ## 15. Schema travado do Estágio 1 (Transfer)
 
@@ -339,9 +341,20 @@ Transfer(
 
 Armadilhas resolvidas no parser:
 - `find_all("td", recursive=False)` para não contar células de inline-tables internas
-- `"End of loan30/06/YYYY"` — data colada, capturada antes do regex numérico
+- `"End of loan30/06/YYYY"` — data colada → `transfer_type = "loan_return"`, descartado imediatamente
 - `td.hauptlink` para pegar link do clube de origem (não o logo)
 - `loan fee:` com valor numérico é empréstimo com taxa, não contratação definitiva
+
+### Limpeza de chegadas (`_dedup_arrivals`)
+Aplicada após scraping de todas as temporadas, antes de salvar o cache:
+1. **Promoções internas** — `from_club` contém o nome do próprio clube ou marcadores de base (`u20`, `primavera`, `reserve`, etc.) → descartadas.
+2. **Dedup cross-season** — chave = `player_name`; mesmo jogador em temporadas diferentes (ex.: loan 2013 + permanent 2015) → mantém só a entrada mais relevante: `permanent > free > loan`; em empate de tipo, temporada mais recente.
+
+### Posições de linha como fallback (ATT / DEF / MID)
+Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o estágio 2 agrupa na linha (`ATT`, `DEF`, `MID`). O estágio 3 e o frontend expandem essas linhas de volta para as posições finas ao filtrar candidatos e chegadas:
+- `ATT` → `["ST","LW","RW","CF"]`
+- `DEF` → `["CB","LB","RB","LWB","RWB"]`
+- `MID` → `["CDM","CM","CAM","LM","RM"]`
 
 ---
 
