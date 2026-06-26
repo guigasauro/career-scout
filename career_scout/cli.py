@@ -1,16 +1,22 @@
 """CLI principal — career-scout."""
 import argparse
-import sys
+import csv
+from dataclasses import asdict
 from pathlib import Path
-
-import pandas as pd
 
 from career_scout.extract.transfermarkt import get_arrivals
 from career_scout.models import Transfer
 
 
-def transfers_to_df(transfers: list[Transfer]) -> pd.DataFrame:
-    return pd.DataFrame([t.__dict__ for t in transfers])
+def save_transfers(transfers: list[Transfer], out: Path) -> None:
+    rows = [asdict(t) for t in transfers]
+    if not rows:
+        return
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader()
+        w.writerows(rows)
 
 
 def cmd_extract(args: argparse.Namespace) -> None:
@@ -24,12 +30,14 @@ def cmd_extract(args: argparse.Namespace) -> None:
         seasons=seasons,
     )
 
-    df = transfers_to_df(transfers)
     out = Path(args.output)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(out, index=False)
-    print(f"{len(df)} chegadas salvas em {out}")
-    print(df[["season", "player_name", "position_norm", "age", "nationality", "transfer_type", "fee"]].to_string(index=False))
+    save_transfers(transfers, out)
+    print(f"{len(transfers)} chegadas salvas em {out}")
+    cols = ["season", "player_name", "position_norm", "age", "nationality", "transfer_type", "fee"]
+    print("  ".join(cols))
+    for t in transfers:
+        d = asdict(t)
+        print("  ".join(str(d.get(c, "")) for c in cols))
 
 
 def main() -> None:
