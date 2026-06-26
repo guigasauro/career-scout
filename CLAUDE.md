@@ -2,7 +2,7 @@
 
 > Título de trabalho: **career-scout**. Ferramenta de scouting para o Modo Carreira do FIFA/EA FC.
 > Esta é a fonte de verdade do projeto. Leia tudo antes de escrever ou alterar código.
-> Status atual: **Estágio 1 concluído** — scraper TM funcional, schema travado, 125 chegadas do PSG (2014–2021) extraídas e salvas. Próximo: Estágio 2 (perfilagem).
+> Status atual: **Pipeline completo (estágios 1–3)** — TM scraper funcional, perfilagem por posição e matching SoFIFA via dataset Kaggle operacionais para PSG × FIFA 22. Próximo: generalizar para múltiplos clubes e edições.
 
 ---
 
@@ -40,30 +40,41 @@ Se nos últimos 5–10 anos o clube X contratou **zagueiros franceses, com ~23 a
 ## 3. Stack e setup
 
 - **Linguagem:** Python 3.11+ (consistente com o histórico do dev; scrapers anteriores em `requests`/BeautifulSoup).
-- **Libs candidatas:** `pandas`, `requests`, `beautifulsoup4`/`lxml`, e **uma das libs de scraping de futebol** (ver [seção 8](#8-bibliotecas-e-recursos-externos)). Decisão de "lib pronta vs scraper próprio" ainda em aberto.
-- **Saída de dados:** CSV/Parquet locais por enquanto (cache em disco). Banco só se/quando justificar.
-- **Interface:** CLI primeiro. Frontend/dashboard é fase futura, não escopo inicial.
+- **Libs em uso:** `requests`, `beautifulsoup4`/`lxml` (scraper TM), `csv` stdlib (I/O). Sem pandas por enquanto.
+- **Saída de dados:** CSV locais em `data/processed/`. Cache de HTML cru em `data/raw/`.
+- **Interface:** CLI (`python -m career_scout.extract.transfermarkt`, `python -m career_scout.match.sofifa`). Frontend é fase futura.
 
-> ⚠️ Comandos de build/test/lint **ainda não definidos** — preencher esta seção assim que o esqueleto do repo existir (ex.: `pytest`, `ruff`, `python -m career_scout ...`).
+### Comandos principais
+```bash
+# Estágio 1 — extração TM
+python -m career_scout.extract.transfermarkt --club-id 583 --club-slug paris-saint-germain --fifa-year 22 --history 7
 
-### Layout de repositório proposto (ajustar conforme implementar)
+# Estágio 2 — perfilagem
+python -m career_scout.profile.aggregate
+
+# Estágio 3 — matching
+python -m career_scout.match.sofifa --year 22 --top 20
 ```
-career-scout/
+
+### Layout de repositório
+```
+transfer-advisor/
 ├── CLAUDE.md
 ├── pyproject.toml
 ├── career_scout/
-│   ├── extract/        # Estágio 1 — scrapers Transfermarkt
-│   │   └── transfermarkt.py
-│   ├── profile/        # Estágio 2 — perfilagem estatística
-│   │   └── aggregate.py
-│   ├── match/          # Estágio 3 — query + ranqueamento no SoFIFA
-│   │   └── sofifa.py
-│   ├── normalize/      # camada de normalização (posições, ligas, valores)
-│   │   └── positions.py
-│   └── models.py       # dataclasses / schemas dos dataframes
+│   ├── extract/
+│   │   └── transfermarkt.py   # Estágio 1 — scraper TM (requests + BS4)
+│   ├── profile/
+│   │   └── aggregate.py       # Estágio 2 — perfilagem por posição
+│   ├── match/
+│   │   ├── sofifa.py          # Estágio 3 — matching via Kaggle CSV
+│   │   └── sofifa_scraper.py  # fallback: scraper SoFIFA para FC 24+
+│   ├── normalize/
+│   │   └── positions.py       # mapa TM → FIFA/SoFIFA + fallback por linha
+│   └── models.py              # dataclasses Transfer e PositionProfile
 ├── data/
-│   ├── raw/            # HTML/JSON cru cacheado
-│   └── processed/      # CSV/Parquet limpos
+│   ├── raw/                   # HTML cacheado (TM) + CSVs Kaggle (players_NN.csv)
+│   └── processed/             # arrivals.csv, profiles.csv, candidates.csv
 └── tests/
 ```
 
@@ -280,10 +291,10 @@ para cada perfil de posição:
 
 1. ✅ **Fatia vertical do Estágio 1.** PSG + FIFA 22 (temporadas 2014–2021). 125 chegadas extraídas no schema 5.1. Schema travado.
 2. ✅ **Normalização de posições** (`normalize/positions.py`) — mapa TM → FIFA/SoFIFA + fallback por linha.
-3. **Estágio 2** (perfilagem) — `profile/aggregate.py`. **Próximo passo.**
-4. **Estágio 3:** dataset pronto do SoFIFA FIFA 22 (Kaggle) + ranqueamento por distância ao perfil.
-5. Generalizar: múltiplos clubes, seletor de versão, parâmetros via CLI.
-6. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26; dashboard.
+3. ✅ **Estágio 2** (perfilagem) — `profile/aggregate.py`. Perfis por posição com moda + suporte mínimo.
+4. ✅ **Estágio 3** — matching via dataset Kaggle `players_{year}.csv`. `league_name` disponível. `_normalize_league` mapeia nomes TM → Kaggle.
+5. **Generalizar:** múltiplos clubes, seletor de edição FIFA via `--year`, parâmetros via CLI. **Próximo passo.**
+6. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback); dashboard.
 
 ---
 
@@ -295,7 +306,7 @@ para cada perfil de posição:
 | **D2** — eixo de valor | **Fee paga** (não valor de mercado). `market_value` removido do schema. A busca no SoFIFA usará `value_eur` um pouco menor que a média de fee das contratações definitivas. |
 | **D3** — granularidade | Posição fina com fallback para linha (config `min_sample`, default 3) |
 | **D5** — janela | 7 anos de histórico (configurável via `--history`) |
-| **D6** — SoFIFA | Dataset Kaggle para FIFA 22; scraping ao vivo como fallback para edições recentes |
+| **D6** — SoFIFA | **Dataset Kaggle `players_{year}.csv`** para FIFA 15–22 (baixado em `data/raw/`). `sofifa_scraper.py` como fallback para FC 24+. Liga disponível via `league_name` no Kaggle — `_normalize_league` faz o mapeamento TM → Kaggle (ex.: "Ligue 1" → "French Ligue 1", "Eredivisie" → "Holland Eredivisie"). |
 | **transfer_type** | Campo adicionado: `"permanent"` \| `"loan"` \| `"free"`. `fee_mean` no Estágio 2 considera só permanent+free onde fee não é None. |
 
 ## 15. Schema travado do Estágio 1 (Transfer)
