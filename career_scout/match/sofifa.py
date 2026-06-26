@@ -57,13 +57,15 @@ def rank_candidates(
     players: list[dict],
     top_n: int = 20,
     weights: dict[str, float] | None = None,
+    exclude_club: str | None = None,
 ) -> list[Candidate]:
     w = weights or DEFAULT_WEIGHTS
 
-    # candidatos que jogam na posição do perfil
+    # candidatos que jogam na posição do perfil, excluindo jogadores do próprio clube
     pool = [
         p for p in players
         if profile.position_norm in _parse_positions(p.get("player_positions", ""))
+        and p.get("club_name") != exclude_club
     ]
     if not pool:
         return []

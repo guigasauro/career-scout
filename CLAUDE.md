@@ -2,7 +2,7 @@
 
 > Título de trabalho: **career-scout**. Ferramenta de scouting para o Modo Carreira do FIFA/EA FC.
 > Esta é a fonte de verdade do projeto. Leia tudo antes de escrever ou alterar código.
-> Status atual: **Pipeline completo (estágios 1–3)** — TM scraper funcional, perfilagem por posição e matching SoFIFA via dataset Kaggle operacionais para PSG × FIFA 22. Próximo: generalizar para múltiplos clubes e edições.
+> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
 
 ---
 
@@ -39,20 +39,28 @@ Se nos últimos 5–10 anos o clube X contratou **zagueiros franceses, com ~23 a
 
 ## 3. Stack e setup
 
-- **Linguagem:** Python 3.11+ (consistente com o histórico do dev; scrapers anteriores em `requests`/BeautifulSoup).
-- **Libs em uso:** `requests`, `beautifulsoup4`/`lxml` (scraper TM), `csv` stdlib (I/O). Sem pandas por enquanto.
+- **Linguagem:** Python 3.11+
+- **Libs em uso:** `requests`, `beautifulsoup4`/`lxml` (scraper TM), `csv` stdlib (I/O), `fastapi[standard]` (API + servidor).
 - **Saída de dados:** CSV locais em `data/processed/`. Cache de HTML cru em `data/raw/`.
-- **Interface:** CLI (`python -m career_scout.extract.transfermarkt`, `python -m career_scout.match.sofifa`). Frontend é fase futura.
+- **Interface:** FastAPI + frontend HTML single-page (`index.html` servido pelo próprio FastAPI em `/`).
 
 ### Comandos principais
 ```bash
-# Estágio 1 — extração TM
+# Ativar venv (obrigatório)
+source transfer-advisor-venv/bin/activate
+
+# Seed do mapeamento TM ↔ SoFIFA (rodar uma vez; aceita filtro por liga)
+python seed_clubs.py "French Ligue 1" "English Premier League" "Spain Primera Division" "German 1. Bundesliga" "Italian Serie A"
+
+# Iniciar API + frontend
+fastapi dev career_scout/api.py
+# Abre http://localhost:8000
+```
+
+CLIs dos estágios individuais ainda funcionam para debug:
+```bash
 python -m career_scout.extract.transfermarkt --club-id 583 --club-slug paris-saint-germain --fifa-year 22 --history 7
-
-# Estágio 2 — perfilagem
 python -m career_scout.profile.aggregate
-
-# Estágio 3 — matching
 python -m career_scout.match.sofifa --year 22 --top 20
 ```
 
@@ -61,7 +69,10 @@ python -m career_scout.match.sofifa --year 22 --top 20
 transfer-advisor/
 ├── CLAUDE.md
 ├── pyproject.toml
+├── index.html                 # Frontend single-page (servido em GET /)
+├── seed_clubs.py              # Script one-time: mapeia clubes Kaggle → TM
 ├── career_scout/
+│   ├── api.py                 # FastAPI: endpoints /overview /scout /clubs /leagues /countries
 │   ├── extract/
 │   │   └── transfermarkt.py   # Estágio 1 — scraper TM (requests + BS4)
 │   ├── profile/
@@ -74,7 +85,8 @@ transfer-advisor/
 │   └── models.py              # dataclasses Transfer e PositionProfile
 ├── data/
 │   ├── raw/                   # HTML cacheado (TM) + CSVs Kaggle (players_NN.csv)
-│   └── processed/             # arrivals.csv, profiles.csv, candidates.csv
+│   ├── processed/             # arrivals_{club_id}_{edition}.csv (cache por clube+edição)
+│   └── club_mapping.json      # mapeamento sofifa_name → {tm_slug, tm_id, league, ok}
 └── tests/
 ```
 
@@ -293,8 +305,10 @@ para cada perfil de posição:
 2. ✅ **Normalização de posições** (`normalize/positions.py`) — mapa TM → FIFA/SoFIFA + fallback por linha.
 3. ✅ **Estágio 2** (perfilagem) — `profile/aggregate.py`. Perfis por posição com moda + suporte mínimo.
 4. ✅ **Estágio 3** — matching via dataset Kaggle `players_{year}.csv`. `league_name` disponível. `_normalize_league` mapeia nomes TM → Kaggle.
-5. **Generalizar:** múltiplos clubes, seletor de edição FIFA via `--year`, parâmetros via CLI. **Próximo passo.**
-6. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback); dashboard.
+5. ✅ **API FastAPI + frontend** — `career_scout/api.py` expõe os 3 estágios. `index.html` com fluxo FIFA → País → Liga → Clube → overview → candidatos.
+6. ✅ **Mapeamento TM ↔ SoFIFA** — `seed_clubs.py` raspa busca do TM para cada clube dos CSVs Kaggle, salva `data/club_mapping.json`. 150 clubes das 5 grandes ligas mapeados + correções manuais para mismatches do primeiro resultado de busca.
+7. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
+8. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback).
 
 ---
 
@@ -328,3 +342,63 @@ Armadilhas resolvidas no parser:
 - `"End of loan30/06/YYYY"` — data colada, capturada antes do regex numérico
 - `td.hauptlink` para pegar link do clube de origem (não o logo)
 - `loan fee:` com valor numérico é empréstimo com taxa, não contratação definitiva
+
+---
+
+## 16. API FastAPI (`career_scout/api.py`)
+
+### Endpoints
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET`  | `/` | Serve `index.html` |
+| `GET`  | `/fifa-years` | Edições disponíveis (baseado nos CSVs em `data/raw/`) |
+| `GET`  | `/countries?edition=N` | Países disponíveis para a edição (via `LEAGUE_COUNTRY`) |
+| `GET`  | `/leagues?edition=N&country=X` | Ligas da edição, filtradas por país |
+| `GET`  | `/clubs?league=X` | Clubes com mapeamento TM válido na liga |
+| `POST` | `/overview` | Estágios 1+2: retorna chegadas + perfis + estatísticas agregadas |
+| `POST` | `/scout` | Estágios 1+2+3: retorna candidatos ranqueados por posição |
+
+### Body de `/overview` e `/scout`
+```json
+{ "club_id": 583, "club_slug": "paris-saint-germain", "club_name": "PSG",
+  "fifa_edition": 22, "history": 7, "top_n": 20 }
+```
+- `fifa_edition` = número da edição (22 = FIFA 22); mapeia para `players_22.csv` e seasons até 2021 (`2000 + edition - 1`)
+- Cache de chegadas em `data/processed/arrivals_{club_id}_{edition}.csv` — segunda chamada não raspa o TM
+
+### Estrutura de clubes (`CLUBS_DB`)
+Carregada na inicialização a partir de `data/club_mapping.json` + `_OVERRIDES` (lista manual em `api.py` que prevalece).  
+Cada entrada: `{name, slug, id, sofifa_name, league}`.  
+`sofifa_name` é usado para excluir jogadores do próprio clube do pool de matching (`exclude_club`).
+
+### `LEAGUE_COUNTRY`
+Dict hardcoded em `api.py` mapeando as 58 ligas dos CSVs Kaggle para países. "Outros" como fallback.  
+Usado em `/countries` e `/leagues?country=X`.
+
+---
+
+## 17. Mapeamento TM ↔ SoFIFA (`seed_clubs.py` + `club_mapping.json`)
+
+### Problema
+Os CSVs Kaggle têm `club_name` (SoFIFA) mas não têm slug/id do Transfermarkt — necessários para raspar o histórico de contratações.
+
+### Solução
+`seed_clubs.py` faz busca no TM (`/schnellsuche/ergebnis/schnellsuche?query=...`) para cada clube único dos CSVs e extrai o slug/id do primeiro resultado. Salva em `data/club_mapping.json` incrementalmente (pode interromper e retomar).
+
+```bash
+# Seed parcial (recomendado primeiro)
+python seed_clubs.py "French Ligue 1" "English Premier League" ...
+
+# Seed completo (~1016 clubes, ~25 min)
+python seed_clubs.py
+```
+
+### Cuidados com o seed
+- O **primeiro resultado** da busca do TM frequentemente é errado (time sub-17, clube de nome similar de outro país, etc.).
+- Após rodar, revisar entradas com `"ok": false` e os slugs suspeitos no JSON.
+- Correções manuais: editar `club_mapping.json` diretamente (`ok: true`, `tm_slug`, `tm_id`) **ou** adicionar ao `_OVERRIDES` em `api.py` para correções permanentes que sobrevivam a re-seeds.
+- Para achar slug/id correto: abrir a página do clube no TM e ler a URL — `/{tm_slug}/startseite/verein/{tm_id}`.
+- PSG no seed veio como `fc-paris-saint-germain/583`; override em `_OVERRIDES` usa `paris-saint-germain/583` (slug correto).
+
+### Estado atual
+150/152 clubes das 5 grandes ligas mapeados. Os 2 restantes (`Évian Thonon Gaillard FC`, `AS Nancy Lorraine`) eram clubes extintos/rebaixados irrelevantes para Career Mode — não mapeados.

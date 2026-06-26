@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Scout</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #0f1117;
+    --surface: #1a1d27;
+    --border:  #2a2d3a;
+    --text:    #e2e4ed;
+    --muted:   #6b7080;
+    --green:   #22c55e;
+    --yellow:  #eab308;
+    --blue:    #3b82f6;
+    --red:     #ef4444;
+    --purple:  #a855f7;
+  }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.5; min-height:100vh; }
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; }
+  header span { color:var(--green); }
+  main { max-width:1200px; margin:0 auto; padding:24px 16px; display:flex; flex-direction:column; gap:20px; }
+
+  /* Form */
+  .form-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 20px 16px; }
+  .form-steps { display:flex; flex-wrap:wrap; gap:28px; align-items:flex-end; }
+  .step { display:flex; flex-direction:column; gap:4px; position:relative; }
+  .step + .step::before { content:'›'; position:absolute; left:-14px; bottom:9px; color:var(--border); font-size:18px; }
+  .step label { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); display:flex; align-items:center; gap:5px; }
+  .step-num { background:var(--border); color:var(--muted); border-radius:50%; width:16px; height:16px; font-size:10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step.active .step-num { background:var(--green); color:#000; }
+  .step.active label { color:var(--text); }
+  select, input[type=number] { background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:7px 10px; font-size:14px; min-width:160px; }
+  select:disabled, input:disabled { opacity:.4; cursor:not-allowed; }
+  select:focus, input:focus { outline:2px solid var(--blue); outline-offset:1px; }
+  input[type=number] { min-width:80px; max-width:100px; }
+  .form-footer { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+  .form-footer label { display:flex; flex-direction:column; gap:4px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  button { background:var(--green); color:#000; border:none; border-radius:6px; padding:8px 22px; font-weight:700; font-size:14px; cursor:pointer; }
+  button:hover:not(:disabled) { filter:brightness(1.1); }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  .hint { font-size:12px; color:var(--muted); }
+
+  /* Status */
+  .status-bar { padding:12px 16px; border-radius:6px; display:none; }
+  .status-bar.loading { background:#1e2a1a; border:1px solid var(--green); color:var(--green); }
+  .status-bar.error   { background:#2a1a1a; border:1px solid var(--red);   color:var(--red); }
+  .spinner { display:inline-block; width:12px; height:12px; border:2px solid var(--green); border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Cards genéricos */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .card-header { padding:12px 16px; background:#1f2232; border-bottom:1px solid var(--border); font-weight:600; font-size:13px; display:flex; align-items:center; gap:8px; }
+  .card-body { padding:16px; }
+
+  /* Stat chips */
+  .chips { display:flex; flex-wrap:wrap; gap:10px; }
+  .chip { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 14px; }
+  .chip .label { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .chip .value { font-size:18px; font-weight:700; }
+  .chip .value.green  { color:var(--green); }
+  .chip .value.yellow { color:var(--yellow); }
+  .chip .value.blue   { color:var(--blue); }
+  .chip .value.purple { color:var(--purple); }
+
+  /* Dist grid */
+  .dist-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
+  .dist-block h4 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:8px; }
+  .dist-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; font-size:12px; }
+  .dist-row .bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .dist-row .fill { height:100%; background:var(--blue); border-radius:2px; }
+  .dist-row .key { min-width:120px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
+  .dist-row .n   { color:var(--muted); min-width:24px; text-align:right; }
+
+  /* Tables */
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:8px 12px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  td { padding:7px 12px; border-bottom:1px solid #1e2030; white-space:nowrap; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#1f2232; }
+
+  /* Badges */
+  .badge { display:inline-block; padding:1px 7px; border-radius:4px; font-size:11px; font-weight:700; }
+  .badge-pos  { background:var(--green);  color:#000; }
+  .badge-freq { background:var(--yellow); color:#000; }
+  .badge-perm { background:#1e3a2a; color:var(--green); border:1px solid #2a5a3a; }
+  .badge-loan { background:#1e2a3a; color:var(--blue);  border:1px solid #2a3a5a; }
+  .badge-free { background:#2a2a1e; color:var(--yellow); border:1px solid #4a4a2a; }
+
+  /* Score bar */
+  .score-bar { display:flex; align-items:center; gap:6px; min-width:80px; }
+  .score-bar .bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .score-bar .fill { height:100%; background:var(--green); border-radius:2px; }
+  .score-bar .val  { font-size:11px; color:var(--muted); min-width:28px; }
+
+  .ovr { font-weight:700; }
+  .ovr.high { color:var(--green); }
+  .ovr.mid  { color:var(--yellow); }
+  .ovr.low  { color:var(--muted); }
+
+  .muted { color:var(--muted); }
+  .trunc { max-width:150px; overflow:hidden; text-overflow:ellipsis; }
+
+  /* Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:100; }
+  .modal-overlay.hidden { display:none; }
+  .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:10px; width:min(480px,90vw); max-height:80vh; display:flex; flex-direction:column; }
+  .modal-head { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-weight:600; }
+  .modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:0 4px; line-height:1; }
+  .modal-close:hover { color:var(--text); }
+  .modal-body { overflow-y:auto; padding:16px; }
+
+  /* "ver todas" link */
+  .see-all { display:inline-block; margin-top:8px; font-size:11px; color:var(--blue); cursor:pointer; }
+  .see-all:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<header><span>⬡</span> Career Scout</header>
+<main>
+
+  <!-- Formulário -->
+  <div class="form-card">
+    <div class="form-steps">
+      <div class="step active" id="step-edition">
+        <label><span class="step-num">1</span>Edição FIFA</label>
+        <select id="sel-edition" onchange="onEditionChange()"><option value="">Carregando…</option></select>
+      </div>
+      <div class="step" id="step-country">
+        <label><span class="step-num">2</span>País</label>
+        <select id="sel-country" disabled onchange="onCountryChange()"><option value="">— selecione a edição —</option></select>
+      </div>
+      <div class="step" id="step-league">
+        <label><span class="step-num">3</span>Liga</label>
+        <select id="sel-league" disabled onchange="onLeagueChange()"><option value="">— selecione o país —</option></select>
+      </div>
+      <div class="step" id="step-club">
+        <label><span class="step-num">4</span>Clube</label>
+        <select id="sel-club" disabled onchange="onClubChange()"><option value="">— selecione a liga —</option></select>
+      </div>
+    </div>
+    <div class="form-footer">
+      <label>Histórico (anos)<input type="number" id="inp-history" value="7" min="2" max="15" disabled></label>
+      <label>Jogadores por posição<input type="number" id="inp-topn" value="20" min="5" max="50" disabled></label>
+      <button id="btn-scout" disabled onclick="runScout()">Gerar candidatos</button>
+      <span class="hint" id="hint"></span>
+    </div>
+  </div>
+
+  <!-- Modal reutilizável -->
+  <div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span id="modal-title"></span>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="status-overview" class="status-bar"></div>
+  <div id="overview"></div>
+  <div id="status-scout"   class="status-bar"></div>
+  <div id="results"></div>
+
+</main>
+<script>
+let selectedClub = null;
+
+// ── init ─────────────────────────────────────────────────────────
+async function init() {
+  const years = await fetch('/fifa-years').then(r => r.json());
+  const sel = document.getElementById('sel-edition');
+  sel.innerHTML = '<option value="">Selecione…</option>';
+  [...years].reverse().forEach(y => {
+    const o = new Option(`FIFA ${y}`, y);
+    sel.appendChild(o);
+  });
+}
+
+// ── cascata de selects ────────────────────────────────────────────
+async function onEditionChange() {
+  const edition = document.getElementById('sel-edition').value;
+  reset('sel-country', '— selecione a edição —', true);
+  reset('sel-league',  '— selecione o país —',   true);
+  reset('sel-club',    '— selecione a liga —',   true);
+  setStep('step-country', false); setStep('step-league', false); setStep('step-club', false);
+  lockFooter(); clearOverview();
+  if (!edition) return;
+
+  const ctrs = await fetch(`/countries?edition=${edition}`).then(r => r.json());
+  const sel = document.getElementById('sel-country');
+  sel.innerHTML = '<option value="">Selecione…</option>';
+  ctrs.forEach(c => sel.appendChild(new Option(c, c)));
+  sel.disabled = false; setStep('step-country', true);
+}
+
+async function onCountryChange() {
+  const edition = document.getElementById('sel-edition').value;
+  const country = document.getElementById('sel-country').value;
+  reset('sel-league', '— selecione o país —', true);
+  reset('sel-club',   '— selecione a liga —', true);
+  setStep('step-league', false); setStep('step-club', false);
+  lockFooter(); clearOverview(); selectedClub = null;
+  if (!country) return;
+
+  const leagues = await fetch(`/leagues?edition=${edition}&country=${encodeURIComponent(country)}`).then(r => r.json());
+  const sel = document.getElementById('sel-league');
+  sel.innerHTML = '<option value="">Selecione…</option>';
+  leagues.forEach(l => sel.appendChild(new Option(l, l)));
+  sel.disabled = false; setStep('step-league', true);
+}
+
+async function onLeagueChange() {
+  const league = document.getElementById('sel-league').value;
+  reset('sel-club', '— selecione a liga —', true);
+  setStep('step-club', false); lockFooter(); clearOverview(); selectedClub = null;
+  if (!league) return;
+
+  const clubs = await fetch(`/clubs?league=${encodeURIComponent(league)}`).then(r => r.json());
+  const sel = document.getElementById('sel-club');
+  if (!clubs.length) {
+    sel.innerHTML = '<option value="">Nenhum clube cadastrado</option>';
+    document.getElementById('hint').textContent = 'Adicione o clube em KNOWN_CLUBS no api.py.';
+    return;
+  }
+  sel.innerHTML = '<option value="">Selecione…</option>';
+  clubs.forEach(c => sel.appendChild(new Option(c.name, JSON.stringify(c))));
+  sel.disabled = false; setStep('step-club', true);
+  document.getElementById('hint').textContent = '';
+}
+
+async function onClubChange() {
+  const val = document.getElementById('sel-club').value;
+  selectedClub = val ? JSON.parse(val) : null;
+  lockFooter(); clearOverview();
+  if (!selectedClub) return;
+  document.getElementById('inp-history').disabled = false;
+  document.getElementById('inp-topn').disabled    = false;
+  document.getElementById('btn-scout').disabled   = false;
+  await loadOverview();
+}
+
+// ── helpers ───────────────────────────────────────────────────────
+function reset(id, placeholder, disabled) {
+  const el = document.getElementById(id);
+  el.innerHTML = `<option value="">${placeholder}</option>`;
+  el.disabled = disabled;
+}
+function setStep(id, active) { document.getElementById(id).classList.toggle('active', active); }
+function lockFooter() {
+  ['inp-history','inp-topn','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
+}
+function clearOverview() {
+  document.getElementById('overview').innerHTML = '';
+  document.getElementById('results').innerHTML  = '';
+  setStatus('status-overview', ''); setStatus('status-scout', '');
+}
+function setStatus(id, type, html = '') {
+  const el = document.getElementById(id);
+  el.className = 'status-bar' + (type ? ` ${type}` : '');
+  el.style.display = type ? 'block' : 'none';
+  el.innerHTML = html;
+}
+function fmt(v, dec = 1) {
+  if (v == null) return '—';
+  if (v >= 1e6) return `€${(v/1e6).toFixed(dec)}M`;
+  if (v >= 1e3) return `€${(v/1e3).toFixed(0)}K`;
+  return `€${v}`;
+}
+function fmtAge(v) { return v != null ? `${v}` : '—'; }
+function pct(v, total) { return total ? Math.round(v / total * 100) : 0; }
+
+// ── modal ────────────────────────────────────────────────────────
+function openModal(title, obj, barColor) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = distRows(obj, barColor);
+  document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').classList.add('hidden');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modal').classList.add('hidden'); });
+
+// ── overview ──────────────────────────────────────────────────────
+async function loadOverview() {
+  const edition = parseInt(document.getElementById('sel-edition').value);
+  const history = parseInt(document.getElementById('inp-history').value);
+  setStatus('status-overview', 'loading', '<span class="spinner"></span>Carregando histórico de contratações…');
+
+  try {
+    const res = await fetch('/overview', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        club_id: selectedClub.id, club_slug: selectedClub.slug,
+        club_name: selectedClub.name, fifa_edition: edition, history, top_n: 20,
+      }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
+    const d = await res.json();
+    setStatus('status-overview', '');
+    document.getElementById('overview').innerHTML = renderOverview(d);
+  } catch(e) {
+    setStatus('status-overview', 'error', `Erro: ${e.message}`);
+  }
+}
+
+function distRows(obj, barColor = 'var(--blue)') {
+  const max = Math.max(...Object.values(obj));
+  return Object.entries(obj).map(([k, v]) => {
+    const w = Math.round(v / max * 100);
+    return `<div class="dist-row">
+      <span class="key" title="${k}">${k}</span>
+      <div class="bar"><div class="fill" style="width:${w}%;background:${barColor}"></div></div>
+      <span class="n">${v}</span>
+    </div>`;
+  }).join('');
+}
+
+function distBlock(title, obj, total, barColor, limit = 5) {
+  const entries = Object.entries(obj);
+  const top     = Object.fromEntries(entries.slice(0, limit));
+  const hasMore = entries.length > limit;
+  const seeAll  = hasMore
+    ? `<span class="see-all" onclick='openModal(${JSON.stringify(title)}, ${JSON.stringify(obj)}, "${barColor}")'>ver todos (${entries.length})</span>`
+    : '';
+  return `<div class="dist-block"><h4>${title}</h4>${distRows(top, barColor)}${seeAll}</div>`;
+}
+
+function renderOverview(d) {
+  const f = d.fee_stats, a = d.age_stats, total = d.total;
+
+  const chips = `<div class="chips">
+    <div class="chip"><div class="label">Total chegadas</div><div class="value">${total}</div></div>
+    <div class="chip"><div class="label">Permanentes</div><div class="value green">${d.n_permanent}</div></div>
+    <div class="chip"><div class="label">Empréstimos</div><div class="value blue">${d.n_loan}</div></div>
+    <div class="chip"><div class="label">Free</div><div class="value yellow">${d.n_free}</div></div>
+    <div class="chip"><div class="label">Fee média (perm.)</div><div class="value">${fmt(f.perm_mean)}</div></div>
+    <div class="chip"><div class="label">Fee mediana (perm.)</div><div class="value">${fmt(f.perm_median)}</div></div>
+    <div class="chip"><div class="label">Fee máxima</div><div class="value">${fmt(f.max)}</div></div>
+    <div class="chip"><div class="label">Fee total gasta</div><div class="value purple">${fmt(f.total)}</div></div>
+    <div class="chip"><div class="label">Idade média</div><div class="value">${a.mean ?? '—'}</div></div>
+    <div class="chip"><div class="label">Faixa de idade</div><div class="value">${a.min ?? '—'}–${a.max ?? '—'}</div></div>
+  </div>`;
+
+  // últimas 5 temporadas (by_season já vem ordenado do mais recente)
+  const last5seasons = Object.fromEntries(Object.entries(d.by_season).slice(0, 5));
+
+  const dist = `<div class="dist-grid">
+    ${distBlock('Últimas temporadas', last5seasons, total, 'var(--blue)', 5)}
+    ${distBlock('Posições mais contratadas', d.by_position, total, 'var(--green)', 5)}
+    ${distBlock('Nacionalidades', d.by_nationality, total, 'var(--purple)', 5)}
+    ${distBlock('Ligas de origem', d.by_from_league, total, 'var(--yellow)', 5)}
+    ${distBlock('Clubes de origem', d.by_from_club, total, 'var(--muted)', 5)}
+  </div>`;
+
+  const profileRows = d.profiles.map(p => `<tr>
+    <td><span class="badge ${p.is_most_frequent ? 'badge-freq' : 'badge-pos'}">${p.position_norm}</span></td>
+    <td>${p.n}</td><td>${p.n_permanent}</td>
+    <td>${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
+    <td>${fmt(p.fee_mean)}</td>
+    <td>${p.nationality_mode || '<span class="muted">—</span>'}</td>
+    <td class="trunc muted" title="${p.from_league_mode || ''}">${p.from_league_mode || '—'}</td>
+    <td class="trunc muted" title="${p.from_club_mode || ''}">${p.from_club_mode || '—'}</td>
+  </tr>`).join('');
+
+  const profilesTable = `<div class="table-wrap"><table>
+    <thead><tr><th>Posição</th><th>n</th><th>n perm.</th><th>Idade média</th><th>Fee média</th><th>Nac. (moda)</th><th>Liga (moda)</th><th>Clube (moda)</th></tr></thead>
+    <tbody>${profileRows}</tbody>
+  </table></div>`;
+
+  const typeLabel = t => {
+    if (t === 'permanent') return '<span class="badge badge-perm">perm</span>';
+    if (t === 'loan')      return '<span class="badge badge-loan">loan</span>';
+    return '<span class="badge badge-free">free</span>';
+  };
+  const arrivalRows = d.arrivals.map(t => `<tr>
+    <td class="muted">${t.season}/${String(t.season+1).slice(2)}</td>
+    <td class="muted">${t.window}</td>
+    <td>${typeLabel(t.transfer_type)}</td>
+    <td style="font-weight:600">${t.player_name}</td>
+    <td><span class="badge badge-pos">${t.position_norm || '?'}</span></td>
+    <td class="muted">${t.position_raw || '—'}</td>
+    <td>${t.age ?? '—'}</td>
+    <td>${t.nationality || '—'}</td>
+    <td class="trunc muted" title="${t.from_club || ''}">${t.from_club || '—'}</td>
+    <td class="trunc muted" title="${t.from_league || ''}">${t.from_league || '—'}</td>
+    <td>${fmt(t.fee)}</td>
+    <td><a href="${t.player_url}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
+  </tr>`).join('');
+
+  const arrivalsTable = `<div class="table-wrap"><table>
+    <thead><tr><th>Temporada</th><th>Janela</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Pos. raw</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th>Fee</th><th></th></tr></thead>
+    <tbody>${arrivalRows}</tbody>
+  </table></div>`;
+
+  return `
+    <div class="card">
+      <div class="card-header">📊 Visão geral — ${d.club} × FIFA ${d.fifa_edition}</div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:20px">
+        ${chips}
+        ${dist}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">📐 Perfis por posição</div>
+      ${profilesTable}
+    </div>
+    <div class="card">
+      <div class="card-header">📋 Todas as chegadas (${total})</div>
+      ${arrivalsTable}
+    </div>`;
+}
+
+// ── scout (candidatos) ────────────────────────────────────────────
+async function runScout() {
+  const edition = parseInt(document.getElementById('sel-edition').value);
+  const history = parseInt(document.getElementById('inp-history').value);
+  const top_n   = parseInt(document.getElementById('inp-topn').value);
+  const btn     = document.getElementById('btn-scout');
+
+  btn.disabled = true;
+  document.getElementById('results').innerHTML = '';
+  setStatus('status-scout', 'loading', '<span class="spinner"></span>Gerando candidatos…');
+
+  try {
+    const res = await fetch('/scout', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        club_id: selectedClub.id, club_slug: selectedClub.slug,
+        club_name: selectedClub.name, fifa_edition: edition, history, top_n,
+      }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
+    const data = await res.json();
+    setStatus('status-scout', '');
+    document.getElementById('results').innerHTML = data.positions.map(renderPosition).join('');
+  } catch(e) {
+    setStatus('status-scout', 'error', `Erro: ${e.message}`);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderPosition({ profile: p, candidates }) {
+  const rows = candidates.map((c, i) => {
+    const pct = Math.round(c.score * 100);
+    const ovrCls = c.overall >= 80 ? 'high' : c.overall >= 70 ? 'mid' : 'low';
+    return `<tr>
+      <td class="muted">${i+1}</td>
+      <td style="font-weight:600;max-width:160px" class="trunc" title="${c.short_name}">${c.short_name}</td>
+      <td class="trunc muted" title="${c.club_name}">${c.club_name}</td>
+      <td class="trunc muted" title="${c.league_name}">${c.league_name}</td>
+      <td>${c.nationality}</td><td>${c.age}</td>
+      <td>${fmt(c.value_eur)}</td>
+      <td class="ovr ${ovrCls}">${c.overall}</td>
+      <td><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-header">
+      <span class="badge ${p.is_most_frequent ? 'badge-freq' : 'badge-pos'}">${p.position_norm}</span>
+      <span style="font-size:12px;color:var(--muted)">
+        n=${p.n} &nbsp;|&nbsp; idade ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; fee ${fmt(p.fee_mean)}
+        &nbsp;|&nbsp; nac. ${p.nationality_mode ?? '—'} &nbsp;|&nbsp; liga ${p.from_league_mode ?? '—'}
+      </span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>Score</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
