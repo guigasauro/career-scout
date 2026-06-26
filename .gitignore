@@ -1,0 +1,12 @@
+transfer-advisor-venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+dist/
+build/
+data/raw/
+data/processed/
+*.csv
+*.parquet
+.DS_Store

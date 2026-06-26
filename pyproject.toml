@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "career-scout"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+    "lxml",
+    "pandas",
+]
+
+[project.scripts]
+career-scout = "career_scout.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["career_scout*"]
