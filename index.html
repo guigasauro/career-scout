@@ -112,6 +112,7 @@
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:100; }
   .modal-overlay.hidden { display:none; }
   .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:10px; width:min(480px,90vw); max-height:80vh; display:flex; flex-direction:column; }
+  .modal-box.wide { width:min(1100px,95vw); max-height:88vh; }
   .modal-head { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-weight:600; }
   .modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:0 4px; line-height:1; }
   .modal-close:hover { color:var(--text); }
@@ -149,6 +150,12 @@
     <div class="form-footer">
       <label>Histórico (temporadas)<input type="number" id="inp-history" value="5" min="2" max="15" disabled></label>
       <label>Jogadores por posição<input type="number" id="inp-topn" value="20" min="5" max="50" disabled></label>
+      <label>Priorizar potencial<select id="sel-potential" disabled>
+        <option value="0">Off</option>
+        <option value="0.15">Baixo</option>
+        <option value="0.3">Médio</option>
+        <option value="0.5">Alto</option>
+      </select></label>
       <button id="btn-scout" disabled onclick="runScout()">Gerar candidatos</button>
       <span class="hint" id="hint"></span>
     </div>
@@ -156,7 +163,7 @@
 
   <!-- Modal reutilizável -->
   <div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
-    <div class="modal-box">
+    <div class="modal-box" id="modal-box">
       <div class="modal-head">
         <span id="modal-title"></span>
         <button class="modal-close" onclick="closeModal()">×</button>
@@ -242,9 +249,10 @@ async function onClubChange() {
   selectedClub = val ? JSON.parse(val) : null;
   lockFooter(); clearOverview();
   if (!selectedClub) return;
-  document.getElementById('inp-history').disabled = false;
-  document.getElementById('inp-topn').disabled    = false;
-  document.getElementById('btn-scout').disabled   = false;
+  document.getElementById('inp-history').disabled  = false;
+  document.getElementById('inp-topn').disabled     = false;
+  document.getElementById('sel-potential').disabled = false;
+  document.getElementById('btn-scout').disabled    = false;
   await loadOverview();
 }
 
@@ -256,7 +264,7 @@ function reset(id, placeholder, disabled) {
 }
 function setStep(id, active) { document.getElementById(id).classList.toggle('active', active); }
 function lockFooter() {
-  ['inp-history','inp-topn','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
+  ['inp-history','inp-topn','sel-potential','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
 }
 function clearOverview() {
   document.getElementById('overview').innerHTML = '';
@@ -332,9 +340,20 @@ function togglePosDetail(id, btn) {
 
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
+  document.getElementById('modal-box').classList.remove('wide');
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = distRows(obj, barColor);
   document.getElementById('modal').classList.remove('hidden');
+}
+function openModalHtml(title, html, wide) {
+  document.getElementById('modal-box').classList.toggle('wide', !!wide);
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal').classList.remove('hidden');
+}
+function openOverviewModal() {
+  const d = window._overviewData;
+  if (d) openModalHtml(`Visão geral — ${d.club} × FIFA ${d.fifa_edition}`, renderOverviewFull(d), true);
 }
 function closeModal(e) {
   if (e && e.target !== document.getElementById('modal')) return;
@@ -359,8 +378,9 @@ async function loadOverview() {
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
     const d = await res.json();
+    window._overviewData = d;
     setStatus('status-overview', '');
-    document.getElementById('overview').innerHTML = renderOverview(d);
+    document.getElementById('overview').innerHTML = renderSimplePanel(d, history);
   } catch(e) {
     setStatus('status-overview', 'error', `Erro: ${e.message}`);
   }
@@ -388,7 +408,31 @@ function distBlock(title, obj, total, barColor, limit = 5) {
   return `<div class="dist-block"><h4>${title}</h4>${distRows(top, barColor)}${seeAll}</div>`;
 }
 
-function renderOverview(d) {
+function modeKey(obj) { const k = Object.keys(obj || {}); return k.length ? k[0] : null; }
+
+function renderSimplePanel(d, history) {
+  const f = d.fee_stats, a = d.age_stats;
+  const perSeason = history ? (d.total / history).toFixed(1) : '—';
+  const natMode    = modeKey(d.by_nationality);
+  const leagueMode = modeKey(d.by_from_league);
+  const chips = `<div class="chips">
+    <div class="chip"><div class="label">Contratações / temporada</div><div class="value green">${perSeason}</div></div>
+    <div class="chip"><div class="label">Nacionalidade (moda)</div><div class="value">${natMode || '—'}</div></div>
+    <div class="chip"><div class="label">Liga de origem (moda)</div><div class="value">${leagueMode || '—'}</div></div>
+    <div class="chip"><div class="label">Idade média</div><div class="value">${a.mean ?? '—'}</div></div>
+    <div class="chip"><div class="label">Valor médio pago</div><div class="value blue">${fmt(f.mean)}</div></div>
+    <div class="chip"><div class="label">Valor máximo pago</div><div class="value purple">${fmt(f.max)}</div></div>
+  </div>`;
+  return `<div class="card">
+    <div class="card-header" style="justify-content:space-between">
+      <span>📊 Visão geral — ${d.club} × FIFA ${d.fifa_edition}</span>
+      <span class="see-all" style="margin:0" onclick="openOverviewModal()">ver detalhes ↗</span>
+    </div>
+    <div class="card-body">${chips}</div>
+  </div>`;
+}
+
+function renderOverviewFull(d) {
   const f = d.fee_stats, a = d.age_stats, total = d.total;
 
   const chips = `<div class="chips">
@@ -509,6 +553,7 @@ async function runScout() {
   const edition = parseInt(document.getElementById('sel-edition').value);
   const history = parseInt(document.getElementById('inp-history').value);
   const top_n   = parseInt(document.getElementById('inp-topn').value);
+  const potential_weight = parseFloat(document.getElementById('sel-potential').value);
   const btn     = document.getElementById('btn-scout');
 
   btn.disabled = true;
@@ -520,7 +565,7 @@ async function runScout() {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         club_id: selectedClub.id, club_slug: selectedClub.slug,
-        club_name: selectedClub.name, fifa_edition: edition, history, top_n,
+        club_name: selectedClub.name, fifa_edition: edition, history, top_n, potential_weight,
       }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
@@ -546,6 +591,7 @@ function renderPosition({ profile: p, candidates }) {
       <td>${c.nationality}</td><td>${c.age}</td>
       <td>${fmt(c.value_eur)}</td>
       <td class="ovr ${ovrCls}">${c.overall}</td>
+      <td class="ovr ${c.potential >= 85 ? 'high' : c.potential >= 78 ? 'mid' : 'low'}">${c.potential || '—'}</td>
       <td><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
     </tr>`;
   }).join('');
@@ -559,7 +605,7 @@ function renderPosition({ profile: p, candidates }) {
       </span>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>Score</th></tr></thead>
+      <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>POT</th><th>Score</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
   </div>`;
