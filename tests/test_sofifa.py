@@ -65,6 +65,40 @@ class TestRankCandidates(unittest.TestCase):
         by_id = {c.sofifa_id: c for c in results}
         self.assertGreater(by_id["1"].score, by_id["2"].score)
 
+    def test_fee_discount_shifts_target(self):
+        # fee_mean=10M, α=0.8 → alvo real = 8M. Jogador a 8M deve casar melhor que a 10M.
+        players = [
+            _p("at8",  "France", 24, 8_000_000,  "CB"),
+            _p("at10", "France", 24, 10_000_000, "CB"),
+        ]
+        by_id = {c.sofifa_id: c.score for c in
+                 rank_candidates(self.profile, players, fee_discount=0.8)}
+        self.assertGreater(by_id["at8"], by_id["at10"])
+        # α=1.0 inverte: alvo volta a 10M
+        by_id = {c.sofifa_id: c.score for c in
+                 rank_candidates(self.profile, players, fee_discount=1.0)}
+        self.assertGreater(by_id["at10"], by_id["at8"])
+
+    def test_score_normalized_to_unit_range(self):
+        # perfeito em todos os eixos ativos → score == 1.0 (não a soma dos pesos)
+        # fee_discount=1.0 para o candidato a 10M cair exatamente no alvo
+        results = rank_candidates(self.profile, self.players, top_n=20,
+                                  exclude_club="ExcludeMe", fee_discount=1.0)
+        self.assertAlmostEqual(max(c.score for c in results), 1.0, places=4)
+
+    def test_potential_knob_reorders(self):
+        players = [
+            _p("low", "France", 24, 10_000_000, "CB"),   # encaixe perfeito, sem potencial
+            _p("hi",  "France", 24, 10_000_000, "CB"),   # idem + potencial alto
+        ]
+        players[0]["potential"] = "75"
+        players[1]["potential"] = "92"
+        off = {c.sofifa_id: c.score for c in rank_candidates(self.profile, players)}
+        self.assertAlmostEqual(off["low"], off["hi"], places=4)  # knob off → empate
+        on = {c.sofifa_id: c.score for c in
+              rank_candidates(self.profile, players, potential_weight=0.5)}
+        self.assertGreater(on["hi"], on["low"])                  # knob on → joia sobe
+
 
 class TestSofifaCache(unittest.TestCase):
     def _tmp_csv(self, d):

@@ -173,6 +173,8 @@ class ScoutRequest(BaseModel):
     fifa_edition: int   # ex.: 22 para FIFA 22; mapeia para players_22.csv e seasons até 2021
     history: int = 5
     top_n: int = 20
+    potential_weight: float = 0.0   # 0 = ignora potencial; >0 prioriza promessas
+    fee_discount: float = 0.8       # D2: value_eur alvo = fee_mean × α (prêmio embutido na fee)
 
 
 def _save_transfers(transfers: list[Transfer], path: Path) -> None:
@@ -281,7 +283,10 @@ def scout(req: ScoutRequest):
     for profile in profiles:
         if not profile.age_mean:
             continue
-        candidates = rank_candidates(profile, players, top_n=req.top_n, exclude_club=sofifa_name)
+        candidates = rank_candidates(profile, players, top_n=req.top_n,
+                                     exclude_club=sofifa_name,
+                                     potential_weight=req.potential_weight,
+                                     fee_discount=req.fee_discount)
         positions.append({
             "profile": asdict(profile),
             "candidates": [asdict(c) for c in candidates],

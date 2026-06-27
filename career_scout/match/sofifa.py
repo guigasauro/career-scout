@@ -34,6 +34,7 @@ class Candidate:
     age: int
     value_eur: Optional[float]
     overall: int
+    potential: int
     player_positions: list[str]
     score: float = 0.0
 
@@ -77,8 +78,11 @@ def rank_candidates(
     top_n: int = 20,
     weights: dict[str, float] | None = None,
     exclude_club: str | None = None,
+    potential_weight: float = 0.0,
+    fee_discount: float = 0.8,
 ) -> list[Candidate]:
-    w = weights or DEFAULT_WEIGHTS
+    w = dict(weights or DEFAULT_WEIGHTS)
+    w["potential"] = potential_weight   # knob do usuário (0 = ignorar potencial)
 
     # expande linha (ATT/DEF/MID) para as posições finas equivalentes
     target_positions = set(_LINE_MEMBERS.get(profile.position_norm, [profile.position_norm]))
@@ -102,15 +106,30 @@ def rank_candidates(
 
     target_league = _normalize_league(profile.from_league_mode) if profile.from_league_mode else None
 
+    # D2: a fee paga embute prêmio (cláusula/leilão/urgência) e o value_eur do
+    # SoFIFA é market value, não preço pago. Desconta a fee para comparar
+    # market value ↔ market value. ponytail: α global; vira por-posição se medir que vale.
+    target_value = profile.fee_mean * fee_discount if profile.fee_mean else None
+
+    # peso total dos eixos que este perfil consegue pontuar — normaliza o score
+    # para [0,1] e o torna comparável entre posições (perfil sem fee/nac/liga
+    # não fica artificialmente pior por ter teto menor).
+    active_weight = (
+        (w["value"]       if profile.fee_mean        else 0)
+        + (w["age"]         if profile.age_mean        else 0)
+        + (w["nationality"] if profile.nationality_mode else 0)
+        + (w["league"]      if target_league           else 0)
+        + (w["potential"])
+    ) or 1.0
+
     results: list[Candidate] = []
     for p in pool:
         score = 0.0
 
         # similaridade de valor (1 - distância z normalizada → [0,1])
-        if profile.fee_mean and p.get("value_eur") and p["value_eur"]:
+        if target_value and p.get("value_eur") and p["value_eur"]:
             v = float(p["value_eur"])
-            # ponytail: comparar value_eur do SoFIFA contra fee_mean do TM (ver D2)
-            dist = abs(v - profile.fee_mean) / val_std
+            dist = abs(v - target_value) / val_std
             score += w["value"] * max(0.0, 1 - dist / 3)
 
         # similaridade de idade
@@ -125,6 +144,10 @@ def rank_candidates(
         if target_league and p.get("league_name") == target_league:
             score += w["league"]
 
+        # potencial (career mode: priorizar promessas) — só pesa se o knob > 0
+        if w["potential"] and p.get("potential"):
+            score += w["potential"] * (int(p["potential"]) / 100)
+
         results.append(Candidate(
             sofifa_id=p.get("sofifa_id", ""),
             short_name=p.get("short_name", p.get("long_name", "")),
@@ -134,8 +157,9 @@ def rank_candidates(
             age=int(p["age"]) if p.get("age") else 0,
             value_eur=float(p["value_eur"]) if p.get("value_eur") and p["value_eur"] else None,
             overall=int(p["overall"]) if p.get("overall") else 0,
+            potential=int(p["potential"]) if p.get("potential") else 0,
             player_positions=_parse_positions(p.get("player_positions", "")),
-            score=round(score, 4),
+            score=round(score / active_weight, 4),
         ))
 
     results.sort(key=lambda c: -c.score)
