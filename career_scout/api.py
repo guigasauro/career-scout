@@ -215,7 +215,6 @@ def overview(req: ScoutRequest):
     free      = [t for t in transfers if t.transfer_type == "free"]
 
     by_season   = dict(sorted(Counter(t.season for t in transfers).items(), reverse=True))
-    by_window   = dict(Counter(t.window for t in transfers))
     by_pos      = dict(Counter(t.position_norm or "?" for t in transfers).most_common())
     by_pos_raw  = dict(Counter(t.position_raw for t in transfers if t.position_raw).most_common())
     by_nat      = dict(Counter(t.nationality for t in transfers if t.nationality).most_common())
@@ -235,7 +234,6 @@ def overview(req: ScoutRequest):
         "n_free": len(free),
         # distribuições
         "by_season":      by_season,
-        "by_window":      by_window,
         "by_position":    by_pos,
         "by_position_raw": by_pos_raw,
         "by_nationality": by_nat,
