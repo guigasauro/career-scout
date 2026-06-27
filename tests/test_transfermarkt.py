@@ -102,5 +102,25 @@ class TestDedupArrivals(unittest.TestCase):
         self.assertEqual(out, [])
 
 
+class TestDedupHeuristics(unittest.TestCase):
+    def test_drops_reserve_and_youth(self):
+        ts = [_t("A", from_club="Real Madrid II"),
+              _t("B", from_club="PSG U19"),
+              _t("C", from_club="Barcelona B")]
+        out = _dedup_arrivals(ts, "PSG")
+        self.assertEqual(out, [])  # reserva/base → todos descartados
+
+    def test_keeps_normal_club_with_incidental_ii(self):
+        # "Hawaii United" contém o bigrama "ii" mas não como palavra isolada.
+        # O código antigo ("ii" substring) descartava por engano; agora mantém.
+        out = _dedup_arrivals([_t("D", from_club="Hawaii United")], "PSG")
+        self.assertEqual([t.player_name for t in out], ["D"])
+
+    def test_internal_promotion_word_boundary(self):
+        # "psg" não casa dentro de "PSGymnase" (sem fronteira de palavra).
+        out = _dedup_arrivals([_t("E", from_club="Le PSGymnase Club")], "PSG")
+        self.assertEqual([t.player_name for t in out], ["E"])
+
+
 if __name__ == "__main__":
     unittest.main()
