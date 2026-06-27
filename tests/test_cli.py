@@ -1,6 +1,6 @@
 import csv, tempfile, unittest
 from pathlib import Path
-from career_scout.cli import save_transfers
+from career_scout.cli import save_transfers, seasons_for
 from career_scout.models import Transfer
 
 
@@ -27,3 +27,12 @@ class TestSaveTransfers(unittest.TestCase):
             p = Path(d) / "out.csv"
             save_transfers([], p)
             self.assertFalse(p.exists())
+
+
+class TestSeasonsFor(unittest.TestCase):
+    def test_matches_api_formula(self):
+        self.assertEqual(seasons_for(22, 5), [2017, 2018, 2019, 2020, 2021])
+
+    def test_length_equals_history(self):
+        self.assertEqual(len(seasons_for(17, 7)), 7)
+        self.assertEqual(seasons_for(17, 7)[-1], 2016)  # ceil = 2000+17-1
