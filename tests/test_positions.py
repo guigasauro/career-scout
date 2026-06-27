@@ -9,7 +9,13 @@ class TestNormalize(unittest.TestCase):
         self.assertEqual(normalize("Goalkeeper"), "GK")
 
     def test_unknown_returns_none(self):
-        self.assertIsNone(normalize("Sweeper"))
+        self.assertIsNone(normalize("Libero-Quarterback"))
+
+    def test_generic_labels(self):
+        self.assertEqual(normalize("Defender"), "DEF")
+        self.assertEqual(normalize("Sweeper"), "DEF")
+        self.assertEqual(normalize("Midfield"), "MID")
+        self.assertEqual(normalize("Forward"), "ATT")
 
     def test_to_line(self):
         self.assertEqual(to_line("CB"), "DEF")
