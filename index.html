@@ -156,6 +156,24 @@
         <option value="0.3">Médio</option>
         <option value="0.5">Alto</option>
       </select></label>
+      <label>Modo reforço<select id="sel-realism" disabled onchange="onRealismChange()">
+        <option value="0">Off</option>
+        <option value="1">On</option>
+      </select></label>
+      <label class="realism-only" style="display:none">Nível-alvo<select id="sel-level">
+        <option value="0">Reforço similar</option>
+        <option value="3">Upgrade</option>
+        <option value="-3">Aposta barata</option>
+      </select></label>
+      <label class="realism-only" style="display:none">Ordenar por<select id="sel-sort">
+        <option value="score">Melhor encaixe</option>
+        <option value="overall">Melhores jogadores</option>
+      </select></label>
+      <label class="realism-only" style="display:none">Tamanho do rol<select id="sel-rol">
+        <option value="0.6">Estrito</option>
+        <option value="0.45" selected>Médio</option>
+        <option value="0.3">Amplo</option>
+      </select></label>
       <button id="btn-scout" disabled onclick="runScout()">Gerar candidatos</button>
       <span class="hint" id="hint"></span>
     </div>
@@ -252,6 +270,7 @@ async function onClubChange() {
   document.getElementById('inp-history').disabled  = false;
   document.getElementById('inp-topn').disabled     = false;
   document.getElementById('sel-potential').disabled = false;
+  document.getElementById('sel-realism').disabled  = false;
   document.getElementById('btn-scout').disabled    = false;
   await loadOverview();
 }
@@ -263,8 +282,12 @@ function reset(id, placeholder, disabled) {
   el.disabled = disabled;
 }
 function setStep(id, active) { document.getElementById(id).classList.toggle('active', active); }
+function onRealismChange() {
+  const on = document.getElementById('sel-realism').value === '1';
+  document.querySelectorAll('.realism-only').forEach(el => el.style.display = on ? '' : 'none');
+}
 function lockFooter() {
-  ['inp-history','inp-topn','sel-potential','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
+  ['inp-history','inp-topn','sel-potential','sel-realism','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
 }
 function clearOverview() {
   document.getElementById('overview').innerHTML = '';
@@ -554,6 +577,10 @@ async function runScout() {
   const history = parseInt(document.getElementById('inp-history').value);
   const top_n   = parseInt(document.getElementById('inp-topn').value);
   const potential_weight = parseFloat(document.getElementById('sel-potential').value);
+  const realism = document.getElementById('sel-realism').value === '1';
+  const level_offset = parseInt(document.getElementById('sel-level').value);
+  const sort_by = document.getElementById('sel-sort').value;
+  const score_threshold = realism ? parseFloat(document.getElementById('sel-rol').value) : 0;
   const btn     = document.getElementById('btn-scout');
 
   btn.disabled = true;
@@ -566,6 +593,7 @@ async function runScout() {
       body: JSON.stringify({
         club_id: selectedClub.id, club_slug: selectedClub.slug,
         club_name: selectedClub.name, fifa_edition: edition, history, top_n, potential_weight,
+        realism, level_offset, sort_by, score_threshold,
       }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
@@ -579,7 +607,9 @@ async function runScout() {
   }
 }
 
-function renderPosition({ profile: p, candidates }) {
+function renderPosition({ profile: p, candidates, team_overall }) {
+  const lvl = team_overall != null
+    ? `&nbsp;|&nbsp; nível titular <b style="color:var(--green)">${team_overall}</b>` : '';
   const rows = candidates.map((c, i) => {
     const pct = Math.round(c.score * 100);
     const ovrCls = c.overall >= 80 ? 'high' : c.overall >= 70 ? 'mid' : 'low';
@@ -601,7 +631,7 @@ function renderPosition({ profile: p, candidates }) {
       <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span>
       <span style="font-size:12px;color:var(--muted)">
         n=${p.n} &nbsp;|&nbsp; idade ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; valor pago ${fmt(p.fee_mean)}
-        &nbsp;|&nbsp; nac. ${p.nationality_mode ?? '—'} &nbsp;|&nbsp; liga ${p.from_league_mode ?? '—'}
+        &nbsp;|&nbsp; nac. ${p.nationality_mode ?? '—'} &nbsp;|&nbsp; liga ${p.from_league_mode ?? '—'}${lvl}
       </span>
     </div>
     <div class="table-wrap"><table>
