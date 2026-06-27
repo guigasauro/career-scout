@@ -25,7 +25,7 @@ DEFAULT_WEIGHTS = {
     "nationality": 0.20,
     "league":      0.10,
 }
-OVERALL_WEIGHT = 0.45   # peso do eixo de nível no modo realismo (firme, mas ainda ≤ value)
+OVERALL_WEIGHT = 0.45   # peso do eixo de nível no modo reforço (firme, mas ainda ≤ value)
 
 
 def line_of_pos(pos: str) -> str:
@@ -122,7 +122,7 @@ def rank_candidates(
 ) -> list[Candidate]:
     w = dict(weights or DEFAULT_WEIGHTS)
     w["potential"] = potential_weight   # knob do usuário (0 = ignorar potencial)
-    # modo realismo: ancora no overall dos titulares do clube (+offset de ambição)
+    # modo reforço: ancora no overall dos titulares do clube (+offset de ambição)
     target_overall = (team_overall + level_offset) if team_overall else None
     w["overall"] = OVERALL_WEIGHT if target_overall else 0.0
 
@@ -195,7 +195,7 @@ def rank_candidates(
         if w["potential"] and p.get("potential"):
             score += w["potential"] * (int(p["potential"]) / 100)
 
-        # nível (modo realismo): proximidade ao overall titular do clube + offset
+        # nível (modo reforço): proximidade ao overall titular do clube + offset
         if target_overall and p.get("overall"):
             dist = abs(int(p["overall"]) - target_overall) / ovr_std
             score += w["overall"] * max(0.0, 1 - dist / 3)
@@ -214,7 +214,7 @@ def rank_candidates(
             score=round(score / active_weight, 4),
         ))
 
-    # rol acima do threshold (modo realismo); 0 = sem filtro
+    # rol acima do threshold (modo reforço); 0 = sem filtro
     if score_threshold:
         results = [c for c in results if c.score >= score_threshold]
     # ordena por encaixe (score) ou por qualidade (overall) — escolha do usuário

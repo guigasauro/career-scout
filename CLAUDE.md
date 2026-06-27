@@ -2,7 +2,7 @@
 
 > Título de trabalho: **career-scout**. Ferramenta de scouting para o Modo Carreira do FIFA/EA FC.
 > Esta é a fonte de verdade do projeto. Leia tudo antes de escrever ou alterar código.
-> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
+> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Overview do clube em painel enxuto + modal detalhado. Score de matching com normalização por eixos ativos, knob de potencial, desconto D2 e **modo reforço** (ancoragem no overall titular do elenco). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
 
 ---
 
@@ -266,18 +266,51 @@ para cada position_norm com ≥1 contratação:
 
 ```
 para cada perfil de posição:
-    candidatos = jogadores da edição-FIFA cuja posição == position_norm
-    para cada candidato, calcular score de distância ao perfil:
-        + match de nacionalidade (se moda existir)        × peso_nac
-        + match de liga (se moda existir)                 × peso_liga
-        + |idade - age_mean| normalizado                  × peso_idade
-        + |value_eur - market_value_mean| normalizado     × peso_valor
-    ordenar por score; retornar top-N
+    candidatos = jogadores da edição-FIFA cuja posição ∈ posições da linha
+    para cada candidato, somar termos [0,1] dos eixos ATIVOS:
+        + match de nacionalidade (se moda existir)              × peso_nac (0.20)
+        + match de liga (se moda existir)                       × peso_liga (0.10)
+        + (1 - |idade - age_mean| / age_std / 3)                × peso_idade (0.30)
+        + (1 - |value_eur - alvo_valor| / val_std / 3)          × peso_valor (0.40)
+        [opc] + (potential/100)                                 × potential_weight
+        [opc] + (1 - |overall - alvo_overall| / ovr_std / 3)    × OVERALL_WEIGHT (0.45)
+    score = soma / Σ(pesos dos eixos ativos)     # normaliza para [0,1]
+    aplicar threshold (modo reforço); ordenar por score ou overall; retornar top-N
 ```
-- Parâmetros categóricos descartados no estágio 2 (moda `None`) **simplesmente não entram** no score.
-- Normalizar idade e valor (z-score ou min-max) antes de somar, senão o valor domina por escala.
-- Pesos configuráveis; default razoável: valor e posição altos, nacionalidade média, liga baixa.
+Implementado em `match/sofifa.py::rank_candidates`. Pontos-chave:
+
+- **Normalização por eixos ativos (crítico):** o score é dividido pela soma dos
+  pesos dos eixos que o perfil consegue pontuar (tem `fee_mean`? `age_mean`? moda
+  de nac/liga?). Isso mantém o score em `[0,1]` e **comparável entre posições** —
+  perfil sem fee/nac não fica com teto menor. Sem isso, posições com menos sinais
+  pareciam piores artificialmente.
+- **Eixo de valor com desconto D2 (`fee_discount`, default 0.8):** o alvo é
+  `fee_mean × α`, não a fee cheia. A fee paga embute prêmio (cláusula/leilão) e o
+  `value_eur` do SoFIFA é market value — descontar casa as duas grandezas. `α=1.0`
+  reproduz o comportamento sem desconto.
+- **Knob de potencial (`potential_weight`, default 0):** eixo opcional que premia
+  `potential` alto (Career Mode: promessas). 0 = não entra no score.
+- **Modo reforço (`team_overall`/`level_offset`/`score_threshold`/`sort_by`):** ver §10.1.
+- Parâmetros categóricos descartados no estágio 2 (moda `None`) **simplesmente não entram** no score (nem no numerador nem no denominador).
 - `from_club_mode` raramente sobrevive ao filtro de moda — não depender dele.
+
+### 10.1 — Modo reforço (ancoragem no nível do elenco)
+Resolve "sugestões abaixo do nível do time": clubes que historicamente compram
+barato (ex.: Milan pós-2010) viam o eixo de valor puxar jogadores fracos. Quando
+ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
+
+- **Baseline (`team_line_overall`):** overall médio dos titulares por linha
+  (`club_position` ∉ {SUB, RES}). Fallback: top-3 por overall na linha quando não
+  há XI marcado (raro no Kaggle; cobre edições futuras sem `club_position`).
+- **`level_offset` (ambição):** desloca o overall-alvo — `0` reforço similar,
+  `+3` upgrade, `−3` aposta barata.
+- **`score_threshold` (tamanho do rol):** corte mínimo de score; retorna o **rol**
+  acima do threshold em vez de top-N puro. Frontend expõe Estrito 0.6 / Médio 0.45
+  / Amplo 0.3. É o que impede "vazamento de estrelas" no sort por overall.
+- **`sort_by`:** `"score"` (melhor encaixe) ou `"overall"` (melhores jogadores do rol).
+- **Peso `OVERALL_WEIGHT = 0.45`** — firme, mas ≤ `value` (decisão do dev: eixo
+  adicional, não principal; OFF = 100% padrão histórico, o comportamento "realista").
+- Default OFF → comportamento idêntico ao de antes.
 
 ---
 
@@ -309,8 +342,10 @@ para cada perfil de posição:
 6. ✅ **Mapeamento TM ↔ SoFIFA** — `seed_clubs.py` raspa busca do TM para cada clube dos CSVs Kaggle, salva `data/club_mapping.json`. 150 clubes das 5 grandes ligas mapeados + correções manuais para mismatches do primeiro resultado de busca.
 7. ✅ **Limpeza de chegadas** — `_dedup_arrivals`: descarte de retornos de empréstimo ("End of loan"), promoções internas (base própria) e dedup cross-season por jogador (permanent > free > loan, temporada mais recente em empate).
 8. ✅ **Frontend refinado** — cores por linha de posição, "ver mais" expansível por posição com distribuições + lista de jogadores, paginação de chegadas (20 + carregar mais), nomenclatura "Valor pago", janela → data aproximada (Jul/Jan + ano).
-9. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
-8. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback).
+9. ✅ **Overview em painel + modal** — ao selecionar o clube, painel enxuto (contratações/temporada, modas de nac/liga, idade média, valor médio/máximo pago) com "ver detalhes ↗" abrindo a visão geral completa no modal.
+10. ✅ **Eixos de score** — normalização por eixos ativos, knob de potencial, desconto D2 (`fee_discount`) e **modo reforço** (ver §10.1). Cobertos por `tests/test_sofifa.py`.
+11. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
+12. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback).
 
 ---
 
@@ -319,7 +354,10 @@ para cada perfil de posição:
 | Decisão | Escolha |
 |---------|---------|
 | **D1** — scraper TM | `requests` + BeautifulSoup direto (ScraperFC não tem método de transfers por clube) |
-| **D2** — eixo de valor | **Fee paga** (não valor de mercado). `market_value` removido do schema. A busca no SoFIFA usará `value_eur` um pouco menor que a média de fee das contratações definitivas. |
+| **D2** — eixo de valor | **Fee paga** (não valor de mercado). `market_value` removido do schema. Desconto **implementado**: alvo no SoFIFA = `fee_mean × fee_discount` (default 0.8), casando `value_eur` (market value) ↔ fee descontada. `α=1.0` desliga o desconto. |
+| **Score** — normalização | Score normalizado pela soma dos **pesos dos eixos ativos** do perfil → `[0,1]` comparável entre posições. Eixo ausente não penaliza nem infla o teto. |
+| **Potencial** — knob | Eixo opcional `potential_weight` (default 0). Preferência do usuário (promessas), não padrão do clube. Frontend: Off/Baixo/Médio/Alto. |
+| **Modo reforço** | Eixo opt-in ancorado no overall titular do elenco (`OVERALL_WEIGHT = 0.45`, ≤ value — **adicional, não principal**). OFF = 100% padrão histórico ("realista"). Controles: Nível-alvo (`level_offset`), Tamanho do rol (`score_threshold`), Ordenar por (`sort_by`). Ver §10.1. |
 | **D3** — granularidade | Posição fina com fallback para linha (config `min_sample`, default 3) |
 | **D5** — janela | **5 temporadas** de histórico (configurável via `--history`). Fórmula: `range(season_ceil - history + 1, season_ceil + 1)` onde `season_ceil = 2000 + fifa_edition - 1`. FIFA 17 → temporadas 2012/13–2016/17. |
 | **D6** — SoFIFA | **Dataset Kaggle `players_{year}.csv`** para FIFA 15–22 (baixado em `data/raw/`). `sofifa_scraper.py` como fallback para FC 24+. Liga disponível via `league_name` no Kaggle — `_normalize_league` faz o mapeamento TM → Kaggle (ex.: "Ligue 1" → "French Ligue 1", "Eredivisie" → "Holland Eredivisie"). |
@@ -371,13 +409,17 @@ Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o est�
 | `POST` | `/overview` | Estágios 1+2: retorna chegadas + perfis + estatísticas agregadas |
 | `POST` | `/scout` | Estágios 1+2+3: retorna candidatos ranqueados por posição |
 
-### Body de `/overview` e `/scout`
+### Body de `/overview` e `/scout` (`ScoutRequest`)
 ```json
 { "club_id": 583, "club_slug": "paris-saint-germain", "club_name": "PSG",
-  "fifa_edition": 22, "history": 7, "top_n": 20 }
+  "fifa_edition": 22, "history": 7, "top_n": 20,
+  "potential_weight": 0.0, "fee_discount": 0.8,
+  "realism": false, "level_offset": 0, "sort_by": "score", "score_threshold": 0.0 }
 ```
 - `fifa_edition` = número da edição (22 = FIFA 22); mapeia para `players_22.csv` e seasons até 2021 (`2000 + edition - 1`)
 - Cache de chegadas em `data/processed/arrivals_{club_id}_{edition}.csv` — segunda chamada não raspa o TM
+- Campos de matching (só usados por `/scout`): `potential_weight` (knob de potencial), `fee_discount` (desconto D2), e o **modo reforço** — `realism` (liga a ancoragem no overall do elenco), `level_offset` (ambição: 0/+3/−3), `sort_by` (`score`|`overall`), `score_threshold` (corte do rol; 0 → backend usa 0.4 quando `realism`). Ver §10–10.1.
+- Resposta de `/scout` inclui `team_levels` (overall titular por linha) e, por posição, `team_overall`. Resposta de `/overview` traz `by_season`, modas (`by_nationality`/`by_from_league`), `age_stats`, `fee_stats`, perfis e chegadas.
 
 ### Estrutura de clubes (`CLUBS_DB`)
 Carregada na inicialização a partir de `data/club_mapping.json` + `_OVERRIDES` (lista manual em `api.py` que prevalece).  
