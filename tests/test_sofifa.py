@@ -6,14 +6,17 @@ from pathlib import Path
 from career_scout.match.sofifa import (
     _load_sofifa_cached,
     league_names,
+    line_of_pos,
     load_sofifa,
     rank_candidates,
+    team_line_overall,
 )
 from career_scout.models import PositionProfile
 
 
 def _p(sofifa_id, nationality, age, value_eur, positions,
-       club_name="Other FC", league_name="French Ligue 1", overall=80):
+       club_name="Other FC", league_name="French Ligue 1", overall=80,
+       club_position="", potential=0):
     return {
         "sofifa_id": sofifa_id,
         "short_name": f"Player {sofifa_id}",
@@ -23,6 +26,8 @@ def _p(sofifa_id, nationality, age, value_eur, positions,
         "age": str(age),
         "value_eur": str(value_eur),
         "overall": str(overall),
+        "potential": str(potential),
+        "club_position": club_position,
         "player_positions": positions,
     }
 
@@ -98,6 +103,67 @@ class TestRankCandidates(unittest.TestCase):
         on = {c.sofifa_id: c.score for c in
               rank_candidates(self.profile, players, potential_weight=0.5)}
         self.assertGreater(on["hi"], on["low"])                  # knob on → joia sobe
+
+
+class TestRealismLevel(unittest.TestCase):
+    def setUp(self):
+        # perfil sem fee/nac/liga: isola o eixo de nível (overall)
+        self.profile = PositionProfile(
+            position_norm="MID", n=3, n_permanent=3, age_mean=24.0,
+            fee_mean=None, nationality_mode=None, from_league_mode=None,
+            from_club_mode=None,
+        )
+        self.players = [
+            _p("near", "X", 24, 5_000_000, "CM", overall=79),  # no nível do time
+            _p("low",  "X", 24, 5_000_000, "CM", overall=68),  # bem abaixo
+            _p("high", "X", 24, 5_000_000, "CM", overall=90),  # acima demais
+        ]
+
+    def test_anchors_on_team_level(self):
+        res = {c.sofifa_id: c.score for c in
+               rank_candidates(self.profile, self.players, team_overall=79.0)}
+        self.assertGreater(res["near"], res["low"])
+        self.assertGreater(res["near"], res["high"])
+
+    def test_upgrade_offset_favors_stronger(self):
+        # offset +6 → alvo 85, o jogador de 90 fica mais perto que o de 79
+        res = {c.sofifa_id: c.score for c in
+               rank_candidates(self.profile, self.players, team_overall=79.0, level_offset=6)}
+        self.assertGreater(res["high"], res["near"])
+
+    def test_threshold_filters_pool(self):
+        full = rank_candidates(self.profile, self.players, team_overall=79.0)
+        strict = rank_candidates(self.profile, self.players, team_overall=79.0,
+                                 score_threshold=0.99)
+        self.assertLess(len(strict), len(full))
+
+    def test_sort_by_overall(self):
+        res = rank_candidates(self.profile, self.players, team_overall=79.0,
+                              sort_by="overall")
+        self.assertEqual([c.overall for c in res], sorted([c.overall for c in res], reverse=True))
+
+
+class TestTeamLineOverall(unittest.TestCase):
+    def test_starters_only(self):
+        players = [
+            _p("1", "X", 24, 0, "CM", club_name="FC", overall=80, club_position="LCM"),
+            _p("2", "X", 24, 0, "CM", club_name="FC", overall=78, club_position="RCM"),
+            _p("3", "X", 24, 0, "CM", club_name="FC", overall=60, club_position="SUB"),  # banco
+        ]
+        lvl = team_line_overall(players, "FC")
+        self.assertEqual(lvl["MID"], 79.0)  # ignora o reserva de 60
+
+    def test_fallback_top3_when_no_starter(self):
+        players = [
+            _p(str(i), "X", 24, 0, "ST", club_name="FC", overall=ov, club_position="SUB")
+            for i, ov in enumerate([70, 72, 74, 50])
+        ]
+        lvl = team_line_overall(players, "FC")
+        self.assertEqual(lvl["ATT"], 72.0)  # top-3 (74,72,70), ignora o 50
+
+    def test_line_of_pos(self):
+        self.assertEqual(line_of_pos("CM"), "MID")
+        self.assertEqual(line_of_pos("DEF"), "DEF")   # já é linha
 
 
 class TestSofifaCache(unittest.TestCase):

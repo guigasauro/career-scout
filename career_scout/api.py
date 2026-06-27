@@ -12,7 +12,9 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from career_scout.extract.transfermarkt import get_arrivals
-from career_scout.match.sofifa import league_names, load_sofifa, rank_candidates
+from career_scout.match.sofifa import (
+    league_names, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
+)
 from career_scout.models import Transfer
 from career_scout.profile.aggregate import build_profiles, load_transfers
 
@@ -175,6 +177,10 @@ class ScoutRequest(BaseModel):
     top_n: int = 20
     potential_weight: float = 0.0   # 0 = ignora potencial; >0 prioriza promessas
     fee_discount: float = 0.8       # D2: value_eur alvo = fee_mean × α (prêmio embutido na fee)
+    realism: bool = False           # modo realismo: ancora no overall titular do clube
+    level_offset: int = 0           # ambição: 0 similar, +3 upgrade, -3 aposta barata
+    sort_by: str = "score"          # "score" (encaixe) | "overall" (melhores jogadores)
+    score_threshold: float = 0.0    # rol acima do threshold (0 = backend usa default no realismo)
 
 
 def _save_transfers(transfers: list[Transfer], path: Path) -> None:
@@ -279,21 +285,32 @@ def scout(req: ScoutRequest):
     club_info = next((c for c in CLUBS_DB if c["id"] == req.club_id), None)
     sofifa_name = club_info["sofifa_name"] if club_info else None
 
+    team_levels = team_line_overall(players, sofifa_name) if req.realism else {}
+    threshold = req.score_threshold or (0.4 if req.realism else 0.0)
+
     positions = []
     for profile in profiles:
         if not profile.age_mean:
             continue
+        team_overall = team_levels.get(line_of_pos(profile.position_norm)) if req.realism else None
         candidates = rank_candidates(profile, players, top_n=req.top_n,
                                      exclude_club=sofifa_name,
                                      potential_weight=req.potential_weight,
-                                     fee_discount=req.fee_discount)
+                                     fee_discount=req.fee_discount,
+                                     team_overall=team_overall,
+                                     level_offset=req.level_offset,
+                                     score_threshold=threshold,
+                                     sort_by=req.sort_by)
         positions.append({
             "profile": asdict(profile),
+            "team_overall": team_overall,
             "candidates": [asdict(c) for c in candidates],
         })
 
     return {
         "club": req.club_name,
         "fifa_edition": req.fifa_edition,
+        "realism": req.realism,
+        "team_levels": team_levels,
         "positions": positions,
     }

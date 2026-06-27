@@ -1,5 +1,6 @@
 """Estágio 3 — matching de jogadores SoFIFA contra perfis do Estágio 2."""
 import csv
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -15,6 +16,8 @@ _LINE_MEMBERS: dict[str, list[str]] = {
     "MID": ["CDM", "CM", "CAM", "LM", "RM"],
     "GK":  ["GK"],
 }
+_POS_LINE = {p: line for line, ps in _LINE_MEMBERS.items() for p in ps}
+_NONSTARTER = {"SUB", "RES", "", "None"}   # club_position de reservas no dataset
 
 DEFAULT_WEIGHTS = {
     "value":       0.40,
@@ -22,6 +25,38 @@ DEFAULT_WEIGHTS = {
     "nationality": 0.20,
     "league":      0.10,
 }
+OVERALL_WEIGHT = 0.45   # peso do eixo de nível no modo realismo (firme, mas ainda ≤ value)
+
+
+def line_of_pos(pos: str) -> str:
+    """Linha (GK/DEF/MID/ATT) de uma posição fina ou de uma linha já agregada."""
+    if pos in _LINE_MEMBERS:
+        return pos
+    return _POS_LINE.get(pos, "ATT")
+
+
+def team_line_overall(players: list[dict], club_name: str | None) -> dict[str, float]:
+    """Overall médio dos titulares do clube por linha (club_position fora de SUB/RES).
+    Fallback por linha: top-3 por overall quando a linha não tem titular marcado."""
+    if not club_name:
+        return {}
+    squad = [p for p in players if p.get("club_name") == club_name]
+    starters: dict[str, list[int]] = defaultdict(list)
+    everyone: dict[str, list[int]] = defaultdict(list)
+    for p in squad:
+        if not p.get("overall"):
+            continue
+        line = line_of_pos((_parse_positions(p.get("player_positions", "")) or ["?"])[0])
+        o = int(p["overall"])
+        everyone[line].append(o)
+        if p.get("club_position", "") not in _NONSTARTER:
+            starters[line].append(o)
+    out: dict[str, float] = {}
+    for line in ("GK", "DEF", "MID", "ATT"):
+        vals = starters.get(line) or sorted(everyone.get(line, []), reverse=True)[:3]
+        if vals:
+            out[line] = round(sum(vals) / len(vals), 1)
+    return out
 
 
 @dataclass
@@ -80,9 +115,16 @@ def rank_candidates(
     exclude_club: str | None = None,
     potential_weight: float = 0.0,
     fee_discount: float = 0.8,
+    team_overall: float | None = None,
+    level_offset: int = 0,
+    score_threshold: float = 0.0,
+    sort_by: str = "score",
 ) -> list[Candidate]:
     w = dict(weights or DEFAULT_WEIGHTS)
     w["potential"] = potential_weight   # knob do usuário (0 = ignorar potencial)
+    # modo realismo: ancora no overall dos titulares do clube (+offset de ambição)
+    target_overall = (team_overall + level_offset) if team_overall else None
+    w["overall"] = OVERALL_WEIGHT if target_overall else 0.0
 
     # expande linha (ATT/DEF/MID) para as posições finas equivalentes
     target_positions = set(_LINE_MEMBERS.get(profile.position_norm, [profile.position_norm]))
@@ -103,6 +145,10 @@ def rank_candidates(
     age_std    = (sum((a - age_mean)**2 for a in ages) / len(ages)) ** 0.5 or 1
     val_mean   = sum(values) / len(values) if values else 0
     val_std    = (sum((v - val_mean)**2 for v in values) / len(values)) ** 0.5 or 1
+    # ponytail: std do overall do pool inteiro da posição; tolerância larga, aperta se precisar
+    overalls   = [int(p["overall"]) for p in pool if p.get("overall")]
+    ovr_mean   = sum(overalls) / len(overalls) if overalls else 0
+    ovr_std    = (sum((o - ovr_mean)**2 for o in overalls) / len(overalls)) ** 0.5 or 1
 
     target_league = _normalize_league(profile.from_league_mode) if profile.from_league_mode else None
 
@@ -120,6 +166,7 @@ def rank_candidates(
         + (w["nationality"] if profile.nationality_mode else 0)
         + (w["league"]      if target_league           else 0)
         + (w["potential"])
+        + (w["overall"])
     ) or 1.0
 
     results: list[Candidate] = []
@@ -148,6 +195,11 @@ def rank_candidates(
         if w["potential"] and p.get("potential"):
             score += w["potential"] * (int(p["potential"]) / 100)
 
+        # nível (modo realismo): proximidade ao overall titular do clube + offset
+        if target_overall and p.get("overall"):
+            dist = abs(int(p["overall"]) - target_overall) / ovr_std
+            score += w["overall"] * max(0.0, 1 - dist / 3)
+
         results.append(Candidate(
             sofifa_id=p.get("sofifa_id", ""),
             short_name=p.get("short_name", p.get("long_name", "")),
@@ -162,7 +214,11 @@ def rank_candidates(
             score=round(score / active_weight, 4),
         ))
 
-    results.sort(key=lambda c: -c.score)
+    # rol acima do threshold (modo realismo); 0 = sem filtro
+    if score_threshold:
+        results = [c for c in results if c.score >= score_threshold]
+    # ordena por encaixe (score) ou por qualidade (overall) — escolha do usuário
+    results.sort(key=(lambda c: -c.overall) if sort_by == "overall" else (lambda c: -c.score))
     return results[:top_n]
 
 
