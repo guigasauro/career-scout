@@ -177,10 +177,10 @@ class ScoutRequest(BaseModel):
     top_n: int = 20
     potential_weight: float = 0.0   # 0 = ignora potencial; >0 prioriza promessas
     fee_discount: float = 0.8       # D2: value_eur alvo = fee_mean × α (prêmio embutido na fee)
-    realism: bool = False           # modo realismo: ancora no overall titular do clube
+    realism: bool = False           # modo reforço: ancora no overall titular do clube
     level_offset: int = 0           # ambição: 0 similar, +3 upgrade, -3 aposta barata
     sort_by: str = "score"          # "score" (encaixe) | "overall" (melhores jogadores)
-    score_threshold: float = 0.0    # rol acima do threshold (0 = backend usa default no realismo)
+    score_threshold: float = 0.0    # rol acima do threshold (0 = backend usa default no modo reforço)
 
 
 def _save_transfers(transfers: list[Transfer], path: Path) -> None:
