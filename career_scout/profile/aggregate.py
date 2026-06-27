@@ -1,5 +1,6 @@
 """Estágio 2 — perfilagem estatística das chegadas por posição."""
 import csv
+import logging
 from collections import Counter
 from dataclasses import asdict
 from pathlib import Path
@@ -8,6 +9,8 @@ from typing import Optional
 
 from career_scout.models import PositionProfile, Transfer
 from career_scout.normalize.positions import POS_TO_LINE
+
+logger = logging.getLogger(__name__)
 
 
 def _mode(values: list[str], min_support: int = 2) -> Optional[str]:
@@ -25,11 +28,18 @@ def build_profiles(
 ) -> list[PositionProfile]:
     """Agrupa chegadas por posição e calcula perfil estatístico."""
     by_pos: dict[str, list[Transfer]] = {}
+    unmapped = 0
     for t in transfers:
         pos = t.position_norm
         if pos is None:
+            unmapped += 1
             continue
         by_pos.setdefault(pos, []).append(t)
+    if unmapped:
+        logger.warning(
+            "build_profiles: %d chegada(s) com posição não mapeada descartada(s)",
+            unmapped,
+        )
 
     # fallback: posições com amostra pequena somam-se à linha
     for pos, group in list(by_pos.items()):

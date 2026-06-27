@@ -13,6 +13,13 @@ TM_TO_FIFA: dict[str, str] = {
     "Right Winger":        "RW",
     "Second Striker":      "CF",
     "Centre-Forward":      "ST",
+    # rótulos genéricos do TM → códigos de linha (já tratados como fallback)
+    "Defender":            "DEF",
+    "Sweeper":             "DEF",
+    "Midfield":            "MID",
+    "midfielder":          "MID",
+    "Forward":             "ATT",
+    "Striker":             "ATT",
 }
 
 # fallback: posição fina → linha

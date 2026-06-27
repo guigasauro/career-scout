@@ -43,6 +43,11 @@ class TestBuildProfiles(unittest.TestCase):
         # LW (n=1) does not stand alone; folds into ATT line, which also has n=1
         self.assertNotIn("LW", positions)
 
+    def test_unmapped_positions_skipped_cleanly(self):
+        ts = [_t("X", None)] + [_t(f"CB{i}", "CB") for i in range(3)]
+        profiles = build_profiles(ts)
+        self.assertTrue(any(p.position_norm == "CB" for p in profiles))
+
 
 if __name__ == "__main__":
     unittest.main()
