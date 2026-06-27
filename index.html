@@ -314,8 +314,7 @@ function typeLabel(t) {
   return '<span class="badge badge-free">free</span>';
 }
 function arrivalDate(t) {
-  if (t.window === 'Winter') return `Jan ${t.season + 1}`;
-  if (t.window === 'Summer') return `Jul ${t.season}`;
+  // TM agrega Summer+Winter por temporada; só a temporada é conhecida.
   return String(t.season);
 }
 function countBy(arr, fn) {
