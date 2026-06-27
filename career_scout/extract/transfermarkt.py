@@ -161,6 +161,26 @@ def parse_arrivals(html: str, club_name: str, season: int, window: str) -> list[
     return transfers
 
 
+# marcadores de base/reserva. Tokens curtos/ambíguos exigem fronteira de palavra.
+_YOUTH_WORD_RE = re.compile(
+    r"\b(u1[6-9]|u2[0-3]|ii|b team|reserves?|primavera|youth|academy)\b",
+    re.IGNORECASE,
+)
+# sufixo de time B: "... B", "... B)", "... (B)"
+_B_TEAM_RE = re.compile(r"\bB\)?\s*$|\(B\)\s*$")
+
+
+def _is_internal_origin(from_club: str, club_lower: str) -> bool:
+    fc = from_club.lower()
+    if _YOUTH_WORD_RE.search(from_club) or _B_TEAM_RE.search(from_club.strip()):
+        return True
+    # promoção interna: o nome do clube de destino aparece como token no de origem,
+    # exigindo fronteira (evita casar "psg" dentro de palavras maiores).
+    if club_lower and re.search(rf"\b{re.escape(club_lower)}\b", fc):
+        return True
+    return False
+
+
 def _dedup_arrivals(transfers: list[Transfer], club_name: str) -> list[Transfer]:
     """Remove duplicatas e entradas irrelevantes.
 
@@ -171,12 +191,10 @@ def _dedup_arrivals(transfers: list[Transfer], club_name: str) -> list[Transfer]
     """
     _priority = {"permanent": 0, "free": 1, "loan": 2}
     seen: dict[str, Transfer] = {}
-    _YOUTH_MARKERS = ("u16", "u17", "u18", "u19", "u20", "u21", "u23",
-                      "primavera", "youth", "reserve", "b team", "ii", " b)")
     club_lower = club_name.lower().removeprefix("ac ").removeprefix("fc ").removeprefix("as ")
     for t in transfers:
-        fc = (t.from_club or "").lower()
-        if fc and (club_lower in fc or any(m in fc for m in _YOUTH_MARKERS)):
+        fc_raw = t.from_club or ""
+        if fc_raw and _is_internal_origin(fc_raw, club_lower):
             continue
         key = t.player_name
         if key not in seen:
