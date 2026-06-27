@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from career_scout.extract.transfermarkt import get_arrivals
-from career_scout.match.sofifa import load_sofifa, rank_candidates
+from career_scout.match.sofifa import league_names, load_sofifa, rank_candidates
 from career_scout.models import Transfer
 from career_scout.profile.aggregate import build_profiles, load_transfers
 
@@ -142,9 +142,8 @@ def countries(edition: int):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
     if not csv_path.exists():
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        league_names = {r["league_name"] for r in csv.DictReader(f) if r.get("league_name")}
-    found = sorted({LEAGUE_COUNTRY.get(l, "Outros") for l in league_names})
+    league_set = league_names(csv_path)
+    found = sorted({LEAGUE_COUNTRY.get(l, "Outros") for l in league_set})
     # "Outros" sempre por último
     return [c for c in found if c != "Outros"] + (["Outros"] if "Outros" in found else [])
 
@@ -154,8 +153,7 @@ def leagues(edition: int, country: str | None = None):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
     if not csv_path.exists():
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        all_leagues = sorted({r["league_name"] for r in csv.DictReader(f) if r.get("league_name")})
+    all_leagues = sorted(league_names(csv_path))
     if country:
         all_leagues = [l for l in all_leagues if LEAGUE_COUNTRY.get(l, "Outros") == country]
     return all_leagues

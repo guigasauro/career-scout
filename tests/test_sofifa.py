@@ -1,6 +1,14 @@
+import csv
+import tempfile
 import unittest
+from pathlib import Path
 
-from career_scout.match.sofifa import rank_candidates
+from career_scout.match.sofifa import (
+    _load_sofifa_cached,
+    league_names,
+    load_sofifa,
+    rank_candidates,
+)
 from career_scout.models import PositionProfile
 
 
@@ -56,6 +64,32 @@ class TestRankCandidates(unittest.TestCase):
                                   exclude_club="ExcludeMe")
         by_id = {c.sofifa_id: c for c in results}
         self.assertGreater(by_id["1"].score, by_id["2"].score)
+
+
+class TestSofifaCache(unittest.TestCase):
+    def _tmp_csv(self, d):
+        p = Path(d) / "players_99.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["short_name", "league_name", "player_positions"])
+            w.writerow(["A", "French Ligue 1", "CB"])
+            w.writerow(["B", "Italian Serie A", "ST"])
+        return p
+
+    def test_independent_lists(self):
+        _load_sofifa_cached.cache_clear()
+        with tempfile.TemporaryDirectory() as d:
+            p = self._tmp_csv(d)
+            a = load_sofifa(p)
+            b = load_sofifa(p)
+            self.assertIsNot(a, b)  # listas separadas, parse compartilhado
+            self.assertEqual(len(a), 2)
+
+    def test_league_names(self):
+        _load_sofifa_cached.cache_clear()
+        with tempfile.TemporaryDirectory() as d:
+            p = self._tmp_csv(d)
+            self.assertEqual(league_names(p), {"French Ligue 1", "Italian Serie A"})
 
 
 if __name__ == "__main__":
