@@ -1,6 +1,7 @@
 """Estágio 3 — matching de jogadores SoFIFA contra perfis do Estágio 2."""
 import csv
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
@@ -37,9 +38,19 @@ class Candidate:
     score: float = 0.0
 
 
+@lru_cache(maxsize=8)
+def _load_sofifa_cached(csv_path_str: str) -> tuple[dict, ...]:
+    with open(csv_path_str, newline="", encoding="utf-8") as f:
+        return tuple(csv.DictReader(f))
+
+
 def load_sofifa(csv_path: Path) -> list[dict]:
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+    # ponytail: cache por caminho; arquivos são estáticos durante o run do servidor.
+    return list(_load_sofifa_cached(str(csv_path)))
+
+
+def league_names(csv_path: Path) -> set[str]:
+    return {r["league_name"] for r in _load_sofifa_cached(str(csv_path)) if r.get("league_name")}
 
 
 def _parse_positions(raw: str) -> list[str]:
