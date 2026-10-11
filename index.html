@@ -307,6 +307,9 @@ function setStatus(id, type, html = '') {
   el.style.display = type ? 'block' : 'none';
   el.innerHTML = html;
 }
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 function fmt(v, dec = 1) {
   if (v == null) return '—';
   if (v >= 1e6) return `€${(v/1e6).toFixed(dec)}M`;
@@ -319,14 +322,14 @@ function arrivalRowHtml(t) {
   return `<tr>
     <td class="muted">${arrivalDate(t)}</td>
     <td>${typeLabel(t.transfer_type)}</td>
-    <td style="font-weight:600">${t.player_name}</td>
-    <td><span class="badge ${posBadge(t.position_norm, false)}">${t.position_norm || '?'}</span></td>
+    <td style="font-weight:600">${esc(t.player_name)}</td>
+    <td><span class="badge ${posBadge(t.position_norm, false)}">${esc(t.position_norm || '?')}</span></td>
     <td>${fmt(t.fee)}</td>
     <td>${t.age ?? '—'}</td>
-    <td>${t.nationality || '—'}</td>
-    <td class="trunc muted" title="${(t.from_club||'').replace(/"/g,'&quot;')}">${t.from_club || '—'}</td>
-    <td class="trunc muted" title="${(t.from_league||'').replace(/"/g,'&quot;')}">${t.from_league || '—'}</td>
-    <td><a href="${t.player_url}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
+    <td>${esc(t.nationality || '—')}</td>
+    <td class="trunc muted" title="${esc(t.from_club)}">${esc(t.from_club || '—')}</td>
+    <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
+    <td><a href="${esc(t.player_url)}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
   </tr>`;
 }
 function loadAllArrivals(key, btn) {
@@ -421,19 +424,22 @@ function distRows(obj, barColor = 'var(--blue)') {
   return Object.entries(obj).map(([k, v]) => {
     const w = Math.round(v / max * 100);
     return `<div class="dist-row">
-      <span class="key" title="${k}">${k}</span>
+      <span class="key" title="${esc(k)}">${esc(k)}</span>
       <div class="bar"><div class="fill" style="width:${w}%;background:${barColor}"></div></div>
       <span class="n">${v}</span>
     </div>`;
   }).join('');
 }
 
+const _dists = [];
 function distBlock(title, obj, total, barColor, limit = 5) {
   const entries = Object.entries(obj);
   const top     = Object.fromEntries(entries.slice(0, limit));
   const hasMore = entries.length > limit;
+  // dados ficam num registro; inline JSON no onclick quebrava com apóstrofo ("Côte d'Ivoire")
+  const idx = _dists.push([title, obj, barColor]) - 1;
   const seeAll  = hasMore
-    ? `<span class="see-all" onclick='openModal(${JSON.stringify(title)}, ${JSON.stringify(obj)}, "${barColor}")'>ver todos (${entries.length})</span>`
+    ? `<span class="see-all" onclick="openModal(..._dists[${idx}])">ver todos (${entries.length})</span>`
     : '';
   return `<div class="dist-block"><h4>${title}</h4>${distRows(top, barColor)}${seeAll}</div>`;
 }
@@ -447,15 +453,15 @@ function renderSimplePanel(d, history) {
   const leagueMode = modeKey(d.by_from_league);
   const chips = `<div class="chips">
     <div class="chip"><div class="label">Contratações / temporada</div><div class="value green">${perSeason}</div></div>
-    <div class="chip"><div class="label">Nacionalidade (moda)</div><div class="value">${natMode || '—'}</div></div>
-    <div class="chip"><div class="label">Liga de origem (moda)</div><div class="value">${leagueMode || '—'}</div></div>
+    <div class="chip"><div class="label">Nacionalidade (moda)</div><div class="value">${esc(natMode || '—')}</div></div>
+    <div class="chip"><div class="label">Liga de origem (moda)</div><div class="value">${esc(leagueMode || '—')}</div></div>
     <div class="chip"><div class="label">Idade média</div><div class="value">${a.mean ?? '—'}</div></div>
     <div class="chip"><div class="label">Valor médio pago</div><div class="value blue">${fmt(f.mean)}</div></div>
     <div class="chip"><div class="label">Valor máximo pago</div><div class="value purple">${fmt(f.max)}</div></div>
   </div>`;
   return `<div class="card">
     <div class="card-header" style="justify-content:space-between">
-      <span>📊 Visão geral — ${d.club} × FIFA ${d.fifa_edition}</span>
+      <span>📊 Visão geral — ${esc(d.club)} × FIFA ${d.fifa_edition}</span>
       <span class="see-all" style="margin:0" onclick="openOverviewModal()">ver detalhes ↗</span>
     </div>
     <div class="card-body">${chips}</div>
@@ -507,21 +513,21 @@ function renderOverviewFull(d) {
     const playerRows = pa.map(t => `<tr>
       <td class="muted">${arrivalDate(t)}</td>
       <td>${typeLabel(t.transfer_type)}</td>
-      <td style="font-weight:600">${t.player_name}</td>
+      <td style="font-weight:600">${esc(t.player_name)}</td>
       <td>${fmt(t.fee)}</td>
       <td>${t.age ?? '—'}</td>
-      <td>${t.nationality || '—'}</td>
-      <td class="trunc muted" title="${(t.from_club||'').replace(/"/g,'&quot;')}">${t.from_club || '—'}</td>
-      <td class="trunc muted" title="${(t.from_league||'').replace(/"/g,'&quot;')}">${t.from_league || '—'}</td>
+      <td>${esc(t.nationality || '—')}</td>
+      <td class="trunc muted" title="${esc(t.from_club)}">${esc(t.from_club || '—')}</td>
+      <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
     </tr>`).join('');
     return `<tr>
       <td><span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span></td>
       <td>${p.n}</td><td>${p.n_permanent}</td>
       <td>${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
       <td>${fmt(p.fee_mean)}</td>
-      <td>${p.nationality_mode || '<span class="muted">—</span>'}</td>
-      <td class="trunc muted" title="${p.from_league_mode || ''}">${p.from_league_mode || '—'}</td>
-      <td class="trunc muted" title="${p.from_club_mode || ''}">${p.from_club_mode || '—'}</td>
+      <td>${p.nationality_mode ? esc(p.nationality_mode) : '<span class="muted">—</span>'}</td>
+      <td class="trunc muted" title="${esc(p.from_league_mode)}">${esc(p.from_league_mode || '—')}</td>
+      <td class="trunc muted" title="${esc(p.from_club_mode)}">${esc(p.from_club_mode || '—')}</td>
       <td><span class="see-all" onclick="togglePosDetail('${detailId}',this)">ver mais ▾</span></td>
     </tr>
     <tr id="${detailId}" style="display:none"><td colspan="9" style="padding:0">
@@ -562,7 +568,7 @@ function renderOverviewFull(d) {
 
   return `
     <div class="card">
-      <div class="card-header">📊 Visão geral — ${d.club} × FIFA ${d.fifa_edition}</div>
+      <div class="card-header">📊 Visão geral — ${esc(d.club)} × FIFA ${d.fifa_edition}</div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px">
         ${chips}
         ${dist}
@@ -622,10 +628,10 @@ function renderPosition({ profile: p, candidates, team_overall }) {
     const ovrCls = c.overall >= 80 ? 'high' : c.overall >= 70 ? 'mid' : 'low';
     return `<tr>
       <td class="muted">${i+1}</td>
-      <td style="font-weight:600;max-width:160px" class="trunc" title="${c.short_name}">${c.short_name}</td>
-      <td class="trunc muted" title="${c.club_name}">${c.club_name}</td>
-      <td class="trunc muted" title="${c.league_name}">${c.league_name}</td>
-      <td>${c.nationality}</td><td>${c.age}</td>
+      <td style="font-weight:600;max-width:160px" class="trunc" title="${esc(c.short_name)}">${esc(c.short_name)}</td>
+      <td class="trunc muted" title="${esc(c.club_name)}">${esc(c.club_name)}</td>
+      <td class="trunc muted" title="${esc(c.league_name)}">${esc(c.league_name)}</td>
+      <td>${esc(c.nationality)}</td><td>${c.age}</td>
       <td>${fmt(c.value_eur)}</td>
       <td class="ovr ${ovrCls}">${c.overall}</td>
       <td class="ovr ${c.potential >= 85 ? 'high' : c.potential >= 78 ? 'mid' : 'low'}">${c.potential || '—'}</td>
@@ -638,7 +644,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span>
       <span style="font-size:12px;color:var(--muted)">
         n=${p.n} &nbsp;|&nbsp; idade ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; valor pago ${fmt(p.fee_mean)}
-        &nbsp;|&nbsp; nac. ${p.nationality_mode ?? '—'} &nbsp;|&nbsp; liga ${p.from_league_mode ?? '—'}${lvl}
+        &nbsp;|&nbsp; nac. ${esc(p.nationality_mode ?? '—')} &nbsp;|&nbsp; liga ${esc(p.from_league_mode ?? '—')}${lvl}
       </span>
     </div>
     <div class="table-wrap"><table>
