@@ -637,6 +637,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <td class="ovr ${ovrCls}">${c.overall}</td>
       <td class="ovr ${c.potential >= 85 ? 'high' : c.potential >= 78 ? 'mid' : 'low'}">${c.potential || '—'}</td>
       <td><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
+      <td>${c.sofifa_id ? `<a href="https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}" target="_blank" style="color:var(--blue);font-size:11px">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
   }).join('');
 
@@ -649,7 +650,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       </span>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>POT</th><th>Score</th></tr></thead>
+      <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>POT</th><th>Score</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
   </div>`;
