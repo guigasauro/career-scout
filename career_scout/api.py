@@ -197,7 +197,7 @@ class ScoutRequest(BaseModel):
     club_name: str
     fifa_edition: int   # ex.: 22 para FIFA 22; mapeia para players_22.csv e seasons até 2021
     history: int = 5
-    top_n: int = 20
+    top_n: int = 10
     potential_weight: float = 0.0   # 0 = ignora potencial; >0 prioriza promessas
     fee_discount: float = 0.8       # D2: value_eur alvo = fee_mean × α (prêmio embutido na fee)
     realism: bool = False           # modo reforço: ancora no overall titular do clube
