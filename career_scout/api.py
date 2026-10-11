@@ -216,9 +216,14 @@ def _save_transfers(transfers: list[Transfer], path: Path) -> None:
         w.writerows(rows)
 
 
+def _arrivals_path(req: ScoutRequest) -> Path:
+    # history entra na chave: a janela muda o conjunto de chegadas (e o dedup cross-season)
+    return BASE / "processed" / f"arrivals_{req.club_id}_{req.fifa_edition}_h{req.history}.csv"
+
+
 def _extract_or_load(req: ScoutRequest) -> list[Transfer]:
     """Estágio 1: usa cache se existir, raspa o TM caso contrário."""
-    arrivals_path = BASE / "processed" / f"arrivals_{req.club_id}_{req.fifa_edition}.csv"
+    arrivals_path = _arrivals_path(req)
     if arrivals_path.exists():
         return load_transfers(arrivals_path)
     season_ceil = 2000 + req.fifa_edition - 1
@@ -236,6 +241,7 @@ def _extract_or_load(req: ScoutRequest) -> list[Transfer]:
 
 @app.post("/overview")
 def overview(req: ScoutRequest):
+    cached = _arrivals_path(req).exists()
     transfers = _extract_or_load(req)
     profiles  = build_profiles(transfers)
 
@@ -257,7 +263,7 @@ def overview(req: ScoutRequest):
     return {
         "club": req.club_name,
         "fifa_edition": req.fifa_edition,
-        "cached": (BASE / "processed" / f"arrivals_{req.club_id}_{req.fifa_edition}.csv").exists(),
+        "cached": cached,
         # totais
         "total": len(transfers),
         "n_permanent": len(permanent),

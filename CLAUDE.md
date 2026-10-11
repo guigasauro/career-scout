@@ -85,7 +85,7 @@ transfer-advisor/
 │   └── models.py              # dataclasses Transfer e PositionProfile
 ├── data/
 │   ├── raw/                   # HTML cacheado (TM) + CSVs Kaggle (players_NN.csv)
-│   ├── processed/             # arrivals_{club_id}_{edition}.csv (cache por clube+edição)
+│   ├── processed/             # arrivals_{club_id}_{edition}_h{history}.csv (cache por clube+edição+histórico)
 │   └── club_mapping.json      # mapeamento sofifa_name → {tm_slug, tm_id, league, ok}
 └── tests/
 ```
@@ -420,7 +420,7 @@ Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o est�
   "realism": false, "level_offset": 0, "sort_by": "score", "score_threshold": 0.0 }
 ```
 - `fifa_edition` = número da edição (22 = FIFA 22); mapeia para `players_22.csv` e seasons até 2021 (`2000 + edition - 1`)
-- Cache de chegadas em `data/processed/arrivals_{club_id}_{edition}.csv` — segunda chamada não raspa o TM
+- Cache de chegadas em `data/processed/arrivals_{club_id}_{edition}_h{history}.csv` — segunda chamada não raspa o TM
 - Campos de matching (só usados por `/scout`): `potential_weight` (knob de potencial), `fee_discount` (desconto D2), e o **modo reforço** — `realism` (liga a ancoragem no overall do elenco), `level_offset` (ambição: 0/+3/−3), `sort_by` (`score`|`overall`), `score_threshold` (corte do rol; 0 → backend usa 0.4 quando `realism`). Ver §10–10.1.
 - Resposta de `/scout` inclui `team_levels` (overall titular por linha) e, por posição, `team_overall`. Resposta de `/overview` traz `by_season`, modas (`by_nationality`/`by_from_league`), `age_stats`, `fee_stats`, perfis e chegadas.
 
