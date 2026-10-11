@@ -193,10 +193,10 @@
 
   <!-- Modal reutilizável -->
   <div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
-    <div class="modal-box" id="modal-box">
+    <div class="modal-box" id="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-head">
         <span id="modal-title"></span>
-        <button class="modal-close" onclick="closeModal()">×</button>
+        <button class="modal-close" id="modal-close" aria-label="Fechar" onclick="hideModal()">×</button>
       </div>
       <div class="modal-body" id="modal-body"></div>
     </div>
@@ -447,28 +447,38 @@ document.addEventListener('click', e => {
   rows.forEach(([, r]) => tbody.appendChild(r));
 });
 
+// Enter/Espaço ativam elementos role=button (os "ver todos"/"ver mais")
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[role=button]')) { e.preventDefault(); e.target.click(); }
+});
+
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
-  document.getElementById('modal-box').classList.remove('wide');
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML = distRows(obj, barColor);
-  document.getElementById('modal').classList.remove('hidden');
+  openModalHtml(title, distRows(obj, barColor), false);
 }
+let _modalOpener = null;
 function openModalHtml(title, html, wide) {
   document.getElementById('modal-box').classList.toggle('wide', !!wide);
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal').classList.remove('hidden');
+  _modalOpener = document.activeElement;
+  document.getElementById('modal-close').focus();
+}
+function hideModal() {
+  document.getElementById('modal').classList.add('hidden');
+  _modalOpener?.focus?.();
 }
 function openOverviewModal() {
   const d = window._overviewData;
   if (d) openModalHtml(`Visão geral — ${d.club} × ${edLabel(d.fifa_edition)}`, renderOverviewFull(d), true);
 }
 function closeModal(e) {
-  if (e && e.target !== document.getElementById('modal')) return;
-  document.getElementById('modal').classList.add('hidden');
+  if (e.target === document.getElementById('modal')) hideModal();  // clique fora da caixa
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modal').classList.add('hidden'); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('modal').classList.contains('hidden')) hideModal();
+});
 
 // ── overview ──────────────────────────────────────────────────────
 async function loadOverview() {
@@ -516,7 +526,7 @@ function distBlock(title, obj, total, barColor, limit = 5) {
   // dados ficam num registro; inline JSON no onclick quebrava com apóstrofo ("Côte d'Ivoire")
   const idx = _dists.push([title, obj, barColor]) - 1;
   const seeAll  = hasMore
-    ? `<span class="see-all" onclick="openModal(..._dists[${idx}])">ver todos (${entries.length})</span>`
+    ? `<span class="see-all" role="button" tabindex="0" onclick="openModal(..._dists[${idx}])">ver todos (${entries.length})</span>`
     : '';
   return `<div class="dist-block"><h4>${title}</h4>${distRows(top, barColor)}${seeAll}</div>`;
 }
@@ -539,7 +549,7 @@ function renderSimplePanel(d, history) {
   return `<div class="card">
     <div class="card-header" style="justify-content:space-between">
       <span>📊 Visão geral — ${esc(d.club)} × ${edLabel(d.fifa_edition)}</span>
-      <span class="see-all" style="margin:0" onclick="openOverviewModal()">ver detalhes ↗</span>
+      <span class="see-all" role="button" tabindex="0" style="margin:0" onclick="openOverviewModal()">ver detalhes ↗</span>
     </div>
     <div class="card-body">${chips}</div>
   </div>`;
@@ -603,7 +613,7 @@ function renderOverviewFull(d) {
       <td>${p.nationality_mode ? esc(p.nationality_mode) : '<span class="muted">—</span>'}</td>
       <td class="trunc muted" title="${esc(p.from_league_mode)}">${esc(p.from_league_mode || '—')}</td>
       <td class="trunc muted" title="${esc(p.from_club_mode)}">${esc(p.from_club_mode || '—')}</td>
-      <td><span class="see-all" onclick="togglePosDetail('${detailId}',this)">ver mais ▾</span></td>
+      <td><span class="see-all" role="button" tabindex="0" onclick="togglePosDetail('${detailId}',this)">ver mais ▾</span></td>
     </tr>
     <tr id="${detailId}" style="display:none"><td colspan="9" style="padding:0">
       <div style="padding:12px 16px;display:flex;flex-direction:column;gap:14px;background:#13141f;border-top:1px solid var(--border)">
@@ -639,7 +649,7 @@ function renderOverviewFull(d) {
     <thead><tr><th>Temporada</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th></th></tr></thead>
     <tbody id="${key}">${initialRows}</tbody>
   </table></div>
-  ${hasMore ? `<span class="see-all" onclick="loadAllArrivals('${key}', this)">carregar mais (${arrivals.length - PAGE} restantes)</span>` : ''}`;
+  ${hasMore ? `<span class="see-all" role="button" tabindex="0" onclick="loadAllArrivals('${key}', this)">carregar mais (${arrivals.length - PAGE} restantes)</span>` : ''}`;
 
   return `
     <div class="card">
