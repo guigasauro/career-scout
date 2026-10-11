@@ -148,7 +148,7 @@
       </div>
     </div>
     <div class="form-footer">
-      <label>Histórico (temporadas)<input type="number" id="inp-history" value="5" min="2" max="15" disabled></label>
+      <label>Histórico (temporadas)<input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
       <label>Jogadores por posição<input type="number" id="inp-topn" value="20" min="5" max="50" disabled></label>
       <label>Priorizar potencial<select id="sel-potential" disabled>
         <option value="0">Off</option>
@@ -398,6 +398,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') document.get
 async function loadOverview() {
   const edition = parseInt(document.getElementById('sel-edition').value);
   const history = parseInt(document.getElementById('inp-history').value);
+  document.getElementById('results').innerHTML = '';
   setStatus('status-overview', 'loading', '<span class="spinner"></span>Carregando histórico de contratações…');
 
   try {
