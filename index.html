@@ -124,6 +124,11 @@
   .pos-nav a { text-decoration:none; padding:3px 10px; font-size:12px; }
   #results .card { scroll-margin-top:52px; }
 
+  table.sortable th { cursor:pointer; user-select:none; }
+  table.sortable th:hover { color:var(--text); }
+  table.sortable th[data-dir=desc]::after { content:' ▼'; }
+  table.sortable th[data-dir=asc]::after  { content:' ▲'; }
+
   /* "ver todas" link */
   .see-all { display:inline-block; margin-top:8px; font-size:11px; color:var(--blue); cursor:pointer; }
   .see-all:hover { text-decoration:underline; }
@@ -379,6 +384,29 @@ function togglePosDetail(id, btn) {
   btn.textContent = open ? 'ver mais ▾' : 'ver menos ▴';
 }
 
+// ── ordenação por cabeçalho (table.sortable) ─────────────────────
+function cellKey(td) {
+  // "€10.5M" → 10500000, "€500K" → 500000, "85%" → 85, "2019/20" → 2019; resto vira texto
+  const m = td.textContent.trim().match(/^€?(-?\d+(?:\.\d+)?)\s*([MK]?)/);
+  return m ? parseFloat(m[1]) * ({ M: 1e6, K: 1e3 }[m[2]] || 1) : td.textContent.trim().toLowerCase();
+}
+document.addEventListener('click', e => {
+  const th = e.target.closest('table.sortable th');
+  if (!th || !th.textContent.trim()) return;
+  const tbody = th.closest('table').tBodies[0], i = th.cellIndex;
+  const dir = th.dataset.dir === 'desc' ? 'asc' : 'desc';  // 1º clique: maior primeiro
+  th.parentElement.querySelectorAll('th').forEach(h => delete h.dataset.dir);
+  th.dataset.dir = dir;
+  const sign = dir === 'asc' ? 1 : -1;
+  const rows = [...tbody.rows].map(r => [cellKey(r.cells[i]), r]);
+  rows.sort(([a], [b]) => {
+    const na = typeof a === 'number', nb = typeof b === 'number';
+    if (na !== nb) return na ? -1 : 1;  // "—" sempre no fim
+    return sign * (na ? a - b : a.localeCompare(b));
+  });
+  rows.forEach(([, r]) => tbody.appendChild(r));
+});
+
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
   document.getElementById('modal-box').classList.remove('wide');
@@ -567,7 +595,7 @@ function renderOverviewFull(d) {
   const initialRows = arrivals.slice(0, PAGE).map(arrivalRow).join('');
   const hasMore = arrivals.length > PAGE;
 
-  const arrivalsTable = `<div class="table-wrap"><table>
+  const arrivalsTable = `<div class="table-wrap"><table class="sortable">
     <thead><tr><th>Temporada</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th></th></tr></thead>
     <tbody id="${key}">${initialRows}</tbody>
   </table></div>
@@ -657,7 +685,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
         &nbsp;|&nbsp; nac. ${esc(p.nationality_mode ?? '—')} &nbsp;|&nbsp; liga ${esc(p.from_league_mode ?? '—')}${lvl}
       </span>
     </div>
-    <div class="table-wrap"><table>
+    <div class="table-wrap"><table class="sortable">
       <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>POT</th><th>Score</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
