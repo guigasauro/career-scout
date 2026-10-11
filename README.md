@@ -17,7 +17,7 @@ Transfermarkt ──► Perfilagem ──► SoFIFA
 2. **Perfilagem:** para cada posição, calcula a média de idade e de valor pago e a moda de nacionalidade e de liga. A moda só entra quando aparece pelo menos 2 vezes.
 3. **Matching:** dá uma nota de semelhança entre 0 e 1 a cada jogador da edição. A nota é ranqueada, e não um filtro, então sempre há resultados. Opcionalmente:
    - premia potencial alto;
-   - no **modo reforço**, ancora as sugestões no overall dos titulares do elenco.
+   - com **Ajustar ao elenco** ligado, ancora as sugestões no overall dos titulares do elenco.
 
 ## Instalação
 

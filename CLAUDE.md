@@ -298,6 +298,8 @@ Implementado em `match/sofifa.py::rank_candidates`. Pontos-chave:
 - `from_club_mode` raramente sobrevive ao filtro de moda — não depender dele.
 
 ### 10.1 — Modo reforço (ancoragem no nível do elenco)
+Rótulo na UI: **"Ajustar ao elenco"** / "Match squad level" / "Ajustar a la plantilla" (no código continua `realism`).
+
 Resolve "sugestões abaixo do nível do time": clubes que historicamente compram
 barato (ex.: Milan pós-2010) viam o eixo de valor puxar jogadores fracos. Quando
 ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
