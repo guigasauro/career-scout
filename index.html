@@ -260,7 +260,7 @@ async function onLeagueChange() {
   const sel = document.getElementById('sel-club');
   if (!clubs.length) {
     sel.innerHTML = '<option value="">Nenhum clube cadastrado</option>';
-    document.getElementById('hint').textContent = 'Adicione o clube em KNOWN_CLUBS no api.py.';
+    document.getElementById('hint').textContent = 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.';
     return;
   }
   sel.innerHTML = '<option value="">Selecione…</option>';
