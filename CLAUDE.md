@@ -2,7 +2,7 @@
 
 > Título de trabalho: **career-scout**. Ferramenta de scouting para o Modo Carreira do FIFA/EA FC.
 > Esta é a fonte de verdade do projeto. Leia tudo antes de escrever ou alterar código.
-> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Overview do clube em painel enxuto + modal detalhado. Score de matching com normalização por eixos ativos, knob de potencial, desconto D2 e **modo reforço** (ancoragem no overall titular do elenco). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
+> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Overview do clube em painel enxuto + modal detalhado. Score de matching com normalização por eixos ativos, knob de potencial, desconto D2 e **modo reforço** (ancoragem no overall titular do elenco). Scraper SoFIFA (`sofifa_scraper.py`) cobre FIFA 23+/FC 24-26 via cookies manuais (Cloudflare bloqueia requests puro e soccerdata — ver §4 D6). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
 
 ---
 
@@ -126,6 +126,8 @@ Quantos anos para trás (5? 10?) e como alinhar ao ano do FIFA jogado.
 ### D6 — Scraping ao vivo vs datasets prontos (SoFIFA)
 Para **edições antigas** do FIFA (15–23), existem datasets completos prontos (Kaggle/HuggingFace) com ~110 atributos por jogador — pode dispensar scraping do SoFIFA.
 - **Recomendação:** se o usuário joga uma edição coberta por dataset pronto, usar o dataset (mais rápido, mais gentil com o site). Scraping ao vivo só para as edições mais recentes (FC 25/26) ou se precisar de um recorte que o dataset não tem.
+- **Atualização (edições pós-FIFA 22):** sofifa.com passou a exigir um desafio Cloudflare (Turnstile) em `/players`. Testado ao vivo: **nem `requests` puro nem `soccerdata` (que usa seleniumbase em modo undetected — a lib de referência do ecossistema) conseguem passar**, mesmo rodando de máquina real (não só sandbox) — os dois caem na página "Performing security verification". `soccerdata` foi cogitado e descartado por esse motivo (não instalar de novo sem re-testar). Solução adotada: **cookies manuais** — o dev resolve o desafio uma vez num navegador normal, exporta `cf_clearance` + User-Agent para `data/raw/sofifa_cookies.json` (gitignored via `data/raw/`), e `sofifa_scraper.py` reusa esses cookies via `requests`. Cookie expira (horas) — renovar manualmente quando `_looks_like_challenge` disparar o erro com instruções.
+- **Bug encontrado (2026-07-12): `/players?r=...` sem ordenação explícita pagina de forma instável e intercala linhas de OUTRA edição.** Sintoma: jogadores aposentados/fora do elenco aparecendo com nome colado a um número (`"23E. Hazard"` — na verdade `<em>23</em>` de squad number de uma página antiga, o link do jogador aponta pra um `r=` diferente do pedido). Detectado no scrape do FC 26: ~11.301/19.103 jogadores da base eram lixo de edições antigas; a paginação nunca convergia (chegou a rodar até offset ~1M reembaralhando o mesmo pool). **Fix: usar `/players?r=...&col=oa&sort=desc`** — com ordenação explícita a paginação fica estável (60/60 por página, sem repetição/contaminação). `_parse_page` também descarta defensivamente qualquer linha cujo link do jogador não termine no `r_key` pedido. `scrape_players` já usa `col=oa&sort=desc` por padrão — não regredir isso se mexer no scraper.
 
 ---
 
@@ -228,6 +230,7 @@ O dataset/scrape do SoFIFA traz ~110 colunas; para este projeto importam princip
 
 ### Ética/robots
 - Conforme nota pública de datasets derivados do SoFIFA, o **`robots.txt` do sofifa.com não restringia a coleta** de dados de players/coaches/teams no momento daquelas coletas. Ainda assim: **rate-limit, cache local e User-Agent honesto** são obrigatórios. Reconferir o `robots.txt` atual antes de scrapar em volume.
+- **Atualização:** o `robots.txt` atual bloqueia explicitamente crawlers de IA (`ClaudeBot`, `GPTBot`, `CCBot`, etc., `Content-Signal: ai-train=no`) e o site inteiro está atrás de um desafio Cloudflare Turnstile em `/players` — daí a necessidade de cookies manuais (ver D6). Uso segue pessoal/não-comercial (`use=reference` é permitido pelo Content-Signal).
 
 ---
 
@@ -345,7 +348,7 @@ ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
 9. ✅ **Overview em painel + modal** — ao selecionar o clube, painel enxuto (contratações/temporada, modas de nac/liga, idade média, valor médio/máximo pago) com "ver detalhes ↗" abrindo a visão geral completa no modal.
 10. ✅ **Eixos de score** — normalização por eixos ativos, knob de potencial, desconto D2 (`fee_discount`) e **modo reforço** (ver §10.1). Cobertos por `tests/test_sofifa.py`.
 11. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
-12. (Futuro) scraping ao vivo do SoFIFA para FC 24/25/26 (`sofifa_scraper.py` já existe como fallback).
+12. ✅ **Scraping ao vivo do SoFIFA para FIFA 23/FC 24/25/26** — `sofifa_scraper.py`, autenticado via cookies manuais (Cloudflare bloqueia requests puro e soccerdata; ver D6). CLI gera `data/raw/players_{edition}.csv` no mesmo formato dos CSVs Kaggle, sem tocar em `api.py`/`sofifa.py`. `club_position` fica vazio de propósito — `team_line_overall` já tem fallback (top-3 por overall) pra isso.
 
 ---
 
@@ -360,7 +363,7 @@ ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
 | **Modo reforço** | Eixo opt-in ancorado no overall titular do elenco (`OVERALL_WEIGHT = 0.45`, ≤ value — **adicional, não principal**). OFF = 100% padrão histórico ("realista"). Controles: Nível-alvo (`level_offset`), Tamanho do rol (`score_threshold`), Ordenar por (`sort_by`). Ver §10.1. |
 | **D3** — granularidade | Posição fina com fallback para linha (config `min_sample`, default 3) |
 | **D5** — janela | **5 temporadas** de histórico (configurável via `--history`). Fórmula: `range(season_ceil - history + 1, season_ceil + 1)` onde `season_ceil = 2000 + fifa_edition - 1`. FIFA 17 → temporadas 2012/13–2016/17. |
-| **D6** — SoFIFA | **Dataset Kaggle `players_{year}.csv`** para FIFA 15–22 (baixado em `data/raw/`). `sofifa_scraper.py` como fallback para FC 24+. Liga disponível via `league_name` no Kaggle — `_normalize_league` faz o mapeamento TM → Kaggle (ex.: "Ligue 1" → "French Ligue 1", "Eredivisie" → "Holland Eredivisie"). |
+| **D6** — SoFIFA | **Dataset Kaggle `players_{year}.csv`** para FIFA 15–22 (baixado em `data/raw/`). `sofifa_scraper.py` para FIFA 23+/FC 24-26, autenticado via cookies manuais (ver §4 D6 — Cloudflare bloqueia `requests` puro e `soccerdata`). Liga disponível via `league_name` no Kaggle — `_normalize_league` faz o mapeamento TM → Kaggle (ex.: "Ligue 1" → "French Ligue 1", "Eredivisie" → "Holland Eredivisie"). O scraper não preenche `league_name` (não disponível na listagem do SoFIFA). |
 | **transfer_type** | Campo adicionado: `"permanent"` \| `"loan"` \| `"free"`. `fee_mean` no Estágio 2 considera só permanent+free onde fee não é None. `"loan_return"` é descartado no parser (retornos de empréstimo — "End of loan" no TM). |
 
 ## 15. Schema travado do Estágio 1 (Transfer)

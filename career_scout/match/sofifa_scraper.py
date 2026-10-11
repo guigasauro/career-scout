@@ -1,5 +1,16 @@
-"""Scraper do SoFIFA — lista versões disponíveis e baixa jogadores por versão."""
+"""Scraper do SoFIFA — lista versões disponíveis e baixa jogadores por versão.
+
+sofifa.com passou a exigir passar por um desafio Cloudflare (Turnstile) que
+nem requests puro nem browser automation (soccerdata/seleniumbase undetected)
+conseguem resolver sozinhos neste projeto — testado ao vivo, os dois caem na
+página "Performing security verification". Solução adotada: o dev resolve o
+desafio uma vez num navegador normal e exporta os cookies da sessão (ver
+`COOKIE_INSTRUCTIONS` abaixo); o scraper reusa esses cookies via requests.
+Cookie expira (tipicamente horas) — precisa renovar manualmente de vez em
+quando; ver `_looks_like_challenge`.
+"""
 import csv
+import json
 import re
 import sys
 import time
@@ -11,8 +22,32 @@ from bs4 import BeautifulSoup
 BASE = "https://sofifa.com"
 PAGE_SIZE = 60
 
+COOKIE_INSTRUCTIONS = """\
+Cookies do SoFIFA ausentes ou expirados (data/raw/sofifa_cookies.json).
 
-def _make_session() -> requests.Session:
+Como renovar:
+  1. Abra https://sofifa.com/players num navegador normal e espere passar
+     pela verificação Cloudflare.
+  2. DevTools → Application/Storage → Cookies → sofifa.com. Copie pelo menos
+     o valor de `cf_clearance` (e quaisquer outros cookies presentes).
+  3. DevTools → Network → clique numa request → Headers → copie o
+     `User-Agent` exato usado por esse navegador.
+  4. Salve em data/raw/sofifa_cookies.json:
+     {
+       "cookies": {"cf_clearance": "...", "outro_cookie": "..."},
+       "user_agent": "Mozilla/5.0 ..."
+     }
+"""
+
+
+def _load_cookie_file(data_dir: Path) -> dict:
+    p = data_dir / "raw" / "sofifa_cookies.json"
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def _make_session(data_dir: Path) -> requests.Session:
     s = requests.Session()
     s.headers.update({
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
@@ -20,19 +55,44 @@ def _make_session() -> requests.Session:
         "Accept-Language": "en-US,en;q=0.9",
         "Referer": "https://sofifa.com/",
     })
-    # força inglês antes de qualquer request — posições e nomes ficam em inglês
-    s.get(f"{BASE}/?hl=en-US", timeout=20)
+    auth = _load_cookie_file(data_dir)
+    if auth.get("user_agent"):
+        s.headers["User-Agent"] = auth["user_agent"]
+    if auth.get("cookies"):
+        s.cookies.update(auth["cookies"])
+    # força inglês antes de qualquer request — posições e nomes ficam em inglês.
+    # best-effort: se o cookie estiver ruim, quem detecta e explica é o _fetch
+    # da primeira request de verdade, não vale duplicar a checagem aqui.
+    try:
+        s.get(f"{BASE}/?hl=en-US", timeout=20)
+    except requests.RequestException:
+        pass
     return s
 
 
 # --- I/O com cache -----------------------------------------------------------
 
+def _looks_like_challenge(html: str) -> bool:
+    """Detecta a página de verificação Cloudflare (cookie ausente/expirado)."""
+    return "cf-chl-widget" in html or "Performing security verification" in html
+
+
 def _fetch(session: requests.Session, url: str, cache: Path, delay: float = 1.5) -> str:
     if cache.exists():
         return cache.read_text(encoding="utf-8")
     time.sleep(delay)
-    resp = session.get(url, timeout=20)
-    resp.raise_for_status()
+    for attempt in range(3):
+        try:
+            resp = session.get(url, timeout=20)
+            resp.raise_for_status()
+            break
+        except requests.RequestException:
+            if attempt == 2:
+                raise
+            time.sleep(delay * (attempt + 1))  # backoff simples: timeout de rede é transitório
+    if _looks_like_challenge(resp.text):
+        # não cacheia a página de desafio — senão envenena o cache pra sempre
+        raise RuntimeError(COOKIE_INSTRUCTIONS)
     cache.write_text(resp.text, encoding="utf-8")
     return resp.text
 
@@ -42,6 +102,12 @@ def _fetch(session: requests.Session, url: str, cache: Path, delay: float = 1.5)
 def _extract_r(value: str) -> str | None:
     m = re.search(r"[?&]r=(\d{6})", value)
     return m.group(1) if m else None
+
+
+def edition_number(label: str) -> int | None:
+    """'FIFA 23' → 23 | 'FC 24' → 24 | 'FC 26' → 26"""
+    m = re.search(r"(\d+)", label)
+    return int(m.group(1)) if m else None
 
 
 def _parse_select(soup: BeautifulSoup, name: str) -> list[tuple[str, str]]:
@@ -67,6 +133,90 @@ def fetch_rosters(session: requests.Session, edition_r: str, data_dir: Path) -> 
     return _parse_select(BeautifulSoup(html, "lxml"), "roster")
 
 
+# --- Liga por clube (league_name não vem na listagem de players) -------------
+#
+# /api/league dá o catálogo (id, nome, país) — independente de edição.
+# /teams?lg={id}&r={r_key} dá os clubes de uma liga numa edição específica.
+# Cruzando os dois: club_name → league_name, pra preencher o que o scraper de
+# listagem deixa em branco. Ver `enrich_league_names`.
+
+def fetch_league_catalog(session: requests.Session, data_dir: Path) -> list[dict]:
+    """[{'league_id': int, 'league_name': str, 'nation_name': str}, ...]"""
+    cache = data_dir / "raw" / "sofifa_leagues.json"
+    if cache.exists():
+        raw = json.loads(cache.read_text(encoding="utf-8"))
+    else:
+        time.sleep(1.0)
+        resp = session.get(f"{BASE}/api/league", timeout=20)
+        resp.raise_for_status()
+        raw = resp.json()
+        cache.write_text(json.dumps(raw), encoding="utf-8")
+    return [
+        {"league_id": c["id"], "league_name": c["value"], "nation_name": c.get("nationName", "")}
+        for group in raw["data"]
+        for c in group["childs"]
+    ]
+
+
+def _parse_teams_page(html: str) -> list[str]:
+    soup = BeautifulSoup(html, "lxml")
+    table = soup.find("table")
+    if not table or not table.find("tbody"):
+        return []
+    names = []
+    for tr in table.find("tbody").find_all("tr"):
+        a = tr.find("a", href=re.compile(r"^/team/\d+"))
+        if a:
+            names.append(a.get_text(strip=True))
+    return names
+
+
+def league_label(league_name: str, nation_name: str) -> str:
+    """Nome de liga pra gravar no CSV. As 5 grandes ligas usam o alias Kaggle
+    já existente em sofifa.py::_normalize_league — é o nome que CLUBS_DB (e
+    portanto /clubs) espera, então casa com o clube sem precisar duplicar essa
+    tabela. As outras ~47 ligas do catálogo SoFIFA não têm clube nenhum em
+    CLUBS_DB mesmo (projeto cobre só as 5 grandes — ver CLAUDE.md), então só
+    precisam ficar únicas pra /countries e /leagues navegarem: sufixo de país
+    resolve ('Premier League' existe na Inglaterra E na Ucrânia, por exemplo)."""
+    from career_scout.match.sofifa import _normalize_league
+    kaggle_name = _normalize_league(league_name)
+    if kaggle_name != league_name:
+        return kaggle_name
+    return f"{league_name} ({nation_name})" if nation_name else league_name
+
+
+def build_club_league_map(session: requests.Session, r_key: str, data_dir: Path) -> dict[str, str]:
+    """club_name → league_label (desambiguado por país) pra uma edição."""
+    club_to_league: dict[str, str] = {}
+    for league in fetch_league_catalog(session, data_dir):
+        lid = league["league_id"]
+        cache = data_dir / "raw" / f"sofifa_teams_{lid}_{r_key}.html"
+        url = f"{BASE}/teams?lg={lid}&r={r_key}&set=true"
+        html = _fetch(session, url, cache, delay=1.0)
+        label = league_label(league["league_name"], league["nation_name"])
+        for team_name in _parse_teams_page(html):
+            club_to_league[team_name] = label
+    return club_to_league
+
+
+def enrich_league_names(session: requests.Session, r_key: str, edition: int, data_dir: Path) -> None:
+    """Reabre players_{edition}.csv já salvo e preenche league_name via clube→liga."""
+    csv_path = data_dir / "raw" / f"players_{edition}.csv"
+    club_to_league = build_club_league_map(session, r_key, data_dir)
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    filled = 0
+    for row in rows:
+        league = club_to_league.get(row["club_name"])
+        if league:
+            row["league_name"] = league
+            filled += 1
+    save_csv(rows, csv_path)
+    print(f"  league_name preenchido em {filled}/{len(rows)} jogadores "
+          f"({len(club_to_league)} clubes mapeados em {len(fetch_league_catalog(session, data_dir))} ligas)")
+
+
 # --- Parser de página --------------------------------------------------------
 
 def _parse_value(text: str) -> float | None:
@@ -79,13 +229,26 @@ def _parse_value(text: str) -> float | None:
     return n * 1_000_000 if m.group(2) == "M" else n * 1_000 if m.group(2) == "K" else n
 
 
-def _parse_page(html: str) -> list[dict]:
+def _parse_page(html: str, r_key: str) -> tuple[list[dict], int]:
+    """r_key: versão sendo raspada. Em offsets altos o SoFIFA reembaralha o pool
+    (ver STALE_PAGE_LIMIT) e chega a intercalar linhas inteiras de OUTRA edição
+    (ex.: Eden Hazard, aposentado, com o elenco do Real Madrid da FIFA 23) nas
+    páginas da edição atual. O link do jogador termina em /{versão}/ — se não
+    bate com r_key, a linha inteira é de outra edição: descartar, não só limpar
+    o texto (o <em>NN</em> de squad number que gruda no nome é só o sintoma
+    visível, não a causa).
+
+    Retorna (linhas_da_edição_certa, total_de_linhas_na_página) — o total bruto
+    é usado por `_paginate` pra saber se a página veio cheia (não pode ser o
+    filtrado: uma página cheia de linhas contaminadas ficaria menor que
+    PAGE_SIZE e pareceria a última página por engano)."""
     soup = BeautifulSoup(html, "lxml")
     table = soup.find("table")
     if not table or not table.find("tbody"):
-        return []
+        return [], 0
 
     rows = []
+    raw_count = 0
     for tr in table.find("tbody").find_all("tr"):
         tds = tr.find_all("td", recursive=False)
         if len(tds) < 7:
@@ -96,8 +259,12 @@ def _parse_page(html: str) -> list[dict]:
         player_a = td1.find("a", href=re.compile(r"^/player/\d+"))
         if not player_a:
             continue
-        parts = player_a["href"].split("/")
+        raw_count += 1
+        parts = player_a["href"].rstrip("/").split("/")
         sofifa_id = parts[2] if len(parts) > 2 else ""
+        href_version = parts[-1] if len(parts) > 3 else ""
+        if href_version != r_key:
+            continue
         short_name = player_a.get_text(strip=True)
 
         pos_spans = td1.find_all("span", class_=re.compile(r"\bpos\b"))
@@ -134,7 +301,7 @@ def _parse_page(html: str) -> list[dict]:
             "league_name":      "",   # não disponível na listagem
             "value_eur":        value_eur,
         })
-    return rows
+    return rows, raw_count
 
 
 # --- Lookups (posição pn= e nacionalidade na=) --------------------------------
@@ -158,6 +325,12 @@ def load_nat_map(data_dir: Path) -> dict[str, int]:
 
 # --- Scraping paginado — modo COMPLETO ----------------------------------------
 
+# ponytail: sofifa.com não devolve página curta no fim — passado um certo offset
+# (~24k testado ao vivo em FC26) ele reembaralha o mesmo pool de ~19k jogadores
+# em vez de parar. Detecção real de fim: N páginas seguidas sem nenhum id novo.
+STALE_PAGE_LIMIT = 5
+
+
 def _paginate(
     session: requests.Session,
     base_params: dict,
@@ -168,18 +341,29 @@ def _paginate(
 ) -> list[dict]:
     """Paginação genérica; cache_prefix identifica o conjunto de params."""
     players: list[dict] = []
+    seen: set[str] = set()
+    stale = 0
     offset = 0
     while True:
         params = {**base_params, "offset": offset}
         cache  = data_dir / "raw" / f"sofifa_{cache_prefix}_{offset:06d}.html"
         url    = f"{BASE}/players"
         html   = _fetch(session, url + "?" + "&".join(f"{k}={v}" for k, v in params.items()), cache, delay)
-        page   = _parse_page(html)
-        if not page:
+        page, raw_count = _parse_page(html, r_key)
+        if raw_count == 0:
             break
-        players.extend(page)
-        print(f"  offset={offset:5d}: +{len(page)} ({len(players)} total)")
-        if len(page) < PAGE_SIZE:
+
+        new_rows = [r for r in page if r["sofifa_id"] not in seen]
+        for r in new_rows:
+            seen.add(r["sofifa_id"])
+        players.extend(new_rows)
+        print(f"  offset={offset:6d}: +{len(new_rows)} novos ({len(players)} únicos totais)")
+
+        stale = 0 if new_rows else stale + 1
+        if stale >= STALE_PAGE_LIMIT:
+            print(f"  {STALE_PAGE_LIMIT} páginas seguidas sem jogador novo — encerrando.")
+            break
+        if raw_count < PAGE_SIZE:
             break
         offset += PAGE_SIZE
     return players
@@ -191,9 +375,14 @@ def scrape_players(
     data_dir: Path,
     delay: float = 1.5,
 ) -> list[dict]:
-    """Modo COMPLETO — baixa todos os jogadores da versão (cache por offset)."""
+    """Modo COMPLETO — baixa todos os jogadores da versão (cache por offset).
+
+    `col=oa&sort=desc` (dev testou ao vivo e confirmou a contagem: 19.370
+    jogadores distintos no FC 26) — sem ordenação explícita, `/players` pagina
+    de forma instável e intercala linhas de edições antigas (ver `_parse_page`).
+    """
     session.get(f"{BASE}/players?r={r_key}&set=true", timeout=20)
-    return _paginate(session, {"r": r_key}, r_key, r_key, data_dir, delay)
+    return _paginate(session, {"r": r_key, "col": "oa", "sort": "desc"}, r_key, r_key, data_dir, delay)
 
 
 # --- Scraping por perfil — modo RÁPIDO ----------------------------------------
@@ -263,44 +452,87 @@ if __name__ == "__main__":
                         help="Modo rápido: filtra por perfil em vez de baixar tudo")
     parser.add_argument("--profiles", default="data/processed/profiles.csv",
                         help="CSV de perfis (necessário para --fast)")
+    parser.add_argument("--edition", type=int, default=None,
+                        help="Edição não-interativa (ex.: 26 = FC 26). Usa sempre o update mais recente.")
+    parser.add_argument("--enrich-league", action="store_true",
+                        help="Só preenche league_name num players_{edition}.csv já existente (requer --edition).")
     args = parser.parse_args()
 
     data_dir = Path(__file__).parent.parent.parent / "data"
-    session  = _make_session()
+    session  = _make_session(data_dir)
 
     # seleção de edição + roster (comum a ambos os modos)
     print("Buscando edições disponíveis no SoFIFA...")
-    editions = fetch_editions(session, data_dir)
+    try:
+        editions = fetch_editions(session, data_dir)
+    except RuntimeError as e:
+        print(e)
+        sys.exit(1)
     if not editions:
         print("Não encontrou edições. Apague: data/raw/sofifa_index.html")
         sys.exit(1)
 
-    print()
-    for i, (k, label) in enumerate(editions):
-        print(f"  [{i:2d}] {label}  (r={k})")
-    choice = input("\nEdição (Enter = 0): ").strip()
-    edition_r, edition_label = editions[int(choice) if choice.isdigit() else 0]
+    if args.edition is not None:
+        matches = [(k, label) for k, label in editions if edition_number(label) == args.edition]
+        if not matches:
+            print(f"Edição {args.edition} não encontrada. Disponíveis: "
+                  f"{sorted({edition_number(l) for _, l in editions} - {None})}")
+            sys.exit(1)
+        edition_r, edition_label = matches[0]
+    else:
+        print()
+        for i, (k, label) in enumerate(editions):
+            print(f"  [{i:2d}] {label}  (r={k})")
+        choice = input("\nEdição (Enter = 0): ").strip()
+        edition_r, edition_label = editions[int(choice) if choice.isdigit() else 0]
 
     print(f"\nBuscando updates de {edition_label}...")
-    rosters = fetch_rosters(session, edition_r, data_dir)
-    print()
-    for i, (k, date) in enumerate(rosters):
-        print(f"  [{i:2d}] {date}  (r={k})")
-    choice = input("\nUpdate (Enter = 0 = mais recente): ").strip()
-    r_key, date_label = rosters[int(choice) if choice.isdigit() else 0]
+    try:
+        rosters = fetch_rosters(session, edition_r, data_dir)
+    except RuntimeError as e:
+        print(e)
+        sys.exit(1)
+
+    if args.edition is not None:
+        r_key, date_label = rosters[0]  # mais recente
+    else:
+        print()
+        for i, (k, date) in enumerate(rosters):
+            print(f"  [{i:2d}] {date}  (r={k})")
+        choice = input("\nUpdate (Enter = 0 = mais recente): ").strip()
+        r_key, date_label = rosters[int(choice) if choice.isdigit() else 0]
 
     print(f"\nVersão: {edition_label} — {date_label}  (r={r_key})")
 
+    if args.enrich_league:
+        edition = edition_number(edition_label)
+        out_csv = data_dir / "raw" / f"players_{edition}.csv"
+        if edition is None or not out_csv.exists():
+            print(f"players_{edition}.csv não existe — rode o modo completo primeiro.")
+            sys.exit(1)
+        print(f"\n[ENRICH] preenchendo league_name em {out_csv}...\n")
+        enrich_league_names(session, r_key, edition, data_dir)
+        sys.exit(0)
+
     if not args.fast:
         # --- MODO COMPLETO ---
-        out_csv = data_dir / "processed" / f"sofifa_{r_key}.csv"
+        edition = edition_number(edition_label)
+        if edition is None:
+            print(f"Não consegui extrair o número da edição de {edition_label!r}.")
+            sys.exit(1)
+        out_csv = data_dir / "raw" / f"players_{edition}.csv"
         if out_csv.exists():
             print(f"Já existe: {out_csv} — apague para refazer.")
             sys.exit(0)
         print(f"\n[COMPLETO] baixando todos os jogadores...\n")
-        players = scrape_players(session, r_key, data_dir)
+        try:
+            players = scrape_players(session, r_key, data_dir)
+        except RuntimeError as e:
+            print(e)
+            sys.exit(1)
         save_csv(players, out_csv)
         print(f"\n{len(players)} jogadores → {out_csv}")
+        enrich_league_names(session, r_key, edition, data_dir)
 
     else:
         # --- MODO RÁPIDO ---

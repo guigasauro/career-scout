@@ -81,6 +81,25 @@ LEAGUE_COUNTRY: dict[str, str] = {
     "Rest of World":                   "Outros",
 }
 
+
+def _load_sofifa_league_country() -> dict[str, str]:
+    """League_name→país pras edições raspadas ao vivo (FIFA 23+): nomes vêm no
+    estilo do próprio site ('Premier League'), não no estilo Kaggle usado em
+    LEAGUE_COUNTRY ('English Premier League') — mapa separado, gerado por
+    `sofifa_scraper.fetch_league_catalog` e cacheado em sofifa_leagues.json."""
+    p = BASE / "raw" / "sofifa_leagues.json"
+    if not p.exists():
+        return {}
+    raw = json.loads(p.read_text(encoding="utf-8"))
+    return {
+        f"{c['value']} ({c['nationName']})" if c.get("nationName") else c["value"]: c.get("nationName", "Outros")
+        for group in raw["data"]
+        for c in group["childs"]
+    }
+
+
+SOFIFA_LEAGUE_COUNTRY: dict[str, str] = _load_sofifa_league_country()
+
 # Overrides manuais: prevalecem sobre o club_mapping.json (para correções de nome)
 _OVERRIDES: list[dict] = [
     {"name": "PSG", "slug": "paris-saint-germain", "id": 583,
@@ -139,13 +158,17 @@ def fifa_years():
     )
 
 
+def _league_country(league_name: str) -> str:
+    return LEAGUE_COUNTRY.get(league_name) or SOFIFA_LEAGUE_COUNTRY.get(league_name, "Outros")
+
+
 @app.get("/countries")
 def countries(edition: int):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
     if not csv_path.exists():
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
     league_set = league_names(csv_path)
-    found = sorted({LEAGUE_COUNTRY.get(l, "Outros") for l in league_set})
+    found = sorted({_league_country(l) for l in league_set})
     # "Outros" sempre por último
     return [c for c in found if c != "Outros"] + (["Outros"] if "Outros" in found else [])
 
@@ -157,7 +180,7 @@ def leagues(edition: int, country: str | None = None):
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
     all_leagues = sorted(league_names(csv_path))
     if country:
-        all_leagues = [l for l in all_leagues if LEAGUE_COUNTRY.get(l, "Outros") == country]
+        all_leagues = [l for l in all_leagues if _league_country(l) == country]
     return all_leagues
 
 
@@ -287,6 +310,11 @@ def scout(req: ScoutRequest):
 
     team_levels = team_line_overall(players, sofifa_name) if req.realism else {}
     threshold = req.score_threshold or (0.4 if req.realism else 0.0)
+    # "overall" só faz sentido junto do modo reforço (ordena por nível bruto,
+    # não por encaixe no perfil histórico) — sem isso, sort_by="overall" vazado
+    # de um toggle anterior do frontend faz o /scout parecer que ignora
+    # completamente o histórico de contratações do clube.
+    sort_by = req.sort_by if req.realism else "score"
 
     positions = []
     for profile in profiles:
@@ -300,7 +328,7 @@ def scout(req: ScoutRequest):
                                      team_overall=team_overall,
                                      level_offset=req.level_offset,
                                      score_threshold=threshold,
-                                     sort_by=req.sort_by)
+                                     sort_by=sort_by)
         positions.append({
             "profile": asdict(profile),
             "team_overall": team_overall,

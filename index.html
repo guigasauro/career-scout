@@ -579,7 +579,7 @@ async function runScout() {
   const potential_weight = parseFloat(document.getElementById('sel-potential').value);
   const realism = document.getElementById('sel-realism').value === '1';
   const level_offset = parseInt(document.getElementById('sel-level').value);
-  const sort_by = document.getElementById('sel-sort').value;
+  const sort_by = realism ? document.getElementById('sel-sort').value : 'score';
   const score_threshold = realism ? parseFloat(document.getElementById('sel-rol').value) : 0;
   const btn     = document.getElementById('btn-scout');
 
