@@ -212,7 +212,7 @@ async function init() {
   }
   sel.innerHTML = '<option value="">Selecione…</option>';
   [...years].reverse().forEach(y => {
-    const o = new Option(`FIFA ${y}`, y);
+    const o = new Option(edLabel(y), y);
     sel.appendChild(o);
   });
 }
@@ -316,6 +316,7 @@ function fmt(v, dec = 1) {
   if (v >= 1e3) return `€${(v/1e3).toFixed(0)}K`;
   return `€${v}`;
 }
+function edLabel(y) { return y >= 24 ? `EA FC ${y}` : `FIFA ${y}`; }
 function fmtAge(v) { return v != null ? `${v}` : '—'; }
 function pct(v, total) { return total ? Math.round(v / total * 100) : 0; }
 function arrivalRowHtml(t) {
@@ -386,7 +387,7 @@ function openModalHtml(title, html, wide) {
 }
 function openOverviewModal() {
   const d = window._overviewData;
-  if (d) openModalHtml(`Visão geral — ${d.club} × FIFA ${d.fifa_edition}`, renderOverviewFull(d), true);
+  if (d) openModalHtml(`Visão geral — ${d.club} × ${edLabel(d.fifa_edition)}`, renderOverviewFull(d), true);
 }
 function closeModal(e) {
   if (e && e.target !== document.getElementById('modal')) return;
@@ -462,7 +463,7 @@ function renderSimplePanel(d, history) {
   </div>`;
   return `<div class="card">
     <div class="card-header" style="justify-content:space-between">
-      <span>📊 Visão geral — ${esc(d.club)} × FIFA ${d.fifa_edition}</span>
+      <span>📊 Visão geral — ${esc(d.club)} × ${edLabel(d.fifa_edition)}</span>
       <span class="see-all" style="margin:0" onclick="openOverviewModal()">ver detalhes ↗</span>
     </div>
     <div class="card-body">${chips}</div>
@@ -569,7 +570,7 @@ function renderOverviewFull(d) {
 
   return `
     <div class="card">
-      <div class="card-header">📊 Visão geral — ${esc(d.club)} × FIFA ${d.fifa_edition}</div>
+      <div class="card-header">📊 Visão geral — ${esc(d.club)} × ${edLabel(d.fifa_edition)}</div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px">
         ${chips}
         ${dist}
