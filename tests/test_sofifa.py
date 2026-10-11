@@ -91,6 +91,13 @@ class TestRankCandidates(unittest.TestCase):
                                   exclude_club="ExcludeMe", fee_discount=1.0)
         self.assertAlmostEqual(max(c.score for c in results), 1.0, places=4)
 
+    def test_breakdown_sums_to_score(self):
+        results = rank_candidates(self.profile, self.players, top_n=20, exclude_club="ExcludeMe")
+        for c in results:
+            got = sum(g for g, _ in c.breakdown.values())
+            self.assertLessEqual(abs(got - c.score * 100), len(c.breakdown))  # tolerância de arredondamento
+            self.assertAlmostEqual(sum(m for _, m in c.breakdown.values()), 100, delta=len(c.breakdown))
+
     def test_potential_knob_reorders(self):
         players = [
             _p("low", "France", 24, 10_000_000, "CB"),   # encaixe perfeito, sem potencial

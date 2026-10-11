@@ -1,7 +1,7 @@
 """Estágio 3 — matching de jogadores SoFIFA contra perfis do Estágio 2."""
 import csv
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
@@ -72,6 +72,8 @@ class Candidate:
     potential: int
     player_positions: list[str]
     score: float = 0.0
+    # eixo → [pontos obtidos, máximo], em pontos percentuais do score (somam ≈ score×100)
+    breakdown: dict[str, list[int]] = field(default_factory=dict)
 
 
 @lru_cache(maxsize=8)
@@ -160,45 +162,48 @@ def rank_candidates(
     # peso total dos eixos que este perfil consegue pontuar — normaliza o score
     # para [0,1] e o torna comparável entre posições (perfil sem fee/nac/liga
     # não fica artificialmente pior por ter teto menor).
-    active_weight = (
-        (w["value"]       if profile.fee_mean        else 0)
-        + (w["age"]         if profile.age_mean        else 0)
-        + (w["nationality"] if profile.nationality_mode else 0)
-        + (w["league"]      if target_league           else 0)
-        + (w["potential"])
-        + (w["overall"])
-    ) or 1.0
+    axis_max = {k: v for k, v in {
+        "value":       w["value"]       if profile.fee_mean         else 0,
+        "age":         w["age"]         if profile.age_mean         else 0,
+        "nationality": w["nationality"] if profile.nationality_mode else 0,
+        "league":      w["league"]      if target_league            else 0,
+        "potential":   w["potential"],
+        "overall":     w["overall"],
+    }.items() if v}
+    active_weight = sum(axis_max.values()) or 1.0
 
     results: list[Candidate] = []
     for p in pool:
-        score = 0.0
+        got = dict.fromkeys(axis_max, 0.0)
 
         # similaridade de valor (1 - distância z normalizada → [0,1])
         if target_value and p.get("value_eur") and p["value_eur"]:
             v = float(p["value_eur"])
             dist = abs(v - target_value) / val_std
-            score += w["value"] * max(0.0, 1 - dist / 3)
+            got["value"] = w["value"] * max(0.0, 1 - dist / 3)
 
         # similaridade de idade
         if profile.age_mean and p.get("age"):
             a = int(p["age"])
             dist = abs(a - profile.age_mean) / age_std
-            score += w["age"] * max(0.0, 1 - dist / 3)
+            got["age"] = w["age"] * max(0.0, 1 - dist / 3)
 
         # bônus categóricos (match binário)
         if profile.nationality_mode and p.get("nationality_name") == profile.nationality_mode:
-            score += w["nationality"]
+            got["nationality"] = w["nationality"]
         if target_league and p.get("league_name") == target_league:
-            score += w["league"]
+            got["league"] = w["league"]
 
         # potencial (career mode: priorizar promessas) — só pesa se o knob > 0
         if w["potential"] and p.get("potential"):
-            score += w["potential"] * (int(p["potential"]) / 100)
+            got["potential"] = w["potential"] * (int(p["potential"]) / 100)
 
         # nível (modo reforço): proximidade ao overall titular do clube + offset
         if target_overall and p.get("overall"):
             dist = abs(int(p["overall"]) - target_overall) / ovr_std
-            score += w["overall"] * max(0.0, 1 - dist / 3)
+            got["overall"] = w["overall"] * max(0.0, 1 - dist / 3)
+
+        score = sum(got.values())
 
         results.append(Candidate(
             sofifa_id=p.get("sofifa_id", ""),
@@ -212,6 +217,8 @@ def rank_candidates(
             potential=int(p["potential"]) if p.get("potential") else 0,
             player_positions=_parse_positions(p.get("player_positions", "")),
             score=round(score / active_weight, 4),
+            breakdown={k: [round(100 * got[k] / active_weight), round(100 * m / active_weight)]
+                       for k, m in axis_max.items()},
         ))
 
     # rol acima do threshold (modo reforço); 0 = sem filtro

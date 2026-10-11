@@ -708,6 +708,11 @@ async function runScout() {
   }
 }
 
+const AXIS_LABEL = { value: 'Valor', age: 'Idade', nationality: 'Nacionalidade', league: 'Liga', potential: 'Potencial', overall: 'Nível do elenco' };
+function scoreTip(b) {
+  // ex.: "Valor 28/36 · Idade 25/27 · Nacionalidade 0/18"
+  return Object.entries(b || {}).map(([k, [got, max]]) => `${AXIS_LABEL[k] || k} ${got}/${max}`).join(' · ');
+}
 function renderPosition({ profile: p, candidates, team_overall }) {
   const lvl = team_overall != null
     ? `&nbsp;|&nbsp; nível titular <b style="color:var(--green)">${team_overall}</b>` : '';
@@ -723,7 +728,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <td>${fmt(c.value_eur)}</td>
       <td class="ovr ${ovrCls}">${c.overall}</td>
       <td class="ovr ${c.potential >= 85 ? 'high' : c.potential >= 78 ? 'mid' : 'low'}">${c.potential || '—'}</td>
-      <td><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
+      <td title="${esc(scoreTip(c.breakdown))}" style="cursor:help"><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
       <td>${c.sofifa_id ? `<a href="https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}" target="_blank" style="color:var(--blue);font-size:11px">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
   }).join('');
