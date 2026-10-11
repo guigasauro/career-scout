@@ -328,7 +328,7 @@ const I18N = {
     no_data_msg: 'Nenhum dado de jogadores em <code>data/raw/</code>. Veja como baixar em {link}.',
     step_edition: 'Edição FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Clube',
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
-    no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
+    no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', rate_limited: 'Muitas buscas seguidas. Espere alguns segundos e tente de novo.', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
     empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de contratação',
     sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
@@ -368,7 +368,7 @@ const I18N = {
     no_data_msg: 'No player data in <code>data/raw/</code>. See how to download it in {link}.',
     step_edition: 'FIFA edition', step_country: 'Country', step_league: 'League', step_club: 'Club',
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
-    no_clubs: 'No clubs mapped', settings: 'Search settings', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
+    no_clubs: 'No clubs mapped', settings: 'Search settings', rate_limited: 'Too many searches in a row. Wait a few seconds and try again.', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
     empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
     dossier_sub: '{ed}, last {h} seasons', typical: 'Typical signing',
     sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
@@ -408,7 +408,7 @@ const I18N = {
     no_data_msg: 'No hay datos de jugadores en <code>data/raw/</code>. Mira cómo descargarlos en {link}.',
     step_edition: 'Edición FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Club',
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
-    no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
+    no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', rate_limited: 'Demasiadas búsquedas seguidas. Espera unos segundos e inténtalo de nuevo.', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
     empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de fichaje',
     sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
@@ -692,6 +692,11 @@ function clearOverview() {
   document.getElementById('results').innerHTML  = '';
   setStatus('status-overview', ''); setStatus('status-scout', '');
 }
+// mensagem de erro da API; 429 vem do limite do nginx (HTML, não JSON)
+async function apiError(res) {
+  if (res.status === 429) return t('rate_limited');
+  try { return (await res.json()).detail || res.statusText; } catch { return res.statusText; }
+}
 function setStatus(id, type, html = '') {
   const el = document.getElementById(id);
   el.className = 'status-bar' + (type ? ` ${type}` : '');
@@ -834,7 +839,7 @@ async function loadOverview() {
         club_name: selectedClub.name, fifa_edition: edition, history, top_n: 20,
       }),
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
+    if (!res.ok) throw new Error(await apiError(res));
     const d = await res.json();
     window._overviewData = d; d._history = history;
     setStatus('status-overview', '');
@@ -1037,7 +1042,7 @@ async function runScout() {
         realism, level_offset, sort_by, score_threshold,
       }),
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
+    if (!res.ok) throw new Error(await apiError(res));
     _lastScout = await res.json();
     setStatus('status-scout', '');
     renderResults(_lastScout);

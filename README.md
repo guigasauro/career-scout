@@ -63,6 +63,10 @@ Abra http://localhost:8000 e escolha edição → país → liga → clube. A in
 
 São 150 clubes das 5 grandes ligas, mapeados entre Transfermarkt e SoFIFA em `data/club_mapping.json`. Para mapear outras ligas, use `seed_clubs.py`.
 
+### Compartilhar com outras pessoas
+
+`deploy/nginx.conf` coloca um nginx na frente do app, com senha (Basic Auth) e limite de buscas: cada clube novo raspa o Transfermarkt a partir do seu IP. O comando Docker está no topo do arquivo. Rode o app com `fastapi run career_scout/api.py --host 127.0.0.1`, para que só o nginx fique exposto.
+
 ## Testes
 
 ```bash
