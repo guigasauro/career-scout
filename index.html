@@ -226,7 +226,46 @@ async function init() {
     const o = new Option(edLabel(y), y);
     sel.appendChild(o);
   });
+  await restoreFromUrl();
 }
+
+// ── estado na URL (?ed=22&club=583…) — recarregar/compartilhar mantém a busca ──
+const URL_FIELDS = {
+  ed: 'sel-edition', country: 'sel-country', league: 'sel-league',
+  hist: 'inp-history', top: 'inp-topn', pot: 'sel-potential',
+  real: 'sel-realism', lvl: 'sel-level', sort: 'sel-sort', rol: 'sel-rol',
+};
+function saveUrl(run = false) {
+  const q = new URLSearchParams();
+  for (const [k, id] of Object.entries(URL_FIELDS)) {
+    const v = document.getElementById(id).value;
+    if (v) q.set(k, v);
+  }
+  if (selectedClub) q.set('club', selectedClub.id);
+  if (run) q.set('run', '1');
+  const qs = q.toString();
+  window.history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+}
+async function restoreFromUrl() {
+  const q = new URLSearchParams(location.search);
+  const set = k => { if (q.has(k)) document.getElementById(URL_FIELDS[k]).value = q.get(k); };
+  ['hist', 'top', 'pot', 'real', 'lvl', 'sort', 'rol'].forEach(set);
+  onRealismChange();
+  if (!q.has('ed')) return;
+  set('ed');      await onEditionChange();
+  if (!q.has('country')) return;
+  set('country'); await onCountryChange();
+  if (!q.has('league')) return;
+  set('league');  await onLeagueChange();
+  const sel = document.getElementById('sel-club');
+  const opt = [...sel.options].find(o => o.value && String(JSON.parse(o.value).id) === q.get('club'));
+  if (!opt) return;
+  sel.value = opt.value;
+  await onClubChange();
+  if (q.get('run')) runScout();
+}
+// qualquer mudança no formulário regrava a URL (e derruba o run=1)
+document.querySelector('.form-card').addEventListener('change', () => saveUrl());
 
 // ── cascata de selects ────────────────────────────────────────────
 async function onEditionChange() {
@@ -235,7 +274,7 @@ async function onEditionChange() {
   reset('sel-league',  '— selecione o país —',   true);
   reset('sel-club',    '— selecione a liga —',   true);
   setStep('step-country', false); setStep('step-league', false); setStep('step-club', false);
-  lockFooter(); clearOverview();
+  lockFooter(); clearOverview(); selectedClub = null;
   if (!edition) return;
 
   const ctrs = await fetch(`/countries?edition=${edition}`).then(r => r.json());
@@ -632,6 +671,7 @@ async function runScout() {
   const btn     = document.getElementById('btn-scout');
 
   btn.disabled = true;
+  saveUrl(true);
   document.getElementById('results').innerHTML = '';
   setStatus('status-scout', 'loading', '<span class="spinner"></span>Gerando candidatos…');
 
