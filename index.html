@@ -103,7 +103,8 @@
   .dossier { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 32px; padding: 24px 28px; background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--pitch); border-radius: var(--radius); }
   .club-name { grid-column: 1 / -1; font: 700 clamp(32px, 4.5vw, 48px)/1 var(--font-cond); letter-spacing: -.005em; }
   .dossier-sub { grid-column: 1 / -1; color: var(--muted); font-weight: 500; }
-  .dossier-summary { font-size: 17px; max-width: 60ch; margin-top: 10px; }
+  .dossier-summary { font-size: 17px; max-width: 60ch; margin-top: 10px; padding-left: 1.2em; display: grid; gap: 2px; }
+  .dossier-summary li::marker { color: var(--pitch); }
   .dossier .btn-secondary { align-self: end; justify-self: end; }
   .typical { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 32px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
   .typical dt { font-size: 13px; color: var(--muted); }
@@ -313,7 +314,7 @@ const I18N = {
     no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
     empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de contratação',
-    summary: '{n} contratações em {h} temporadas ({per} por temporada). Valor médio pago: {fee}; o mais alto: {max}.',
+    sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
     hint_unmapped: 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.',
     hist: 'Histórico (temporadas)', hist_tip: 'Quantas temporadas antes da edição entram no perfil de contratações do clube.',
     topn: 'Jogadores por posição', topn_tip: 'Máximo de candidatos listados em cada posição.',
@@ -353,7 +354,7 @@ const I18N = {
     no_clubs: 'No clubs mapped', settings: 'Search settings', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
     empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
     dossier_sub: '{ed}, last {h} seasons', typical: 'Typical signing',
-    summary: '{n} signings over {h} seasons ({per} per season). Average fee paid: {fee}; highest: {max}.',
+    sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
     hint_unmapped: 'Map the club in data/club_mapping.json (seed_clubs.py) or in _OVERRIDES in api.py.',
     hist: 'History (seasons)', hist_tip: "How many seasons before the edition go into the club's signing profile.",
     topn: 'Players per position', topn_tip: 'Maximum number of candidates listed per position.',
@@ -393,7 +394,7 @@ const I18N = {
     no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
     empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de fichaje',
-    summary: '{n} fichajes en {h} temporadas ({per} por temporada). Valor medio pagado: {fee}; el más alto: {max}.',
+    sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
     hint_unmapped: 'Mapea el club en data/club_mapping.json (seed_clubs.py) o en _OVERRIDES en api.py.',
     hist: 'Historial (temporadas)', hist_tip: 'Cuántas temporadas antes de la edición entran en el perfil de fichajes del club.',
     topn: 'Jugadores por posición', topn_tip: 'Máximo de candidatos listados por posición.',
@@ -848,7 +849,11 @@ function renderSimplePanel(d, history) {
   return `<section class="dossier">
     <h1 class="club-name">${esc(d.club)}</h1>
     <p class="dossier-sub">${tr('dossier_sub', { ed: edLabel(d.fifa_edition), h: history })}</p>
-    <p class="dossier-summary">${tr('summary', { n: d.total, h: history, per, fee: fmt(f.mean), max: fmt(f.max) })}</p>
+    <ul class="dossier-summary">
+      <li>${tr('sum_signings', { n: d.total, h: history, per })}</li>
+      <li>${tr('sum_fee_mean', { fee: fmt(f.mean) })}</li>
+      <li>${tr('sum_fee_max', { max: fmt(f.max) })}</li>
+    </ul>
     <button class="btn-secondary" onclick="openOverviewModal()">${tr('see_details')}</button>
     <dl class="typical" aria-label="${tr('typical')}">
       <div><dt>${tr('c_age_mean')}</dt><dd>${a.mean ?? '—'}</dd></div>
