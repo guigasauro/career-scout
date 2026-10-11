@@ -355,9 +355,10 @@ function typeLabel(t) {
   if (t === 'loan')      return '<span class="badge badge-loan">loan</span>';
   return '<span class="badge badge-free">free</span>';
 }
+function seasonLabel(y) { return `${y}/${String(Number(y)+1).slice(2)}`; }  // 2012 → "2012/13"
 function arrivalDate(t) {
   // TM agrega Summer+Winter por temporada; só a temporada é conhecida.
-  return String(t.season);
+  return seasonLabel(t.season);
 }
 function countBy(arr, fn) {
   const c = {};
@@ -485,8 +486,6 @@ function renderOverviewFull(d) {
     <div class="chip"><div class="label">Faixa de idade</div><div class="value">${a.min ?? '—'}–${a.max ?? '—'}</div></div>
   </div>`;
 
-  // all seasons com label "2012/13"
-  const seasonLabel = y => `${y}/${String(Number(y)+1).slice(2)}`;
   const bySeasonLabeled = Object.fromEntries(Object.entries(d.by_season).map(([y,n]) => [seasonLabel(y), n]));
 
   const dist = `<div class="dist-grid">
@@ -540,7 +539,7 @@ function renderOverviewFull(d) {
           ${distBlock('Clubes de origem', byClub, pa.length, 'var(--blue)', 5)}
         </div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Data</th><th>Tipo</th><th>Jogador</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th></tr></thead>
+          <thead><tr><th>Temporada</th><th>Tipo</th><th>Jogador</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th></tr></thead>
           <tbody>${playerRows}</tbody>
         </table></div>
       </div>
@@ -563,7 +562,7 @@ function renderOverviewFull(d) {
   const hasMore = arrivals.length > PAGE;
 
   const arrivalsTable = `<div class="table-wrap"><table>
-    <thead><tr><th>Data</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th></th></tr></thead>
+    <thead><tr><th>Temporada</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th></th></tr></thead>
     <tbody id="${key}">${initialRows}</tbody>
   </table></div>
   ${hasMore ? `<span class="see-all" onclick="loadAllArrivals('${key}', this)">carregar mais (${arrivals.length - PAGE} restantes)</span>` : ''}`;
