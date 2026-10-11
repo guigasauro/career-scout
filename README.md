@@ -6,6 +6,8 @@ Ele aprende no [Transfermarkt](https://www.transfermarkt.com) o *padrão de cont
 
 > Exemplo: se nos últimos 5 anos o clube contratou **zagueiros franceses de ~23 anos por ~€10M**, o career-scout ranqueia os zagueiros da edição escolhida pela semelhança com esse perfil.
 
+![Career Scout: dossiê do Tottenham Hotspur no FIFA 22 e candidatos a zagueiro ranqueados](docs/screenshot.png)
+
 ## Como funciona
 
 ```
