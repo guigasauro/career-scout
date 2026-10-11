@@ -32,7 +32,12 @@ pip install -e ".[dev]"
 
 Os dados de jogadores **não são distribuídos neste repositório**. Coloque-os em `data/raw/`:
 
-- **FIFA 15–22:** baixe o dataset [FIFA 22 complete player dataset](https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset) (Kaggle) e copie os `players_15.csv` … `players_22.csv` para `data/raw/`.
+- **FIFA 15–22:** dataset [FIFA 22 complete player dataset](https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset) do Kaggle. Com a [CLI do Kaggle](https://github.com/Kaggle/kaggle-api#api-credentials), o download é um comando só. É preciso uma conta gratuita e o token em `~/.kaggle/kaggle.json`:
+  ```bash
+  pip install kaggle
+  kaggle datasets download -d stefanoleone992/fifa-22-complete-player-dataset -p data/raw --unzip
+  ```
+  Sem a CLI: baixe o zip pelo site e extraia os `players_15.csv` … `players_22.csv` em `data/raw/`.
 - **FIFA 23 / FC 24–26:** gere com o scraper incluso. O SoFIFA fica atrás de um desafio Cloudflare, então o scraper usa cookies da sua sessão:
   1. Abra https://sofifa.com/players no navegador e espere passar a verificação.
   2. Copie o cookie `cf_clearance` e o `User-Agent` do navegador (DevTools).

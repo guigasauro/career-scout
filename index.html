@@ -203,6 +203,13 @@ let selectedClub = null;
 async function init() {
   const years = await fetch('/fifa-years').then(r => r.json());
   const sel = document.getElementById('sel-edition');
+  if (!years.length) {
+    sel.innerHTML = '<option value="">Sem dados</option>';
+    setStatus('status-overview', 'error',
+      'Nenhum dado de jogadores em <code>data/raw/</code>. Veja como baixar em ' +
+      '<a href="https://github.com/guigasauro/career-scout#dados-do-sofifa-não-inclusos" target="_blank">README → Dados do SoFIFA</a>.');
+    return;
+  }
   sel.innerHTML = '<option value="">Selecione…</option>';
   [...years].reverse().forEach(y => {
     const o = new Option(`FIFA ${y}`, y);
