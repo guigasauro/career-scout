@@ -136,57 +136,63 @@
 </style>
 </head>
 <body>
-<header><span>⬡</span> Career Scout</header>
+<header><span>⬡</span> Career Scout
+  <select id="sel-lang" onchange="setLang(this.value)" aria-label="Idioma / Language" style="margin-left:auto;min-width:0;font-weight:400">
+    <option value="pt">🇧🇷 Português</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="es">🇪🇸 Español</option>
+  </select>
+</header>
 <main>
 
   <!-- Formulário -->
   <div class="form-card">
     <div class="form-steps">
       <div class="step active" id="step-edition">
-        <label><span class="step-num">1</span>Edição FIFA</label>
-        <select id="sel-edition" onchange="onEditionChange()"><option value="">Carregando…</option></select>
+        <label><span class="step-num">1</span><span data-i18n="step_edition"></span></label>
+        <select id="sel-edition" onchange="onEditionChange()"><option value="" data-i18n="loading"></option></select>
       </div>
       <div class="step" id="step-country">
-        <label><span class="step-num">2</span>País</label>
-        <select id="sel-country" disabled onchange="onCountryChange()"><option value="">— selecione a edição —</option></select>
+        <label><span class="step-num">2</span><span data-i18n="step_country"></span></label>
+        <select id="sel-country" disabled onchange="onCountryChange()"><option value="" data-i18n="pick_edition"></option></select>
       </div>
       <div class="step" id="step-league">
-        <label><span class="step-num">3</span>Liga</label>
-        <select id="sel-league" disabled onchange="onLeagueChange()"><option value="">— selecione o país —</option></select>
+        <label><span class="step-num">3</span><span data-i18n="step_league"></span></label>
+        <select id="sel-league" disabled onchange="onLeagueChange()"><option value="" data-i18n="pick_country"></option></select>
       </div>
       <div class="step" id="step-club">
-        <label><span class="step-num">4</span>Clube</label>
-        <select id="sel-club" disabled onchange="onClubChange()"><option value="">— selecione a liga —</option></select>
+        <label><span class="step-num">4</span><span data-i18n="step_club"></span></label>
+        <select id="sel-club" disabled onchange="onClubChange()"><option value="" data-i18n="pick_league"></option></select>
       </div>
     </div>
     <div class="form-footer">
-      <label><span>Histórico (temporadas) <span class="info" title="Quantas temporadas antes da edição entram no perfil de contratações do clube.">ⓘ</span></span><input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
-      <label><span>Jogadores por posição <span class="info" title="Máximo de candidatos listados em cada posição.">ⓘ</span></span><input type="number" id="inp-topn" value="20" min="5" max="50" disabled></label>
-      <label><span>Priorizar potencial <span class="info" title="Dá peso extra a jogadores com potencial alto (promessas). Off = só o padrão histórico do clube.">ⓘ</span></span><select id="sel-potential" disabled>
-        <option value="0">Off</option>
-        <option value="0.15">Baixo</option>
-        <option value="0.3">Médio</option>
-        <option value="0.5">Alto</option>
+      <label><span><span data-i18n="hist"></span> <span class="info" data-i18n-title="hist_tip">ⓘ</span></span><input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
+      <label><span><span data-i18n="topn"></span> <span class="info" data-i18n-title="topn_tip">ⓘ</span></span><input type="number" id="inp-topn" value="20" min="5" max="50" disabled></label>
+      <label><span><span data-i18n="pot"></span> <span class="info" data-i18n-title="pot_tip">ⓘ</span></span><select id="sel-potential" disabled>
+        <option value="0" data-i18n="off"></option>
+        <option value="0.15" data-i18n="low"></option>
+        <option value="0.3" data-i18n="mid"></option>
+        <option value="0.5" data-i18n="high"></option>
       </select></label>
-      <label><span>Modo reforço <span class="info" title="Ancora as sugestões no overall médio dos titulares de cada linha, para não sugerir jogadores abaixo do nível do elenco.">ⓘ</span></span><select id="sel-realism" disabled onchange="onRealismChange()">
-        <option value="0">Off</option>
-        <option value="1">On</option>
+      <label><span><span data-i18n="realism"></span> <span class="info" data-i18n-title="realism_tip">ⓘ</span></span><select id="sel-realism" disabled onchange="onRealismChange()">
+        <option value="0" data-i18n="off"></option>
+        <option value="1" data-i18n="on"></option>
       </select></label>
-      <label class="realism-only" style="display:none"><span>Nível-alvo <span class="info" title="Reforço similar = overall dos titulares; Upgrade = +3; Aposta barata = −3.">ⓘ</span></span><select id="sel-level">
-        <option value="0">Reforço similar</option>
-        <option value="3">Upgrade</option>
-        <option value="-3">Aposta barata</option>
+      <label class="realism-only" style="display:none"><span><span data-i18n="level"></span> <span class="info" data-i18n-title="level_tip">ⓘ</span></span><select id="sel-level">
+        <option value="0" data-i18n="lvl_same"></option>
+        <option value="3" data-i18n="lvl_up"></option>
+        <option value="-3" data-i18n="lvl_cheap"></option>
       </select></label>
-      <label class="realism-only" style="display:none"><span>Ordenar por <span class="info" title="Melhor encaixe = mais parecido com o perfil do clube; Melhores jogadores = maior overall entre os que passaram no corte.">ⓘ</span></span><select id="sel-sort">
-        <option value="score">Melhor encaixe</option>
-        <option value="overall">Melhores jogadores</option>
+      <label class="realism-only" style="display:none"><span><span data-i18n="sort"></span> <span class="info" data-i18n-title="sort_tip">ⓘ</span></span><select id="sel-sort">
+        <option value="score" data-i18n="sort_score"></option>
+        <option value="overall" data-i18n="sort_ovr"></option>
       </select></label>
-      <label class="realism-only" style="display:none"><span>Tamanho do rol <span class="info" title="Score mínimo para entrar na lista: Estrito 60%, Médio 45%, Amplo 30%.">ⓘ</span></span><select id="sel-rol">
-        <option value="0.6">Estrito</option>
-        <option value="0.45" selected>Médio</option>
-        <option value="0.3">Amplo</option>
+      <label class="realism-only" style="display:none"><span><span data-i18n="rol"></span> <span class="info" data-i18n-title="rol_tip">ⓘ</span></span><select id="sel-rol">
+        <option value="0.6" data-i18n="rol_strict"></option>
+        <option value="0.45" selected data-i18n="rol_mid"></option>
+        <option value="0.3" data-i18n="rol_wide"></option>
       </select></label>
-      <button id="btn-scout" disabled onclick="runScout()">Gerar candidatos</button>
+      <button id="btn-scout" disabled onclick="runScout()" data-i18n="btn_scout"></button>
       <span class="hint" id="hint"></span>
     </div>
   </div>
@@ -196,7 +202,7 @@
     <div class="modal-box" id="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-head">
         <span id="modal-title"></span>
-        <button class="modal-close" id="modal-close" aria-label="Fechar" onclick="hideModal()">×</button>
+        <button class="modal-close" id="modal-close" data-i18n-aria="close" onclick="hideModal()">×</button>
       </div>
       <div class="modal-body" id="modal-body"></div>
     </div>
@@ -211,18 +217,205 @@
 <script>
 let selectedClub = null;
 
+// ── i18n (pt / en / es) ───────────────────────────────────────────
+const I18N = {
+  pt: {
+    loading: 'Carregando…', select: 'Selecione…', no_data: 'Sem dados',
+    no_data_msg: 'Nenhum dado de jogadores em <code>data/raw/</code>. Veja como baixar em {link}.',
+    step_edition: 'Edição FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Clube',
+    pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
+    no_clubs: 'Nenhum clube cadastrado',
+    hint_unmapped: 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.',
+    hist: 'Histórico (temporadas)', hist_tip: 'Quantas temporadas antes da edição entram no perfil de contratações do clube.',
+    topn: 'Jogadores por posição', topn_tip: 'Máximo de candidatos listados em cada posição.',
+    pot: 'Priorizar potencial', pot_tip: 'Dá peso extra a jogadores com potencial alto (promessas). Off = só o padrão histórico do clube.',
+    off: 'Off', on: 'On', low: 'Baixo', mid: 'Médio', high: 'Alto',
+    realism: 'Modo reforço', realism_tip: 'Ancora as sugestões no overall médio dos titulares de cada linha, para não sugerir jogadores abaixo do nível do elenco.',
+    level: 'Nível-alvo', level_tip: 'Reforço similar = overall dos titulares; Upgrade = +3; Aposta barata = −3.',
+    lvl_same: 'Reforço similar', lvl_up: 'Upgrade', lvl_cheap: 'Aposta barata',
+    sort: 'Ordenar por', sort_tip: 'Melhor encaixe = mais parecido com o perfil do clube; Melhores jogadores = maior overall entre os que passaram no corte.',
+    sort_score: 'Melhor encaixe', sort_ovr: 'Melhores jogadores',
+    rol: 'Tamanho do rol', rol_tip: 'Score mínimo para entrar na lista: Estrito 60%, Médio 45%, Amplo 30%.',
+    rol_strict: 'Estrito', rol_mid: 'Médio', rol_wide: 'Amplo',
+    btn_scout: 'Gerar candidatos', close: 'Fechar', error: 'Erro',
+    loading_overview: 'Carregando histórico de contratações…', loading_scout: 'Gerando candidatos…',
+    see_all: 'ver todos ({n})', see_details: 'ver detalhes ↗', more: 'ver mais ▾', less: 'ver menos ▴',
+    load_more: 'carregar mais ({n} restantes)',
+    overview_title: 'Visão geral — {club} × {ed}', profiles: 'Perfis por posição', all_arrivals: 'Todas as chegadas ({n})',
+    c_per_season: 'Contratações / temporada', c_nat_mode: 'Nacionalidade (moda)', c_league_mode: 'Liga de origem (moda)',
+    c_age_mean: 'Idade média', c_fee_mean: 'Valor médio pago', c_fee_max: 'Valor máximo pago',
+    c_total: 'Total chegadas', c_perm: 'Permanentes', c_loan: 'Empréstimos', c_free: 'Livres',
+    c_fee_perm: 'Valor médio pago (perm.)', c_spent: 'Total gasto', c_age_range: 'Faixa de idade',
+    d_seasons: 'Últimas temporadas', d_positions: 'Posições mais contratadas', d_nats: 'Nacionalidades',
+    d_leagues: 'Ligas de origem', d_clubs: 'Clubes de origem',
+    th_season: 'Temporada', th_type: 'Tipo', th_player: 'Jogador', th_pos: 'Pos.', th_fee: 'Valor pago', th_age: 'Idade',
+    th_nat: 'Nac.', th_from_club: 'Clube origem', th_from_league: 'Liga origem', th_position: 'Posição',
+    th_nperm: 'n perm.', th_age_mean: 'Idade média', th_fee_mean: 'Valor médio pago', th_nat_mode: 'Nac. (moda)',
+    th_league_mode: 'Liga (moda)', th_club_mode: 'Clube (moda)', th_name: 'Nome', th_club: 'Clube', th_league: 'Liga', th_value: 'Valor',
+    type_perm: 'compra', type_loan: 'emprést.', type_free: 'livre',
+    hdr_age: 'idade', hdr_fee: 'valor pago', hdr_nat: 'nac.', hdr_league: 'liga', hdr_level: 'nível titular',
+    ax_value: 'Valor', ax_age: 'Idade', ax_nationality: 'Nacionalidade', ax_league: 'Liga', ax_potential: 'Potencial', ax_overall: 'Nível do elenco',
+  },
+  en: {
+    loading: 'Loading…', select: 'Select…', no_data: 'No data',
+    no_data_msg: 'No player data in <code>data/raw/</code>. See how to download it in {link}.',
+    step_edition: 'FIFA edition', step_country: 'Country', step_league: 'League', step_club: 'Club',
+    pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
+    no_clubs: 'No clubs mapped',
+    hint_unmapped: 'Map the club in data/club_mapping.json (seed_clubs.py) or in _OVERRIDES in api.py.',
+    hist: 'History (seasons)', hist_tip: "How many seasons before the edition go into the club's signing profile.",
+    topn: 'Players per position', topn_tip: 'Maximum number of candidates listed per position.',
+    pot: 'Prioritize potential', pot_tip: "Gives extra weight to high-potential players (wonderkids). Off = only the club's historical pattern.",
+    off: 'Off', on: 'On', low: 'Low', mid: 'Medium', high: 'High',
+    realism: 'Reinforcement mode', realism_tip: "Anchors suggestions to the average overall of each line's starters, so it doesn't suggest players below the squad's level.",
+    level: 'Target level', level_tip: "Similar level = starters' overall; Upgrade = +3; Cheap gamble = −3.",
+    lvl_same: 'Similar level', lvl_up: 'Upgrade', lvl_cheap: 'Cheap gamble',
+    sort: 'Sort by', sort_tip: "Best fit = closest to the club's profile; Best players = highest overall among those above the cutoff.",
+    sort_score: 'Best fit', sort_ovr: 'Best players',
+    rol: 'List size', rol_tip: 'Minimum score to make the list: Strict 60%, Medium 45%, Broad 30%.',
+    rol_strict: 'Strict', rol_mid: 'Medium', rol_wide: 'Broad',
+    btn_scout: 'Find candidates', close: 'Close', error: 'Error',
+    loading_overview: 'Loading transfer history…', loading_scout: 'Finding candidates…',
+    see_all: 'see all ({n})', see_details: 'see details ↗', more: 'show more ▾', less: 'show less ▴',
+    load_more: 'load more ({n} left)',
+    overview_title: 'Overview — {club} × {ed}', profiles: 'Profiles by position', all_arrivals: 'All arrivals ({n})',
+    c_per_season: 'Signings / season', c_nat_mode: 'Nationality (mode)', c_league_mode: 'Source league (mode)',
+    c_age_mean: 'Average age', c_fee_mean: 'Average fee paid', c_fee_max: 'Highest fee paid',
+    c_total: 'Total arrivals', c_perm: 'Permanent', c_loan: 'Loans', c_free: 'Free',
+    c_fee_perm: 'Average fee (perm.)', c_spent: 'Total spent', c_age_range: 'Age range',
+    d_seasons: 'Recent seasons', d_positions: 'Most signed positions', d_nats: 'Nationalities',
+    d_leagues: 'Source leagues', d_clubs: 'Source clubs',
+    th_season: 'Season', th_type: 'Type', th_player: 'Player', th_pos: 'Pos.', th_fee: 'Fee paid', th_age: 'Age',
+    th_nat: 'Nat.', th_from_club: 'From club', th_from_league: 'From league', th_position: 'Position',
+    th_nperm: 'n perm.', th_age_mean: 'Avg. age', th_fee_mean: 'Avg. fee paid', th_nat_mode: 'Nat. (mode)',
+    th_league_mode: 'League (mode)', th_club_mode: 'Club (mode)', th_name: 'Name', th_club: 'Club', th_league: 'League', th_value: 'Value',
+    type_perm: 'perm', type_loan: 'loan', type_free: 'free',
+    hdr_age: 'age', hdr_fee: 'fee paid', hdr_nat: 'nat.', hdr_league: 'league', hdr_level: "starters' level",
+    ax_value: 'Value', ax_age: 'Age', ax_nationality: 'Nationality', ax_league: 'League', ax_potential: 'Potential', ax_overall: 'Squad level',
+  },
+  es: {
+    loading: 'Cargando…', select: 'Selecciona…', no_data: 'Sin datos',
+    no_data_msg: 'No hay datos de jugadores en <code>data/raw/</code>. Mira cómo descargarlos en {link}.',
+    step_edition: 'Edición FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Club',
+    pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
+    no_clubs: 'Ningún club registrado',
+    hint_unmapped: 'Mapea el club en data/club_mapping.json (seed_clubs.py) o en _OVERRIDES en api.py.',
+    hist: 'Historial (temporadas)', hist_tip: 'Cuántas temporadas antes de la edición entran en el perfil de fichajes del club.',
+    topn: 'Jugadores por posición', topn_tip: 'Máximo de candidatos listados por posición.',
+    pot: 'Priorizar potencial', pot_tip: 'Da peso extra a jugadores con alto potencial (promesas). Off = solo el patrón histórico del club.',
+    off: 'Off', on: 'On', low: 'Bajo', mid: 'Medio', high: 'Alto',
+    realism: 'Modo refuerzo', realism_tip: 'Ancla las sugerencias en el overall medio de los titulares de cada línea, para no sugerir jugadores por debajo del nivel de la plantilla.',
+    level: 'Nivel objetivo', level_tip: 'Refuerzo similar = overall de los titulares; Mejora = +3; Apuesta barata = −3.',
+    lvl_same: 'Refuerzo similar', lvl_up: 'Mejora', lvl_cheap: 'Apuesta barata',
+    sort: 'Ordenar por', sort_tip: 'Mejor encaje = más parecido al perfil del club; Mejores jugadores = mayor overall entre los que pasan el corte.',
+    sort_score: 'Mejor encaje', sort_ovr: 'Mejores jugadores',
+    rol: 'Tamaño de la lista', rol_tip: 'Score mínimo para entrar en la lista: Estricto 60%, Medio 45%, Amplio 30%.',
+    rol_strict: 'Estricto', rol_mid: 'Medio', rol_wide: 'Amplio',
+    btn_scout: 'Buscar candidatos', close: 'Cerrar', error: 'Error',
+    loading_overview: 'Cargando historial de fichajes…', loading_scout: 'Buscando candidatos…',
+    see_all: 'ver todos ({n})', see_details: 'ver detalles ↗', more: 'ver más ▾', less: 'ver menos ▴',
+    load_more: 'cargar más ({n} restantes)',
+    overview_title: 'Resumen — {club} × {ed}', profiles: 'Perfiles por posición', all_arrivals: 'Todas las llegadas ({n})',
+    c_per_season: 'Fichajes / temporada', c_nat_mode: 'Nacionalidad (moda)', c_league_mode: 'Liga de origen (moda)',
+    c_age_mean: 'Edad media', c_fee_mean: 'Valor medio pagado', c_fee_max: 'Valor máximo pagado',
+    c_total: 'Total de llegadas', c_perm: 'Definitivos', c_loan: 'Cesiones', c_free: 'Libres',
+    c_fee_perm: 'Valor medio pagado (def.)', c_spent: 'Total gastado', c_age_range: 'Rango de edad',
+    d_seasons: 'Últimas temporadas', d_positions: 'Posiciones más fichadas', d_nats: 'Nacionalidades',
+    d_leagues: 'Ligas de origen', d_clubs: 'Clubes de origen',
+    th_season: 'Temporada', th_type: 'Tipo', th_player: 'Jugador', th_pos: 'Pos.', th_fee: 'Valor pagado', th_age: 'Edad',
+    th_nat: 'Nac.', th_from_club: 'Club de origen', th_from_league: 'Liga de origen', th_position: 'Posición',
+    th_nperm: 'n def.', th_age_mean: 'Edad media', th_fee_mean: 'Valor medio pagado', th_nat_mode: 'Nac. (moda)',
+    th_league_mode: 'Liga (moda)', th_club_mode: 'Club (moda)', th_name: 'Nombre', th_club: 'Club', th_league: 'Liga', th_value: 'Valor',
+    type_perm: 'compra', type_loan: 'cesión', type_free: 'libre',
+    hdr_age: 'edad', hdr_fee: 'valor pagado', hdr_nat: 'nac.', hdr_league: 'liga', hdr_level: 'nivel titular',
+    ax_value: 'Valor', ax_age: 'Edad', ax_nationality: 'Nacionalidad', ax_league: 'Liga', ax_potential: 'Potencial', ax_overall: 'Nivel de plantilla',
+  },
+};
+const LOCALE = { pt: 'pt-BR', en: 'en', es: 'es' };
+let LANG = (() => { try { return localStorage.getItem('lang'); } catch { return null; } })();
+if (!I18N[LANG]) LANG = { en: 'en', es: 'es' }[navigator.language.slice(0, 2)] || 'pt';
+
+function t(key, vars = {}) {
+  const s = I18N[LANG][key] ?? I18N.pt[key] ?? key;  // chave desconhecida ("OVR", "#") passa direto
+  return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+}
+// t() para templates HTML: escapa o texto e as variáveis (nome do clube vem dos dados)
+function tr(key, vars = {}) {
+  return esc(t(key, vars));
+}
+function thead(...keys) {
+  return `<tr>${keys.map(k => `<th>${k ? esc(t(k)) : ''}</th>`).join('')}</tr>`;
+}
+
+// Países: nomes vêm em inglês (SoFIFA/TM). Tradução nativa via Intl.DisplayNames,
+// que precisa do código ISO — o mapa nome→código é montado do próprio Intl em inglês.
+const COUNTRY_ISO_ALIAS = {
+  'Bonaire': 'BQ', 'Brunei Darussalam': 'BN', 'Cabo Verde': 'CV', 'Cape Verde Islands': 'CV', 'China PR': 'CN',
+  'Chinese Taipei': 'TW', 'Congo': 'CG', 'Congo DR': 'CD', 'DR Congo': 'CD', 'Czech Republic': 'CZ', 'Guinea Bissau': 'GW',
+  'Hong Kong': 'HK', 'Korea DPR': 'KP', 'Korea Republic': 'KR', 'Korea, South': 'KR', 'Korea, North': 'KP',
+  'Kyrgyz Republic': 'KG', 'Macau': 'MO', 'Palestine': 'PS', 'Republic of Ireland': 'IE', 'Saint Kitts and Nevis': 'KN',
+  'Saint Lucia': 'LC', 'Saint Vincent and the Grenadines': 'VC', 'Sint Maarten (Dutch part)': 'SX', 'Swaziland': 'SZ',
+  'São Tomé e Príncipe': 'ST', 'Turkey': 'TR', 'Türkiye': 'TR', 'UAE': 'AE', 'USA': 'US', 'Bosnia-Herzegovina': 'BA',
+};
+// sem código ISO de país (nações do Reino Unido) + o "Outros" do backend
+const COUNTRY_NON_ISO = {
+  'England':          { pt: 'Inglaterra',       en: 'England',          es: 'Inglaterra' },
+  'Scotland':         { pt: 'Escócia',          en: 'Scotland',         es: 'Escocia' },
+  'Wales':            { pt: 'País de Gales',    en: 'Wales',            es: 'Gales' },
+  'Northern Ireland': { pt: 'Irlanda do Norte', en: 'Northern Ireland', es: 'Irlanda del Norte' },
+  'Outros':           { pt: 'Outros',           en: 'Others',           es: 'Otros' },
+};
+const _normCountry = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’`]/g, "'").replace(/&/g, 'and').toLowerCase();
+let _isoByName = null;
+const _regionNames = {};
+function countryName(name) {
+  if (!name) return name;
+  if (COUNTRY_NON_ISO[name]) return COUNTRY_NON_ISO[name][LANG];
+  if (!_isoByName) {
+    _isoByName = {};
+    const en = new Intl.DisplayNames(['en'], { type: 'region' }), A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (const a of A) for (const b of A) {
+      const n = en.of(a + b);
+      if (n && n !== a + b) _isoByName[_normCountry(n)] = a + b;
+    }
+  }
+  const code = COUNTRY_ISO_ALIAS[name] || _isoByName[_normCountry(name)];
+  if (!code) return name;  // desconhecido: mostra como veio
+  _regionNames[LANG] ??= new Intl.DisplayNames([LOCALE[LANG]], { type: 'region' });
+  return _regionNames[LANG].of(code) || name;
+}
+
+function applyI18n() {
+  document.documentElement.lang = LOCALE[LANG];
+  document.getElementById('sel-lang').value = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  document.querySelectorAll('#sel-country option').forEach(o => { if (o.value) o.textContent = countryName(o.value); });
+}
+function setLang(lang) {
+  LANG = lang;
+  try { localStorage.setItem('lang', lang); } catch {}
+  applyI18n();
+  // re-renderiza o que já está na tela com o novo idioma
+  const ov = window._overviewData;
+  if (ov && document.getElementById('overview').innerHTML) document.getElementById('overview').innerHTML = renderSimplePanel(ov, ov._history);
+  if (_lastScout && document.getElementById('results').innerHTML) renderResults(_lastScout);
+  if (!document.getElementById('modal').classList.contains('hidden')) hideModal();
+}
+
+
 // ── init ─────────────────────────────────────────────────────────
 async function init() {
   const years = await fetch('/fifa-years').then(r => r.json());
   const sel = document.getElementById('sel-edition');
   if (!years.length) {
-    sel.innerHTML = '<option value="">Sem dados</option>';
-    setStatus('status-overview', 'error',
-      'Nenhum dado de jogadores em <code>data/raw/</code>. Veja como baixar em ' +
-      '<a href="https://github.com/guigasauro/career-scout#dados-do-sofifa-não-inclusos" target="_blank">README → Dados do SoFIFA</a>.');
+    reset('sel-edition', 'no_data', false);
+    setStatus('status-overview', 'error', t('no_data_msg', { link:
+      '<a href="https://github.com/guigasauro/career-scout#dados-do-sofifa-não-inclusos" target="_blank">README → SoFIFA</a>' }));
     return;
   }
-  sel.innerHTML = '<option value="">Selecione…</option>';
+  reset('sel-edition', 'select', false);
   [...years].reverse().forEach(y => {
     const o = new Option(edLabel(y), y);
     sel.appendChild(o);
@@ -271,53 +464,55 @@ document.querySelector('.form-card').addEventListener('change', () => saveUrl())
 // ── cascata de selects ────────────────────────────────────────────
 async function onEditionChange() {
   const edition = document.getElementById('sel-edition').value;
-  reset('sel-country', '— selecione a edição —', true);
-  reset('sel-league',  '— selecione o país —',   true);
-  reset('sel-club',    '— selecione a liga —',   true);
+  reset('sel-country', 'pick_edition', true);
+  reset('sel-league',  'pick_country', true);
+  reset('sel-club',    'pick_league',  true);
   setStep('step-country', false); setStep('step-league', false); setStep('step-club', false);
   lockFooter(); clearOverview(); selectedClub = null;
   if (!edition) return;
 
   const ctrs = await fetch(`/countries?edition=${edition}`).then(r => r.json());
   const sel = document.getElementById('sel-country');
-  sel.innerHTML = '<option value="">Selecione…</option>';
-  ctrs.forEach(c => sel.appendChild(new Option(c, c)));
+  reset('sel-country', 'select', false);
+  // valor fica em inglês (é o que a API espera); só o rótulo é traduzido
+  ctrs.map(c => [countryName(c), c]).sort(([a], [b]) => a.localeCompare(b, LOCALE[LANG]))
+      .forEach(([label, c]) => sel.appendChild(new Option(label, c)));
   sel.disabled = false; setStep('step-country', true);
 }
 
 async function onCountryChange() {
   const edition = document.getElementById('sel-edition').value;
   const country = document.getElementById('sel-country').value;
-  reset('sel-league', '— selecione o país —', true);
-  reset('sel-club',   '— selecione a liga —', true);
+  reset('sel-league', 'pick_country', true);
+  reset('sel-club',   'pick_league',  true);
   setStep('step-league', false); setStep('step-club', false);
   lockFooter(); clearOverview(); selectedClub = null;
   if (!country) return;
 
   const leagues = await fetch(`/leagues?edition=${edition}&country=${encodeURIComponent(country)}`).then(r => r.json());
   const sel = document.getElementById('sel-league');
-  sel.innerHTML = '<option value="">Selecione…</option>';
+  reset('sel-league', 'select', false);
   leagues.forEach(l => sel.appendChild(new Option(l, l)));
   sel.disabled = false; setStep('step-league', true);
 }
 
 async function onLeagueChange() {
   const league = document.getElementById('sel-league').value;
-  reset('sel-club', '— selecione a liga —', true);
+  reset('sel-club', 'pick_league', true);
   setStep('step-club', false); lockFooter(); clearOverview(); selectedClub = null;
   if (!league) return;
 
   const clubs = await fetch(`/clubs?league=${encodeURIComponent(league)}`).then(r => r.json());
   const sel = document.getElementById('sel-club');
   if (!clubs.length) {
-    sel.innerHTML = '<option value="">Nenhum clube cadastrado</option>';
-    document.getElementById('hint').textContent = 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.';
+    reset('sel-club', 'no_clubs', true);
+    setHint('hint_unmapped');
     return;
   }
-  sel.innerHTML = '<option value="">Selecione…</option>';
+  reset('sel-club', 'select', false);
   clubs.forEach(c => sel.appendChild(new Option(c.name, JSON.stringify(c))));
   sel.disabled = false; setStep('step-club', true);
-  document.getElementById('hint').textContent = '';
+  setHint(null);
 }
 
 async function onClubChange() {
@@ -334,10 +529,15 @@ async function onClubChange() {
 }
 
 // ── helpers ───────────────────────────────────────────────────────
-function reset(id, placeholder, disabled) {
+function reset(id, key, disabled) {
   const el = document.getElementById(id);
-  el.innerHTML = `<option value="">${placeholder}</option>`;
+  el.innerHTML = `<option value="" data-i18n="${key}">${t(key)}</option>`;
   el.disabled = disabled;
+}
+function setHint(key) {
+  const el = document.getElementById('hint');
+  if (key) { el.dataset.i18n = key; el.textContent = t(key); }
+  else { delete el.dataset.i18n; el.textContent = ''; }
 }
 function setStep(id, active) { document.getElementById(id).classList.toggle('active', active); }
 function onRealismChange() {
@@ -378,7 +578,7 @@ function arrivalRowHtml(t) {
     <td><span class="badge ${posBadge(t.position_norm, false)}">${esc(t.position_norm || '?')}</span></td>
     <td>${fmt(t.fee)}</td>
     <td>${t.age ?? '—'}</td>
-    <td>${esc(t.nationality || '—')}</td>
+    <td>${esc(countryName(t.nationality) || '—')}</td>
     <td class="trunc muted" title="${esc(t.from_club)}">${esc(t.from_club || '—')}</td>
     <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
     <td><a href="${esc(t.player_url)}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
@@ -402,9 +602,9 @@ function posBadge(pos, isFreq) {
   return 'badge-pos';
 }
 function typeLabel(t) {
-  if (t === 'permanent') return '<span class="badge badge-perm">perm</span>';
-  if (t === 'loan')      return '<span class="badge badge-loan">loan</span>';
-  return '<span class="badge badge-free">free</span>';
+  if (t === 'permanent') return `<span class="badge badge-perm">${tr('type_perm')}</span>`;
+  if (t === 'loan')      return `<span class="badge badge-loan">${tr('type_loan')}</span>`;
+  return `<span class="badge badge-free">${tr('type_free')}</span>`;
 }
 function seasonLabel(y) { return `${y}/${String(Number(y)+1).slice(2)}`; }  // 2012 → "2012/13"
 function arrivalDate(t) {
@@ -421,7 +621,7 @@ function togglePosDetail(id, btn) {
   if (!row) return;
   const open = row.style.display !== 'none';
   row.style.display = open ? 'none' : '';
-  btn.textContent = open ? 'ver mais ▾' : 'ver menos ▴';
+  btn.textContent = open ? t('more') : t('less');
 }
 
 // ── ordenação por cabeçalho (table.sortable) ─────────────────────
@@ -471,7 +671,7 @@ function hideModal() {
 }
 function openOverviewModal() {
   const d = window._overviewData;
-  if (d) openModalHtml(`Visão geral — ${d.club} × ${edLabel(d.fifa_edition)}`, renderOverviewFull(d), true);
+  if (d) openModalHtml(t('overview_title', { club: d.club, ed: edLabel(d.fifa_edition) }), renderOverviewFull(d), true);
 }
 function closeModal(e) {
   if (e.target === document.getElementById('modal')) hideModal();  // clique fora da caixa
@@ -485,7 +685,7 @@ async function loadOverview() {
   const edition = parseInt(document.getElementById('sel-edition').value);
   const history = parseInt(document.getElementById('inp-history').value);
   document.getElementById('results').innerHTML = '';
-  setStatus('status-overview', 'loading', '<span class="spinner"></span>Carregando histórico de contratações…');
+  setStatus('status-overview', 'loading', `<span class="spinner"></span>${t('loading_overview')}`);
 
   try {
     const res = await fetch('/overview', {
@@ -498,11 +698,11 @@ async function loadOverview() {
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
     const d = await res.json();
-    window._overviewData = d;
+    window._overviewData = d; d._history = history;
     setStatus('status-overview', '');
     document.getElementById('overview').innerHTML = renderSimplePanel(d, history);
   } catch(e) {
-    setStatus('status-overview', 'error', `Erro: ${e.message}`);
+    setStatus('status-overview', 'error', `${t('error')}: ${esc(e.message)}`);
   }
 }
 
@@ -526,11 +726,17 @@ function distBlock(title, obj, total, barColor, limit = 5) {
   // dados ficam num registro; inline JSON no onclick quebrava com apóstrofo ("Côte d'Ivoire")
   const idx = _dists.push([title, obj, barColor]) - 1;
   const seeAll  = hasMore
-    ? `<span class="see-all" role="button" tabindex="0" onclick="openModal(..._dists[${idx}])">ver todos (${entries.length})</span>`
+    ? `<span class="see-all" role="button" tabindex="0" onclick="openModal(..._dists[${idx}])">${t('see_all', { n: entries.length })}</span>`
     : '';
-  return `<div class="dist-block"><h4>${title}</h4>${distRows(top, barColor)}${seeAll}</div>`;
+  return `<div class="dist-block"><h4>${esc(title)}</h4>${distRows(top, barColor)}${seeAll}</div>`;
 }
 
+// traduz as chaves (nomes de país) de um {país: n}
+function countryKeys(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj || {})) { const n = countryName(k); out[n] = (out[n] || 0) + v; }
+  return out;
+}
 function modeKey(obj) { const k = Object.keys(obj || {}); return k.length ? k[0] : null; }
 
 function renderSimplePanel(d, history) {
@@ -539,17 +745,17 @@ function renderSimplePanel(d, history) {
   const natMode    = modeKey(d.by_nationality);
   const leagueMode = modeKey(d.by_from_league);
   const chips = `<div class="chips">
-    <div class="chip"><div class="label">Contratações / temporada</div><div class="value green">${perSeason}</div></div>
-    <div class="chip"><div class="label">Nacionalidade (moda)</div><div class="value">${esc(natMode || '—')}</div></div>
-    <div class="chip"><div class="label">Liga de origem (moda)</div><div class="value">${esc(leagueMode || '—')}</div></div>
-    <div class="chip"><div class="label">Idade média</div><div class="value">${a.mean ?? '—'}</div></div>
-    <div class="chip"><div class="label">Valor médio pago</div><div class="value blue">${fmt(f.mean)}</div></div>
-    <div class="chip"><div class="label">Valor máximo pago</div><div class="value purple">${fmt(f.max)}</div></div>
+    <div class="chip"><div class="label">${tr('c_per_season')}</div><div class="value green">${perSeason}</div></div>
+    <div class="chip"><div class="label">${tr('c_nat_mode')}</div><div class="value">${esc(countryName(natMode) || '—')}</div></div>
+    <div class="chip"><div class="label">${tr('c_league_mode')}</div><div class="value">${esc(leagueMode || '—')}</div></div>
+    <div class="chip"><div class="label">${tr('c_age_mean')}</div><div class="value">${a.mean ?? '—'}</div></div>
+    <div class="chip"><div class="label">${tr('c_fee_mean')}</div><div class="value blue">${fmt(f.mean)}</div></div>
+    <div class="chip"><div class="label">${tr('c_fee_max')}</div><div class="value purple">${fmt(f.max)}</div></div>
   </div>`;
   return `<div class="card">
     <div class="card-header" style="justify-content:space-between">
-      <span>📊 Visão geral — ${esc(d.club)} × ${edLabel(d.fifa_edition)}</span>
-      <span class="see-all" role="button" tabindex="0" style="margin:0" onclick="openOverviewModal()">ver detalhes ↗</span>
+      <span>📊 ${tr('overview_title', { club: d.club, ed: edLabel(d.fifa_edition) })}</span>
+      <span class="see-all" role="button" tabindex="0" style="margin:0" onclick="openOverviewModal()">${tr('see_details')}</span>
     </div>
     <div class="card-body">${chips}</div>
   </div>`;
@@ -559,25 +765,25 @@ function renderOverviewFull(d) {
   const f = d.fee_stats, a = d.age_stats, total = d.total;
 
   const chips = `<div class="chips">
-    <div class="chip"><div class="label">Total chegadas</div><div class="value">${total}</div></div>
-    <div class="chip"><div class="label">Permanentes</div><div class="value green">${d.n_permanent}</div></div>
-    <div class="chip"><div class="label">Empréstimos</div><div class="value blue">${d.n_loan}</div></div>
-    <div class="chip"><div class="label">Free</div><div class="value yellow">${d.n_free}</div></div>
-    <div class="chip"><div class="label">Valor médio pago (perm.)</div><div class="value">${fmt(f.perm_mean)}</div></div>
-    <div class="chip"><div class="label">Valor máximo pago</div><div class="value">${fmt(f.max)}</div></div>
-    <div class="chip"><div class="label">Total gasto</div><div class="value purple">${fmt(f.total)}</div></div>
-    <div class="chip"><div class="label">Idade média</div><div class="value">${a.mean ?? '—'}</div></div>
-    <div class="chip"><div class="label">Faixa de idade</div><div class="value">${a.min ?? '—'}–${a.max ?? '—'}</div></div>
+    <div class="chip"><div class="label">${tr('c_total')}</div><div class="value">${total}</div></div>
+    <div class="chip"><div class="label">${tr('c_perm')}</div><div class="value green">${d.n_permanent}</div></div>
+    <div class="chip"><div class="label">${tr('c_loan')}</div><div class="value blue">${d.n_loan}</div></div>
+    <div class="chip"><div class="label">${tr('c_free')}</div><div class="value yellow">${d.n_free}</div></div>
+    <div class="chip"><div class="label">${tr('c_fee_perm')}</div><div class="value">${fmt(f.perm_mean)}</div></div>
+    <div class="chip"><div class="label">${tr('c_fee_max')}</div><div class="value">${fmt(f.max)}</div></div>
+    <div class="chip"><div class="label">${tr('c_spent')}</div><div class="value purple">${fmt(f.total)}</div></div>
+    <div class="chip"><div class="label">${tr('c_age_mean')}</div><div class="value">${a.mean ?? '—'}</div></div>
+    <div class="chip"><div class="label">${tr('c_age_range')}</div><div class="value">${a.min ?? '—'}–${a.max ?? '—'}</div></div>
   </div>`;
 
   const bySeasonLabeled = Object.fromEntries(Object.entries(d.by_season).map(([y,n]) => [seasonLabel(y), n]));
 
   const dist = `<div class="dist-grid">
-    ${distBlock('Últimas temporadas', bySeasonLabeled, total, 'var(--blue)', 5)}
-    ${distBlock('Posições mais contratadas', d.by_position, total, 'var(--green)', 5)}
-    ${distBlock('Nacionalidades', d.by_nationality, total, 'var(--purple)', 5)}
-    ${distBlock('Ligas de origem', d.by_from_league, total, 'var(--yellow)', 5)}
-    ${distBlock('Clubes de origem', d.by_from_club, total, 'var(--muted)', 5)}
+    ${distBlock(t('d_seasons'), bySeasonLabeled, total, 'var(--blue)', 5)}
+    ${distBlock(t('d_positions'), d.by_position, total, 'var(--green)', 5)}
+    ${distBlock(t('d_nats'), countryKeys(d.by_nationality), total, 'var(--purple)', 5)}
+    ${distBlock(t('d_leagues'), d.by_from_league, total, 'var(--yellow)', 5)}
+    ${distBlock(t('d_clubs'), d.by_from_club, total, 'var(--muted)', 5)}
   </div>`;
 
   const LINE_MEMBERS = {
@@ -592,7 +798,7 @@ function renderOverviewFull(d) {
     const detailId = `pd-${i}-${Date.now()}`;
     const members = posSet(p.position_norm);
     const pa = d.arrivals.filter(t => members.has(t.position_norm));
-    const byNat    = countBy(pa, t => t.nationality);
+    const byNat    = countBy(pa, t => countryName(t.nationality));
     const byLeague = countBy(pa, t => t.from_league);
     const byClub   = countBy(pa, t => t.from_club);
     const playerRows = pa.map(t => `<tr>
@@ -601,7 +807,7 @@ function renderOverviewFull(d) {
       <td style="font-weight:600">${esc(t.player_name)}</td>
       <td>${fmt(t.fee)}</td>
       <td>${t.age ?? '—'}</td>
-      <td>${esc(t.nationality || '—')}</td>
+      <td>${esc(countryName(t.nationality) || '—')}</td>
       <td class="trunc muted" title="${esc(t.from_club)}">${esc(t.from_club || '—')}</td>
       <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
     </tr>`).join('');
@@ -610,20 +816,20 @@ function renderOverviewFull(d) {
       <td>${p.n}</td><td>${p.n_permanent}</td>
       <td>${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
       <td>${fmt(p.fee_mean)}</td>
-      <td>${p.nationality_mode ? esc(p.nationality_mode) : '<span class="muted">—</span>'}</td>
+      <td>${p.nationality_mode ? esc(countryName(p.nationality_mode)) : '<span class="muted">—</span>'}</td>
       <td class="trunc muted" title="${esc(p.from_league_mode)}">${esc(p.from_league_mode || '—')}</td>
       <td class="trunc muted" title="${esc(p.from_club_mode)}">${esc(p.from_club_mode || '—')}</td>
-      <td><span class="see-all" role="button" tabindex="0" onclick="togglePosDetail('${detailId}',this)">ver mais ▾</span></td>
+      <td><span class="see-all" role="button" tabindex="0" onclick="togglePosDetail('${detailId}',this)">${tr('more')}</span></td>
     </tr>
     <tr id="${detailId}" style="display:none"><td colspan="9" style="padding:0">
       <div style="padding:12px 16px;display:flex;flex-direction:column;gap:14px;background:#13141f;border-top:1px solid var(--border)">
         <div class="dist-grid" style="grid-template-columns:repeat(3,1fr)">
-          ${distBlock('Nacionalidades', byNat, pa.length, 'var(--purple)', 5)}
-          ${distBlock('Ligas de origem', byLeague, pa.length, 'var(--yellow)', 5)}
-          ${distBlock('Clubes de origem', byClub, pa.length, 'var(--blue)', 5)}
+          ${distBlock(t('d_nats'), byNat, pa.length, 'var(--purple)', 5)}
+          ${distBlock(t('d_leagues'), byLeague, pa.length, 'var(--yellow)', 5)}
+          ${distBlock(t('d_clubs'), byClub, pa.length, 'var(--blue)', 5)}
         </div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Temporada</th><th>Tipo</th><th>Jogador</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th></tr></thead>
+          <thead>${thead('th_season', 'th_type', 'th_player', 'th_fee', 'th_age', 'th_nat', 'th_from_club', 'th_from_league')}</thead>
           <tbody>${playerRows}</tbody>
         </table></div>
       </div>
@@ -631,7 +837,7 @@ function renderOverviewFull(d) {
   }).join('');
 
   const profilesTable = `<div class="table-wrap"><table>
-    <thead><tr><th>Posição</th><th>n</th><th>n perm.</th><th>Idade média</th><th>Valor médio pago</th><th>Nac. (moda)</th><th>Liga (moda)</th><th>Clube (moda)</th><th></th></tr></thead>
+    <thead>${thead('th_position', 'n', 'th_nperm', 'th_age_mean', 'th_fee_mean', 'th_nat_mode', 'th_league_mode', 'th_club_mode', '')}</thead>
     <tbody>${profileRows}</tbody>
   </table></div>`;
 
@@ -646,25 +852,25 @@ function renderOverviewFull(d) {
   const hasMore = arrivals.length > PAGE;
 
   const arrivalsTable = `<div class="table-wrap"><table class="sortable">
-    <thead><tr><th>Temporada</th><th>Tipo</th><th>Jogador</th><th>Pos.</th><th>Valor pago</th><th>Idade</th><th>Nac.</th><th>Clube origem</th><th>Liga origem</th><th></th></tr></thead>
+    <thead>${thead('th_season', 'th_type', 'th_player', 'th_pos', 'th_fee', 'th_age', 'th_nat', 'th_from_club', 'th_from_league', '')}</thead>
     <tbody id="${key}">${initialRows}</tbody>
   </table></div>
-  ${hasMore ? `<span class="see-all" role="button" tabindex="0" onclick="loadAllArrivals('${key}', this)">carregar mais (${arrivals.length - PAGE} restantes)</span>` : ''}`;
+  ${hasMore ? `<span class="see-all" role="button" tabindex="0" onclick="loadAllArrivals('${key}', this)">${tr('load_more', { n: arrivals.length - PAGE })}</span>` : ''}`;
 
   return `
     <div class="card">
-      <div class="card-header">📊 Visão geral — ${esc(d.club)} × ${edLabel(d.fifa_edition)}</div>
+      <div class="card-header">📊 ${tr('overview_title', { club: d.club, ed: edLabel(d.fifa_edition) })}</div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:20px">
         ${chips}
         ${dist}
       </div>
     </div>
     <div class="card">
-      <div class="card-header">📐 Perfis por posição</div>
+      <div class="card-header">📐 ${tr('profiles')}</div>
       ${profilesTable}
     </div>
     <div class="card">
-      <div class="card-header">📋 Todas as chegadas (${total})</div>
+      <div class="card-header">📋 ${tr('all_arrivals', { n: total })}</div>
       ${arrivalsTable}
     </div>`;
 }
@@ -684,7 +890,7 @@ async function runScout() {
   btn.disabled = true;
   saveUrl(true);
   document.getElementById('results').innerHTML = '';
-  setStatus('status-scout', 'loading', '<span class="spinner"></span>Gerando candidatos…');
+  setStatus('status-scout', 'loading', `<span class="spinner"></span>${t('loading_scout')}`);
 
   try {
     const res = await fetch('/scout', {
@@ -696,26 +902,29 @@ async function runScout() {
       }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
-    const data = await res.json();
+    _lastScout = await res.json();
     setStatus('status-scout', '');
-    const nav = `<nav class="pos-nav">${data.positions.map(({ profile: p }) =>
-      `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}" href="#pos-${esc(p.position_norm)}">${esc(p.position_norm)} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
-    document.getElementById('results').innerHTML = nav + data.positions.map(renderPosition).join('');
+    renderResults(_lastScout);
   } catch(e) {
-    setStatus('status-scout', 'error', `Erro: ${e.message}`);
+    setStatus('status-scout', 'error', `${t('error')}: ${esc(e.message)}`);
   } finally {
     btn.disabled = false;
   }
 }
 
-const AXIS_LABEL = { value: 'Valor', age: 'Idade', nationality: 'Nacionalidade', league: 'Liga', potential: 'Potencial', overall: 'Nível do elenco' };
+let _lastScout = null;
+function renderResults(data) {
+  const nav = `<nav class="pos-nav">${data.positions.map(({ profile: p }) =>
+    `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}" href="#pos-${esc(p.position_norm)}">${esc(p.position_norm)} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
+  document.getElementById('results').innerHTML = nav + data.positions.map(renderPosition).join('');
+}
 function scoreTip(b) {
   // ex.: "Valor 28/36 · Idade 25/27 · Nacionalidade 0/18"
-  return Object.entries(b || {}).map(([k, [got, max]]) => `${AXIS_LABEL[k] || k} ${got}/${max}`).join(' · ');
+  return Object.entries(b || {}).map(([k, [got, max]]) => `${t('ax_' + k)} ${got}/${max}`).join(' · ');
 }
 function renderPosition({ profile: p, candidates, team_overall }) {
   const lvl = team_overall != null
-    ? `&nbsp;|&nbsp; nível titular <b style="color:var(--green)">${team_overall}</b>` : '';
+    ? `&nbsp;|&nbsp; ${tr('hdr_level')} <b style="color:var(--green)">${team_overall}</b>` : '';
   const rows = candidates.map((c, i) => {
     const pct = Math.round(c.score * 100);
     const ovrCls = c.overall >= 80 ? 'high' : c.overall >= 70 ? 'mid' : 'low';
@@ -724,7 +933,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <td style="font-weight:600;max-width:160px" class="trunc" title="${esc(c.short_name)}">${esc(c.short_name)}</td>
       <td class="trunc muted" title="${esc(c.club_name)}">${esc(c.club_name)}</td>
       <td class="trunc muted" title="${esc(c.league_name)}">${esc(c.league_name)}</td>
-      <td>${esc(c.nationality)}</td><td>${c.age}</td>
+      <td>${esc(countryName(c.nationality))}</td><td>${c.age}</td>
       <td>${fmt(c.value_eur)}</td>
       <td class="ovr ${ovrCls}">${c.overall}</td>
       <td class="ovr ${c.potential >= 85 ? 'high' : c.potential >= 78 ? 'mid' : 'low'}">${c.potential || '—'}</td>
@@ -737,17 +946,18 @@ function renderPosition({ profile: p, candidates, team_overall }) {
     <div class="card-header">
       <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span>
       <span style="font-size:12px;color:var(--muted)">
-        n=${p.n} &nbsp;|&nbsp; idade ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; valor pago ${fmt(p.fee_mean)}
-        &nbsp;|&nbsp; nac. ${esc(p.nationality_mode ?? '—')} &nbsp;|&nbsp; liga ${esc(p.from_league_mode ?? '—')}${lvl}
+        n=${p.n} &nbsp;|&nbsp; ${tr('hdr_age')} ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; ${tr('hdr_fee')} ${fmt(p.fee_mean)}
+        &nbsp;|&nbsp; ${tr('hdr_nat')} ${esc(countryName(p.nationality_mode) ?? '—')} &nbsp;|&nbsp; ${tr('hdr_league')} ${esc(p.from_league_mode ?? '—')}${lvl}
       </span>
     </div>
     <div class="table-wrap"><table class="sortable">
-      <thead><tr><th>#</th><th>Nome</th><th>Clube</th><th>Liga</th><th>Nac.</th><th>Idade</th><th>Valor</th><th>OVR</th><th>POT</th><th>Score</th><th></th></tr></thead>
+      <thead>${thead('#', 'th_name', 'th_club', 'th_league', 'th_nat', 'th_age', 'th_value', 'OVR', 'POT', 'Score', '')}</thead>
       <tbody>${rows}</tbody>
     </table></div>
   </div>`;
 }
 
+applyI18n();
 init();
 </script>
 </body>

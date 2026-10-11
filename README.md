@@ -57,7 +57,7 @@ As chegadas do Transfermarkt são raspadas sob demanda e ficam em cache em `data
 fastapi dev career_scout/api.py
 ```
 
-Abra http://localhost:8000 e escolha edição → país → liga → clube.
+Abra http://localhost:8000 e escolha edição → país → liga → clube. A interface está em português, inglês e espanhol (seletor no canto superior direito).
 
 São 150 clubes das 5 grandes ligas, mapeados entre Transfermarkt e SoFIFA em `data/club_mapping.json`. Para mapear outras ligas, use `seed_clubs.py`.
 
