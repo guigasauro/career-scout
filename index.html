@@ -118,6 +118,12 @@
   .modal-close:hover { color:var(--text); }
   .modal-body { overflow-y:auto; padding:16px; }
 
+  /* Resultados: navegação por posição (sticky) */
+  #results { display:flex; flex-direction:column; gap:20px; }
+  .pos-nav { position:sticky; top:0; z-index:10; display:flex; flex-wrap:wrap; gap:6px; padding:10px 0; background:var(--bg); }
+  .pos-nav a { text-decoration:none; padding:3px 10px; font-size:12px; }
+  #results .card { scroll-margin-top:52px; }
+
   /* "ver todas" link */
   .see-all { display:inline-block; margin-top:8px; font-size:11px; color:var(--blue); cursor:pointer; }
   .see-all:hover { text-decoration:underline; }
@@ -613,7 +619,9 @@ async function runScout() {
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
     const data = await res.json();
     setStatus('status-scout', '');
-    document.getElementById('results').innerHTML = data.positions.map(renderPosition).join('');
+    const nav = `<nav class="pos-nav">${data.positions.map(({ profile: p }) =>
+      `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}" href="#pos-${esc(p.position_norm)}">${esc(p.position_norm)} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
+    document.getElementById('results').innerHTML = nav + data.positions.map(renderPosition).join('');
   } catch(e) {
     setStatus('status-scout', 'error', `Erro: ${e.message}`);
   } finally {
@@ -641,7 +649,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
     </tr>`;
   }).join('');
 
-  return `<div class="card">
+  return `<div class="card" id="pos-${esc(p.position_norm)}">
     <div class="card-header">
       <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span>
       <span style="font-size:12px;color:var(--muted)">
