@@ -78,7 +78,7 @@
   .step.active .step-num { background: var(--pitch); color: var(--pitch-ink); border-color: var(--pitch); }
   .step.active label { color: var(--ink); }
 
-  select, input[type=number] { width: 100%; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 8px 10px; font: 500 15px/1.3 var(--font); }
+  select, input[type=number] { width: 100%; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 8px 10px; font: 500 16px/1.3 var(--font); }  /* 16px: abaixo disso o Safari do iPhone dá zoom no foco */
   select:disabled, input:disabled { opacity: .5; cursor: not-allowed; }
 
   /* Layout: ajustes à esquerda, resultados à direita */
@@ -87,7 +87,8 @@
   .settings h2 { font: 600 18px/1.2 var(--font-cond); }
   .settings label { display: grid; gap: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
   .settings label > span { display: flex; align-items: center; gap: 6px; }
-  .info { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 600 11px/1 var(--font); color: var(--muted); border: 1px solid var(--line-strong); cursor: help; }
+  .info::after { content: ''; position: absolute; inset: -14px; }  /* área de toque ~44px */
+  .info { position: relative; display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 600 11px/1 var(--font); color: var(--muted); border: 1px solid var(--line-strong); cursor: help; }
   .info:hover { color: var(--ink); border-color: var(--muted); }
   .realism-group { display: grid; gap: 16px; padding-left: 12px; border-left: 2px solid var(--pitch-soft); }
   .hint { font-size: 13px; color: var(--muted); }
@@ -150,9 +151,12 @@
   tbody tr:hover td { background: var(--raised); }
   th.num, td.num { text-align: right; }
   .player { font-weight: 600; }
+  .player a { color: inherit; text-decoration: none; }
+  .player a:hover { color: var(--pitch); text-decoration: underline; }
+  .show-sm { display: none !important; }
   .muted { color: var(--muted); }
   .trunc { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
-  td .sub { display: block; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+  td .sub { display: block; font-size: 13px; font-weight: 400; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
   .ext { font-size: 13px; font-weight: 500; text-decoration: none; }
   .ext:hover { text-decoration: underline; }
   table.sortable th { cursor: pointer; user-select: none; }
@@ -197,12 +201,15 @@
   /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgb(8 14 11 / .55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
   .modal-overlay.hidden { display: none; }
-  .modal-box { background: var(--ground); border: 1px solid var(--line); border-radius: 10px; width: min(480px, 100%); max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgb(0 0 0 / .25); }
-  .modal-box.wide { width: min(1100px, 100%); max-height: 90vh; }
+  .modal-box { background: var(--ground); border: 1px solid var(--line); border-radius: 10px; width: min(480px, 100%); max-height: 85vh; max-height: 85dvh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgb(0 0 0 / .25); }
+  .modal-box.wide { width: min(1100px, 100%); max-height: 90vh; max-height: 90dvh; }
   .modal-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; font: 600 20px/1.2 var(--font-cond); background: var(--surface); border-radius: 10px 10px 0 0; }
   .modal-close { background: none; border: 0; color: var(--muted); font-size: 24px; line-height: 1; padding: 2px 8px; }
   .modal-close:hover { color: var(--ink); }
   .modal-body { overflow-y: auto; padding: 18px; display: grid; grid-auto-rows: max-content; gap: 20px; }
+
+  .tip { position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 200; max-width: 520px; margin: 0 auto; padding: 12px 16px; background: var(--ink); color: var(--surface); border-radius: var(--radius); white-space: pre-line; font-size: 15px; box-shadow: 0 10px 30px rgb(0 0 0 / .3); }
+  .tip[hidden] { display: none; }
 
   .see-all { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--pitch); cursor: pointer; }
   .see-all:hover { text-decoration: underline; }
@@ -218,6 +225,14 @@
     .picker { grid-template-columns: 1fr; }
     .dossier { grid-template-columns: 1fr; padding: 20px; }
     .dossier .btn-secondary { justify-self: start; }
+    /* tabela de candidatos compacta: nome+clube, idade, valor, OVR, POT, % */
+    .hide-sm { display: none; }
+    .show-sm { display: block !important; }
+    .pos-section th, .pos-section td { padding: 9px 6px; }
+    .pos-section td.player { max-width: 140px; white-space: normal; }
+    .score-bar { grid-template-columns: 36px; }
+    .score-bar .bar { display: none; }
+    .modal-overlay { padding: 8px; }
   }
 </style>
 </head>
@@ -307,6 +322,8 @@
     </main>
   </div>
 </div>
+
+<div id="tip" class="tip" role="status" hidden></div>
 
 <!-- Modal reutilizável -->
 <div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
@@ -456,11 +473,12 @@ function t(key, vars = {}) {
 function tr(key, vars = {}) {
   return esc(t(key, vars));
 }
-// '>' no início da chave = coluna numérica (alinhada à direita)
+// prefixos na chave: '>' coluna numérica (à direita), '~' some no celular — ex.: '~>#'
 function thead(...keys) {
   return `<tr>${keys.map(k => {
-    const num = k.startsWith('>'), key = num ? k.slice(1) : k;
-    return `<th${num ? ' class="num"' : ''}>${key ? esc(t(key)) : ''}</th>`;
+    const [, flags, key] = k.match(/^([>~]*)(.*)$/);
+    const cls = [flags.includes('>') && 'num', flags.includes('~') && 'hide-sm'].filter(Boolean).join(' ');
+    return `<th${cls ? ` class="${cls}"` : ''}>${key ? esc(t(key)) : ''}</th>`;
   }).join('')}</tr>`;
 }
 // tiers de carta do FUT: bronze < 65, prata 65–74, ouro ≥ 75
@@ -790,6 +808,24 @@ document.addEventListener('click', e => {
   rows.forEach(([, r]) => tbody.appendChild(r));
 });
 
+// Telas de toque não têm hover, então o `title` (ⓘ, detalhe do score, ★) nunca aparece:
+// o toque mostra o texto num balão fixo no rodapé.
+document.addEventListener('click', e => {
+  if (!matchMedia('(hover: none)').matches) return;
+  const tip = document.getElementById('tip');
+  const el = e.target.closest('[title]');
+  if (!el || el.closest('a, button, select, th')) {
+    // o toque num <label> gera um segundo clique no campo; esse não fecha o balão
+    if (!e.target.closest('label')) tip.hidden = true;
+    return;
+  }
+  if (el.matches('.info')) e.preventDefault();  // não abre o select/input do label ao tocar no ⓘ
+  tip.textContent = el.title;
+  tip.hidden = false;
+  clearTimeout(tip._timer);
+  tip._timer = setTimeout(() => tip.hidden = true, 6000);
+});
+
 // Enter/Espaço ativam elementos role=button (os "ver todos"/"ver mais")
 document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[role=button]')) { e.preventDefault(); e.target.click(); }
@@ -1046,6 +1082,10 @@ async function runScout() {
     _lastScout = await res.json();
     setStatus('status-scout', '');
     renderResults(_lastScout);
+    // no celular os resultados ficam bem abaixo do botão: rola até eles
+    const results = document.getElementById('results');
+    if (results.getBoundingClientRect().top > innerHeight * 0.6)
+      results.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   } catch(e) {
     setStatus('status-scout', 'error', `${t('error')}: ${esc(e.message)}`);
   } finally {
@@ -1067,17 +1107,18 @@ function scoreTip(b) {
 function renderPosition({ profile: p, candidates, team_overall }) {
   const rows = candidates.map((c, i) => {
     const pct = Math.round(c.score * 100);
+    const sofifa = c.sofifa_id ? `https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}` : '';
     return `<tr>
-      <td class="num muted">${i + 1}</td>
-      <td class="player trunc" title="${esc(c.short_name)}">${esc(c.short_name)}</td>
-      <td class="trunc" title="${esc(c.club_name)} (${esc(c.league_name)})">${esc(c.club_name)}<span class="sub">${esc(c.league_name)}</span></td>
-      <td>${esc(countryName(c.nationality))}</td>
+      <td class="num muted hide-sm">${i + 1}</td>
+      <td class="player trunc">${sofifa ? `<a href="${sofifa}" target="_blank" rel="noopener">${esc(c.short_name)}</a>` : esc(c.short_name)}<span class="sub show-sm">${esc(c.club_name)}</span></td>
+      <td class="trunc hide-sm" title="${esc(c.club_name)} (${esc(c.league_name)})">${esc(c.club_name)}<span class="sub">${esc(c.league_name)}</span></td>
+      <td class="hide-sm">${esc(countryName(c.nationality))}</td>
       <td class="num">${c.age}</td>
       <td class="num">${fmt(c.value_eur)}</td>
       <td class="num">${tier(c.overall)}</td>
       <td class="num">${tier(c.potential)}</td>
       <td class="num" title="${esc(scoreTip(c.breakdown))}" style="cursor:help"><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
-      <td>${c.sofifa_id ? `<a class="ext" href="https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}" target="_blank" rel="noopener">SoFIFA ↗</a>` : ''}</td>
+      <td class="hide-sm">${sofifa ? `<a class="ext" href="${sofifa}" target="_blank" rel="noopener">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
   }).join('');
   const prof = [
@@ -1095,7 +1136,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <dl class="pos-profile">${prof}</dl>
     </header>
     <div class="table-wrap"><table class="sortable">
-      <thead>${thead('>#', 'th_name', 'th_club', 'th_nat', '>th_age', '>th_value', '>OVR', '>POT', '>Score', '')}</thead>
+      <thead>${thead('~>#', 'th_name', '~th_club', '~th_nat', '>th_age', '>th_value', '>OVR', '>POT', '>Score', '~')}</thead>
       <tbody>${rows}</tbody>
     </table></div>
   </section>`;
