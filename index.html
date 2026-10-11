@@ -4,216 +4,302 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Career Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Tokens: gramado sóbrio + tiers de carta (bronze/prata/ouro) + cores de linha do jogo */
   :root {
-    --bg:      #0f1117;
-    --surface: #1a1d27;
-    --border:  #2a2d3a;
-    --text:    #e2e4ed;
-    --muted:   #6b7080;
-    --green:   #22c55e;
-    --yellow:  #eab308;
-    --blue:    #3b82f6;
-    --red:     #ef4444;
-    --purple:  #a855f7;
+    color-scheme: light;
+    --ground: #F3F6F4;  --surface: #FFFFFF;  --raised: #F8FAF9;
+    --ink: #16211C;     --muted: #56645D;    --faint: #8A9790;
+    --line: #DCE3DF;    --line-strong: #BCC8C1;
+    --pitch: #1E6B47;   --pitch-ink: #FFFFFF; --pitch-soft: #E2EFE8;
+    --focus: #2F6FDB;
+    --danger: #A8261E;  --danger-soft: #FBEAE8;
+    --gk: #8F5E0E;  --def: #2160A6;  --mid: #2A7449;  --att: #B03636;
+    --bronze: #8A4F28; --bronze-bg: #F4E4D7;
+    --silver: #59656E; --silver-bg: #E6EBEE;
+    --gold:   #876A0E; --gold-bg:   #F7EBBF;
+    --font: 'Barlow', system-ui, sans-serif;
+    --font-cond: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+    --radius: 8px;
   }
-  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.5; min-height:100vh; }
-  header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; }
-  header span { color:var(--green); }
-  main { max-width:1200px; margin:0 auto; padding:24px 16px; display:flex; flex-direction:column; gap:20px; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --ground: #0F1613;  --surface: #16201B;  --raised: #1B2721;
+      --ink: #E3EAE6;     --muted: #9AA9A1;    --faint: #6E7D75;
+      --line: #25322B;    --line-strong: #3A4A42;
+      --pitch: #4BAA78;   --pitch-ink: #07130D; --pitch-soft: #1B3327;
+      --focus: #7FA9F6;
+      --danger: #F28B82;  --danger-soft: #3A1E1C;
+      --gk: #E2AD52;  --def: #79A9E4;  --mid: #64C18E;  --att: #EC8A84;
+      --bronze: #DDA27A; --bronze-bg: #3A2A1F;
+      --silver: #C1CBD2; --silver-bg: #2B3238;
+      --gold:   #E8C964; --gold-bg:   #3A3219;
+    }
+  }
 
-  /* Form */
-  .form-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 20px 16px; }
-  .form-steps { display:flex; flex-wrap:wrap; gap:28px; align-items:flex-end; }
-  .step { display:flex; flex-direction:column; gap:4px; position:relative; }
-  .step + .step::before { content:'›'; position:absolute; left:-14px; bottom:9px; color:var(--border); font-size:18px; }
-  .step label { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); display:flex; align-items:center; gap:5px; }
-  .step-num { background:var(--border); color:var(--muted); border-radius:50%; width:16px; height:16px; font-size:10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .step.active .step-num { background:var(--green); color:#000; }
-  .step.active label { color:var(--text); }
-  select, input[type=number] { background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:7px 10px; font-size:14px; min-width:160px; }
-  select:disabled, input:disabled { opacity:.4; cursor:not-allowed; }
-  select:focus, input:focus { outline:2px solid var(--blue); outline-offset:1px; }
-  input[type=number] { min-width:80px; max-width:100px; }
-  .form-footer { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; }
-  .form-footer label { display:flex; flex-direction:column; gap:4px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-  button { background:var(--green); color:#000; border:none; border-radius:6px; padding:8px 22px; font-weight:700; font-size:14px; cursor:pointer; }
-  button:hover:not(:disabled) { filter:brightness(1.1); }
-  button:disabled { opacity:.4; cursor:not-allowed; }
-  .hint { font-size:12px; color:var(--muted); }
-  .info { cursor:help; color:var(--blue); text-transform:none; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--ground); color: var(--ink); font: 400 15px/1.5 var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+  html { scroll-behavior: smooth; }
+  a { color: var(--pitch); }
+  code { font-size: .9em; background: var(--raised); padding: 1px 5px; border-radius: 4px; }
 
-  /* Status */
-  .status-bar { padding:12px 16px; border-radius:6px; display:none; }
-  .status-bar.loading { background:#1e2a1a; border:1px solid var(--green); color:var(--green); }
-  .status-bar.error   { background:#2a1a1a; border:1px solid var(--red);   color:var(--red); }
-  .spinner { display:inline-block; width:12px; height:12px; border:2px solid var(--green); border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:middle; }
-  @keyframes spin { to { transform:rotate(360deg); } }
+  /* Topo */
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 10px; font: 700 22px/1 var(--font-cond); letter-spacing: .01em; color: var(--ink); text-decoration: none; }
+  .brand svg { color: var(--pitch); }
+  .topbar select { margin-left: auto; width: auto; }
 
-  /* Cards genéricos */
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-  .card-header { padding:12px 16px; background:#1f2232; border-bottom:1px solid var(--border); font-weight:600; font-size:13px; display:flex; align-items:center; gap:8px; }
-  .card-body { padding:16px; }
+  .page { max-width: 1280px; margin: 0 auto; padding: 24px; display: grid; gap: 24px; }
 
-  /* Stat chips */
-  .chips { display:flex; flex-wrap:wrap; gap:10px; }
-  .chip { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 14px; }
-  .chip .label { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-  .chip .value { font-size:18px; font-weight:700; }
-  .chip .value.green  { color:var(--green); }
-  .chip .value.yellow { color:var(--yellow); }
-  .chip .value.blue   { color:var(--blue); }
-  .chip .value.purple { color:var(--purple); }
+  /* Seletor em 4 passos (é uma sequência real: cada passo libera o próximo) */
+  .picker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .step { display: grid; gap: 6px; }
+  .step label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .step-num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font: 600 12px/1 var(--font); background: var(--raised); color: var(--faint); border: 1px solid var(--line); }
+  .step.active .step-num { background: var(--pitch); color: var(--pitch-ink); border-color: var(--pitch); }
+  .step.active label { color: var(--ink); }
 
-  /* Dist grid */
-  .dist-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
-  .dist-block h4 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:8px; }
-  .dist-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; font-size:12px; }
-  .dist-row .bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
-  .dist-row .fill { height:100%; background:var(--blue); border-radius:2px; }
-  .dist-row .key { min-width:120px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
-  .dist-row .n   { color:var(--muted); min-width:24px; text-align:right; }
+  select, input[type=number] { width: 100%; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 8px 10px; font: 500 15px/1.3 var(--font); }
+  select:disabled, input:disabled { opacity: .5; cursor: not-allowed; }
 
-  /* Tables */
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; }
-  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:8px 12px; border-bottom:1px solid var(--border); white-space:nowrap; }
-  td { padding:7px 12px; border-bottom:1px solid #1e2030; white-space:nowrap; }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:#1f2232; }
+  /* Layout: ajustes à esquerda, resultados à direita */
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .settings { display: grid; gap: 16px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); position: sticky; top: 16px; }
+  .settings h2 { font: 600 18px/1.2 var(--font-cond); }
+  .settings label { display: grid; gap: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .settings label > span { display: flex; align-items: center; gap: 6px; }
+  .info { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 600 11px/1 var(--font); color: var(--muted); border: 1px solid var(--line-strong); cursor: help; }
+  .info:hover { color: var(--ink); border-color: var(--muted); }
+  .realism-group { display: grid; gap: 16px; padding-left: 12px; border-left: 2px solid var(--pitch-soft); }
+  .hint { font-size: 13px; color: var(--muted); }
 
-  /* Badges */
-  .badge { display:inline-block; padding:1px 7px; border-radius:4px; font-size:11px; font-weight:700; }
-  .badge-pos  { background:var(--green);  color:#000; }
-  .badge-pos-gk  { background:var(--yellow); color:#000; }
-  .badge-pos-def { background:var(--blue);   color:#000; }
-  .badge-pos-mid { background:var(--green);  color:#000; }
-  .badge-pos-att { background:var(--red);    color:#fff; }
-  .badge-freq { background:var(--yellow); color:#000; }
-  .badge-perm { background:#1e3a2a; color:var(--green); border:1px solid #2a5a3a; }
-  .badge-loan { background:#1e2a3a; color:var(--blue);  border:1px solid #2a3a5a; }
-  .badge-free { background:#2a2a1e; color:var(--yellow); border:1px solid #4a4a2a; }
+  button { font: 600 15px/1 var(--font); cursor: pointer; border-radius: 6px; }
+  #btn-scout { background: var(--pitch); color: var(--pitch-ink); border: 0; padding: 12px 16px; }
+  #btn-scout:hover:not(:disabled) { filter: brightness(1.08); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-secondary { background: transparent; color: var(--pitch); border: 1px solid var(--line-strong); padding: 9px 14px; font-size: 14px; }
+  .btn-secondary:hover { border-color: var(--pitch); background: var(--pitch-soft); }
 
-  /* Score bar */
-  .score-bar { display:flex; align-items:center; gap:6px; min-width:80px; }
-  .score-bar .bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
-  .score-bar .fill { height:100%; background:var(--green); border-radius:2px; }
-  .score-bar .val  { font-size:11px; color:var(--muted); min-width:28px; }
+  .content { display: grid; gap: 24px; min-width: 0; }
 
-  .ovr { font-weight:700; }
-  .ovr.high { color:var(--green); }
-  .ovr.mid  { color:var(--yellow); }
-  .ovr.low  { color:var(--muted); }
+  /* Estados */
+  .status-bar { display: none; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+  .status-bar.loading { color: var(--muted); }
+  .status-bar.error { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--pitch); border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; margin-right: 10px; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { padding: 48px 32px; text-align: center; border: 1px dashed var(--line-strong); border-radius: var(--radius); color: var(--muted); }
+  .empty h2 { font: 600 24px/1.2 var(--font-cond); color: var(--ink); margin-bottom: 6px; }
+  .empty p { max-width: 46ch; margin: 0 auto; }
+  #status-overview[style*="block"] ~ .empty, #overview:not(:empty) ~ .empty { display: none; }
 
-  .muted { color:var(--muted); }
-  .trunc { max-width:150px; overflow:hidden; text-overflow:ellipsis; }
+  /* Dossiê do clube — o elemento de destaque da página */
+  .dossier { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 32px; padding: 24px 28px; background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--pitch); border-radius: var(--radius); }
+  .club-name { grid-column: 1 / -1; font: 700 clamp(32px, 4.5vw, 48px)/1 var(--font-cond); letter-spacing: -.005em; }
+  .dossier-sub { grid-column: 1 / -1; color: var(--muted); font-weight: 500; }
+  .dossier-summary { font-size: 17px; max-width: 60ch; margin-top: 10px; }
+  .dossier .btn-secondary { align-self: end; justify-self: end; }
+  .typical { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 32px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .typical dt { font-size: 13px; color: var(--muted); }
+  .typical dd { font: 600 20px/1.2 var(--font-cond); }
+
+  /* Seções genéricas (modal de histórico) */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .card-header { padding: 12px 16px; border-bottom: 1px solid var(--line); font: 600 18px/1.2 var(--font-cond); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .card-body { padding: 16px; }
+  .section-title { font: 600 26px/1.1 var(--font-cond); }
+
+  .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 24px; }
+  .chip .label { font-size: 13px; color: var(--muted); }
+  .chip .value { font: 600 22px/1.2 var(--font-cond); font-variant-numeric: tabular-nums; }
+
+  .dist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+  .dist-block h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .dist-row { display: grid; grid-template-columns: 120px 1fr 28px; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 14px; }
+  .dist-row .key { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dist-row .bar, .score-bar .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .dist-row .fill, .score-bar .fill { height: 100%; border-radius: 3px; }
+  .dist-row .n { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Tabelas */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; background: var(--raised); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: var(--raised); }
+  th.num, td.num { text-align: right; }
+  .player { font-weight: 600; }
+  .muted { color: var(--muted); }
+  .trunc { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+  td .sub { display: block; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+  .ext { font-size: 13px; font-weight: 500; text-decoration: none; }
+  .ext:hover { text-decoration: underline; }
+  table.sortable th { cursor: pointer; user-select: none; }
+  table.sortable th:hover { color: var(--ink); }
+  table.sortable th[data-dir=desc]::after { content: ' ▼'; font-size: 10px; }
+  table.sortable th[data-dir=asc]::after  { content: ' ▲'; font-size: 10px; }
+
+  /* Badges de posição: cor da linha (padrão do jogo) */
+  .badge { display: inline-block; min-width: 38px; text-align: center; padding: 2px 8px; border-radius: 4px; font: 700 14px/1.3 var(--font-cond); letter-spacing: .02em; color: var(--c, var(--muted)); background: color-mix(in srgb, var(--c, var(--muted)) 13%, transparent); border: 1px solid color-mix(in srgb, var(--c, var(--muted)) 35%, transparent); text-decoration: none; }
+  .badge-pos-gk  { --c: var(--gk); }
+  .badge-pos-def { --c: var(--def); }
+  .badge-pos-mid { --c: var(--mid); }
+  .badge-pos-att { --c: var(--att); }
+  .badge-freq::after { content: ' ★'; }
+  .badge-perm, .badge-loan, .badge-free { min-width: 0; font: 500 12px/1.4 var(--font); letter-spacing: 0; }
+  .badge-perm { --c: var(--pitch); }
+  .badge-loan { --c: var(--def); }
+  .badge-free { --c: var(--gold); }
+
+  /* Tiers de carta (FUT): bronze < 65, prata 65–74, ouro ≥ 75 */
+  .tier { display: inline-block; min-width: 34px; text-align: center; padding: 1px 6px; border-radius: 4px; font: 700 16px/1.3 var(--font-cond); }
+  .tier.bronze { color: var(--bronze); background: var(--bronze-bg); }
+  .tier.silver { color: var(--silver); background: var(--silver-bg); }
+  .tier.gold   { color: var(--gold);   background: var(--gold-bg); }
+
+  .score-bar { display: grid; grid-template-columns: 56px 36px; align-items: center; gap: 8px; justify-content: end; }
+  .score-bar .fill { background: var(--pitch); }
+  .score-bar .val { font-size: 14px; text-align: right; }
+
+  /* Resultados por posição */
+  .pos-nav { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0; background: var(--ground); }
+  .pos-section { scroll-margin-top: 56px; }
+  .pos-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .pos-head .badge { font-size: 17px; }
+  .pos-profile { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; }
+  .pos-profile div { display: flex; gap: 6px; }
+  .pos-profile dt { color: var(--muted); }
+  .pos-profile dd { font-weight: 600; }
+  #results { display: grid; gap: 20px; }
+  #overview:empty, #results:empty { display: none; }
 
   /* Modal */
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:100; }
-  .modal-overlay.hidden { display:none; }
-  .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:10px; width:min(480px,90vw); max-height:80vh; display:flex; flex-direction:column; }
-  .modal-box.wide { width:min(1100px,95vw); max-height:88vh; }
-  .modal-head { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-weight:600; }
-  .modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:0 4px; line-height:1; }
-  .modal-close:hover { color:var(--text); }
-  .modal-body { overflow-y:auto; padding:16px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgb(8 14 11 / .55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--ground); border: 1px solid var(--line); border-radius: 10px; width: min(480px, 100%); max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgb(0 0 0 / .25); }
+  .modal-box.wide { width: min(1100px, 100%); max-height: 90vh; }
+  .modal-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; font: 600 20px/1.2 var(--font-cond); background: var(--surface); border-radius: 10px 10px 0 0; }
+  .modal-close { background: none; border: 0; color: var(--muted); font-size: 24px; line-height: 1; padding: 2px 8px; }
+  .modal-close:hover { color: var(--ink); }
+  .modal-body { overflow-y: auto; padding: 18px; display: grid; grid-auto-rows: max-content; gap: 20px; }
 
-  /* Resultados: navegação por posição (sticky) */
-  #results { display:flex; flex-direction:column; gap:20px; }
-  .pos-nav { position:sticky; top:0; z-index:10; display:flex; flex-wrap:wrap; gap:6px; padding:10px 0; background:var(--bg); }
-  .pos-nav a { text-decoration:none; padding:3px 10px; font-size:12px; }
-  #results .card { scroll-margin-top:52px; }
+  .see-all { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--pitch); cursor: pointer; }
+  .see-all:hover { text-decoration: underline; }
 
-  table.sortable th { cursor:pointer; user-select:none; }
-  table.sortable th:hover { color:var(--text); }
-  table.sortable th[data-dir=desc]::after { content:' ▼'; }
-  table.sortable th[data-dir=asc]::after  { content:' ▲'; }
-
-  /* "ver todas" link */
-  .see-all { display:inline-block; margin-top:8px; font-size:11px; color:var(--blue); cursor:pointer; }
-  .see-all:hover { text-decoration:underline; }
+  @media (max-width: 900px) {
+    .picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .layout { grid-template-columns: 1fr; }
+    .settings { position: static; }
+  }
+  @media (max-width: 520px) {
+    .page { padding: 16px; }
+    .topbar { padding: 12px 16px; }
+    .picker { grid-template-columns: 1fr; }
+    .dossier { grid-template-columns: 1fr; padding: 20px; }
+    .dossier .btn-secondary { justify-self: start; }
+  }
 </style>
 </head>
 <body>
-<header><span>⬡</span> Career Scout
-  <select id="sel-lang" onchange="setLang(this.value)" aria-label="Idioma / Language" style="margin-left:auto;min-width:0;font-weight:400">
-    <option value="pt">🇧🇷 Português</option>
-    <option value="en">🇬🇧 English</option>
-    <option value="es">🇪🇸 Español</option>
+<header class="topbar">
+  <a class="brand" href="/">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" rx="3" stroke="currentColor" stroke-width="2"/><line x1="13" y1="2" x2="13" y2="24" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="13" r="4.5" stroke="currentColor" stroke-width="2"/></svg>
+    Career Scout
+  </a>
+  <select id="sel-lang" onchange="setLang(this.value)" aria-label="Idioma / Language / Idioma">
+    <option value="pt">Português</option>
+    <option value="en">English</option>
+    <option value="es">Español</option>
   </select>
 </header>
-<main>
 
-  <!-- Formulário -->
-  <div class="form-card">
-    <div class="form-steps">
-      <div class="step active" id="step-edition">
-        <label><span class="step-num">1</span><span data-i18n="step_edition"></span></label>
-        <select id="sel-edition" onchange="onEditionChange()"><option value="" data-i18n="loading"></option></select>
-      </div>
-      <div class="step" id="step-country">
-        <label><span class="step-num">2</span><span data-i18n="step_country"></span></label>
-        <select id="sel-country" disabled onchange="onCountryChange()"><option value="" data-i18n="pick_edition"></option></select>
-      </div>
-      <div class="step" id="step-league">
-        <label><span class="step-num">3</span><span data-i18n="step_league"></span></label>
-        <select id="sel-league" disabled onchange="onLeagueChange()"><option value="" data-i18n="pick_country"></option></select>
-      </div>
-      <div class="step" id="step-club">
-        <label><span class="step-num">4</span><span data-i18n="step_club"></span></label>
-        <select id="sel-club" disabled onchange="onClubChange()"><option value="" data-i18n="pick_league"></option></select>
-      </div>
+<div class="page">
+  <!-- Escolha do clube: 4 passos em sequência -->
+  <section class="picker" aria-label="Clube">
+    <div class="step active" id="step-edition">
+      <label for="sel-edition"><span class="step-num">1</span><span data-i18n="step_edition"></span></label>
+      <select id="sel-edition" onchange="onEditionChange()"><option value="" data-i18n="loading"></option></select>
     </div>
-    <div class="form-footer">
-      <label><span><span data-i18n="hist"></span> <span class="info" data-i18n-title="hist_tip">ⓘ</span></span><input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
-      <label><span><span data-i18n="topn"></span> <span class="info" data-i18n-title="topn_tip">ⓘ</span></span><input type="number" id="inp-topn" value="10" min="5" max="50" disabled></label>
-      <label><span><span data-i18n="pot"></span> <span class="info" data-i18n-title="pot_tip">ⓘ</span></span><select id="sel-potential" disabled>
+    <div class="step" id="step-country">
+      <label for="sel-country"><span class="step-num">2</span><span data-i18n="step_country"></span></label>
+      <select id="sel-country" disabled onchange="onCountryChange()"><option value="" data-i18n="pick_edition"></option></select>
+    </div>
+    <div class="step" id="step-league">
+      <label for="sel-league"><span class="step-num">3</span><span data-i18n="step_league"></span></label>
+      <select id="sel-league" disabled onchange="onLeagueChange()"><option value="" data-i18n="pick_country"></option></select>
+    </div>
+    <div class="step" id="step-club">
+      <label for="sel-club"><span class="step-num">4</span><span data-i18n="step_club"></span></label>
+      <select id="sel-club" disabled onchange="onClubChange()"><option value="" data-i18n="pick_league"></option></select>
+    </div>
+  </section>
+
+  <div class="layout">
+    <!-- Ajustes da busca -->
+    <aside class="settings">
+      <h2 data-i18n="settings"></h2>
+      <label><span><span data-i18n="hist"></span><span class="info" tabindex="0" role="img" data-i18n-title="hist_tip" data-i18n-aria="hist_tip">i</span></span><input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
+      <label><span><span data-i18n="topn"></span><span class="info" tabindex="0" role="img" data-i18n-title="topn_tip" data-i18n-aria="topn_tip">i</span></span><input type="number" id="inp-topn" value="10" min="5" max="50" disabled></label>
+      <label><span><span data-i18n="pot"></span><span class="info" tabindex="0" role="img" data-i18n-title="pot_tip" data-i18n-aria="pot_tip">i</span></span><select id="sel-potential" disabled>
         <option value="0" data-i18n="off"></option>
         <option value="0.15" data-i18n="low"></option>
         <option value="0.3" data-i18n="mid"></option>
         <option value="0.5" data-i18n="high"></option>
       </select></label>
-      <label><span><span data-i18n="realism"></span> <span class="info" data-i18n-title="realism_tip">ⓘ</span></span><select id="sel-realism" disabled onchange="onRealismChange()">
+      <label><span><span data-i18n="realism"></span><span class="info" tabindex="0" role="img" data-i18n-title="realism_tip" data-i18n-aria="realism_tip">i</span></span><select id="sel-realism" disabled onchange="onRealismChange()">
         <option value="0" data-i18n="off"></option>
         <option value="1" data-i18n="on"></option>
       </select></label>
-      <label class="realism-only" style="display:none"><span><span data-i18n="level"></span> <span class="info" data-i18n-title="level_tip">ⓘ</span></span><select id="sel-level">
-        <option value="0" data-i18n="lvl_same"></option>
-        <option value="3" data-i18n="lvl_up"></option>
-        <option value="-3" data-i18n="lvl_cheap"></option>
-      </select></label>
-      <label class="realism-only" style="display:none"><span><span data-i18n="sort"></span> <span class="info" data-i18n-title="sort_tip">ⓘ</span></span><select id="sel-sort">
-        <option value="score" data-i18n="sort_score"></option>
-        <option value="overall" data-i18n="sort_ovr"></option>
-      </select></label>
-      <label class="realism-only" style="display:none"><span><span data-i18n="rol"></span> <span class="info" data-i18n-title="rol_tip">ⓘ</span></span><select id="sel-rol">
-        <option value="0.6" data-i18n="rol_strict"></option>
-        <option value="0.45" selected data-i18n="rol_mid"></option>
-        <option value="0.3" data-i18n="rol_wide"></option>
-      </select></label>
-      <button id="btn-scout" disabled onclick="runScout()" data-i18n="btn_scout"></button>
-      <span class="hint" id="hint"></span>
-    </div>
-  </div>
-
-  <!-- Modal reutilizável -->
-  <div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
-    <div class="modal-box" id="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-head">
-        <span id="modal-title"></span>
-        <button class="modal-close" id="modal-close" data-i18n-aria="close" onclick="hideModal()">×</button>
+      <div class="realism-group realism-only" style="display:none">
+        <label><span><span data-i18n="level"></span><span class="info" tabindex="0" role="img" data-i18n-title="level_tip" data-i18n-aria="level_tip">i</span></span><select id="sel-level">
+          <option value="0" data-i18n="lvl_same"></option>
+          <option value="3" data-i18n="lvl_up"></option>
+          <option value="-3" data-i18n="lvl_cheap"></option>
+        </select></label>
+        <label><span><span data-i18n="sort"></span><span class="info" tabindex="0" role="img" data-i18n-title="sort_tip" data-i18n-aria="sort_tip">i</span></span><select id="sel-sort">
+          <option value="score" data-i18n="sort_score"></option>
+          <option value="overall" data-i18n="sort_ovr"></option>
+        </select></label>
+        <label><span><span data-i18n="rol"></span><span class="info" tabindex="0" role="img" data-i18n-title="rol_tip" data-i18n-aria="rol_tip">i</span></span><select id="sel-rol">
+          <option value="0.6" data-i18n="rol_strict"></option>
+          <option value="0.45" selected data-i18n="rol_mid"></option>
+          <option value="0.3" data-i18n="rol_wide"></option>
+        </select></label>
       </div>
-      <div class="modal-body" id="modal-body"></div>
-    </div>
+      <button id="btn-scout" disabled onclick="runScout()" data-i18n="btn_scout"></button>
+      <p class="hint" id="hint"></p>
+    </aside>
+
+    <main class="content">
+      <div id="status-overview" class="status-bar" role="status"></div>
+      <div id="overview"></div>
+      <div class="empty">
+        <h2 data-i18n="empty_title"></h2>
+        <p data-i18n="empty_body"></p>
+      </div>
+      <div id="status-scout" class="status-bar" role="status"></div>
+      <div id="results"></div>
+    </main>
   </div>
+</div>
 
-  <div id="status-overview" class="status-bar"></div>
-  <div id="overview"></div>
-  <div id="status-scout"   class="status-bar"></div>
-  <div id="results"></div>
-
-</main>
+<!-- Modal reutilizável -->
+<div id="modal" class="modal-overlay hidden" onclick="closeModal(event)">
+  <div class="modal-box" id="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <span id="modal-title"></span>
+      <button class="modal-close" id="modal-close" data-i18n-aria="close" onclick="hideModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
 <script>
 let selectedClub = null;
 
@@ -224,7 +310,10 @@ const I18N = {
     no_data_msg: 'Nenhum dado de jogadores em <code>data/raw/</code>. Veja como baixar em {link}.',
     step_edition: 'Edição FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Clube',
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
-    no_clubs: 'Nenhum clube cadastrado',
+    no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
+    empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
+    dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de contratação',
+    summary: '{n} contratações em {h} temporadas ({per} por temporada). Valor médio pago: {fee}; o mais alto: {max}.',
     hint_unmapped: 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.',
     hist: 'Histórico (temporadas)', hist_tip: 'Quantas temporadas antes da edição entram no perfil de contratações do clube.',
     topn: 'Jogadores por posição', topn_tip: 'Máximo de candidatos listados em cada posição.',
@@ -239,10 +328,10 @@ const I18N = {
     rol_strict: 'Estrito', rol_mid: 'Médio', rol_wide: 'Amplo',
     btn_scout: 'Gerar candidatos', close: 'Fechar', error: 'Erro',
     loading_overview: 'Carregando histórico de contratações…', loading_scout: 'Gerando candidatos…',
-    see_all: 'ver todos ({n})', see_details: 'ver detalhes ↗', more: 'ver mais ▾', less: 'ver menos ▴',
+    see_all: 'ver todos ({n})', see_details: 'Ver histórico completo', more: 'ver mais ▾', less: 'ver menos ▴',
     load_more: 'carregar mais ({n} restantes)',
     overview_title: 'Visão geral — {club} × {ed}', profiles: 'Perfis por posição', all_arrivals: 'Todas as chegadas ({n})',
-    c_per_season: 'Contratações / temporada', c_nat_mode: 'Nacionalidade (moda)', c_league_mode: 'Liga de origem (moda)',
+    c_per_season: 'Contratações / temporada', c_nat_mode: 'Nacionalidade mais comum', c_league_mode: 'Liga de origem mais comum',
     c_age_mean: 'Idade média', c_fee_mean: 'Valor médio pago', c_fee_max: 'Valor máximo pago',
     c_total: 'Total chegadas', c_perm: 'Permanentes', c_loan: 'Empréstimos', c_free: 'Livres',
     c_fee_perm: 'Valor médio pago (perm.)', c_spent: 'Total gasto', c_age_range: 'Faixa de idade',
@@ -250,10 +339,10 @@ const I18N = {
     d_leagues: 'Ligas de origem', d_clubs: 'Clubes de origem',
     th_season: 'Temporada', th_type: 'Tipo', th_player: 'Jogador', th_pos: 'Pos.', th_fee: 'Valor pago', th_age: 'Idade',
     th_nat: 'Nac.', th_from_club: 'Clube origem', th_from_league: 'Liga origem', th_position: 'Posição',
-    th_nperm: 'n perm.', th_age_mean: 'Idade média', th_fee_mean: 'Valor médio pago', th_nat_mode: 'Nac. (moda)',
-    th_league_mode: 'Liga (moda)', th_club_mode: 'Clube (moda)', th_name: 'Nome', th_club: 'Clube', th_league: 'Liga', th_value: 'Valor',
+    th_nperm: 'n perm.', th_age_mean: 'Idade média', th_fee_mean: 'Valor médio pago', th_nat_mode: 'Nac. típica',
+    th_league_mode: 'Liga típica', th_club_mode: 'Clube típico', th_name: 'Nome', th_club: 'Clube', th_league: 'Liga', th_value: 'Valor',
     type_perm: 'compra', type_loan: 'emprést.', type_free: 'livre',
-    hdr_age: 'idade', hdr_fee: 'valor pago', hdr_nat: 'nac.', hdr_league: 'liga', hdr_level: 'nível titular',
+    hdr_level: 'Nível titular',
     ax_value: 'Valor', ax_age: 'Idade', ax_nationality: 'Nacionalidade', ax_league: 'Liga', ax_potential: 'Potencial', ax_overall: 'Nível do elenco',
   },
   en: {
@@ -261,7 +350,10 @@ const I18N = {
     no_data_msg: 'No player data in <code>data/raw/</code>. See how to download it in {link}.',
     step_edition: 'FIFA edition', step_country: 'Country', step_league: 'League', step_club: 'Club',
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
-    no_clubs: 'No clubs mapped',
+    no_clubs: 'No clubs mapped', settings: 'Search settings', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
+    empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
+    dossier_sub: '{ed}, last {h} seasons', typical: 'Typical signing',
+    summary: '{n} signings over {h} seasons ({per} per season). Average fee paid: {fee}; highest: {max}.',
     hint_unmapped: 'Map the club in data/club_mapping.json (seed_clubs.py) or in _OVERRIDES in api.py.',
     hist: 'History (seasons)', hist_tip: "How many seasons before the edition go into the club's signing profile.",
     topn: 'Players per position', topn_tip: 'Maximum number of candidates listed per position.',
@@ -276,10 +368,10 @@ const I18N = {
     rol_strict: 'Strict', rol_mid: 'Medium', rol_wide: 'Broad',
     btn_scout: 'Find candidates', close: 'Close', error: 'Error',
     loading_overview: 'Loading transfer history…', loading_scout: 'Finding candidates…',
-    see_all: 'see all ({n})', see_details: 'see details ↗', more: 'show more ▾', less: 'show less ▴',
+    see_all: 'see all ({n})', see_details: 'See full history', more: 'show more ▾', less: 'show less ▴',
     load_more: 'load more ({n} left)',
     overview_title: 'Overview — {club} × {ed}', profiles: 'Profiles by position', all_arrivals: 'All arrivals ({n})',
-    c_per_season: 'Signings / season', c_nat_mode: 'Nationality (mode)', c_league_mode: 'Source league (mode)',
+    c_per_season: 'Signings / season', c_nat_mode: 'Most common nationality', c_league_mode: 'Most common source league',
     c_age_mean: 'Average age', c_fee_mean: 'Average fee paid', c_fee_max: 'Highest fee paid',
     c_total: 'Total arrivals', c_perm: 'Permanent', c_loan: 'Loans', c_free: 'Free',
     c_fee_perm: 'Average fee (perm.)', c_spent: 'Total spent', c_age_range: 'Age range',
@@ -287,10 +379,10 @@ const I18N = {
     d_leagues: 'Source leagues', d_clubs: 'Source clubs',
     th_season: 'Season', th_type: 'Type', th_player: 'Player', th_pos: 'Pos.', th_fee: 'Fee paid', th_age: 'Age',
     th_nat: 'Nat.', th_from_club: 'From club', th_from_league: 'From league', th_position: 'Position',
-    th_nperm: 'n perm.', th_age_mean: 'Avg. age', th_fee_mean: 'Avg. fee paid', th_nat_mode: 'Nat. (mode)',
-    th_league_mode: 'League (mode)', th_club_mode: 'Club (mode)', th_name: 'Name', th_club: 'Club', th_league: 'League', th_value: 'Value',
+    th_nperm: 'n perm.', th_age_mean: 'Avg. age', th_fee_mean: 'Avg. fee paid', th_nat_mode: 'Typical nat.',
+    th_league_mode: 'Typical league', th_club_mode: 'Typical club', th_name: 'Name', th_club: 'Club', th_league: 'League', th_value: 'Value',
     type_perm: 'perm', type_loan: 'loan', type_free: 'free',
-    hdr_age: 'age', hdr_fee: 'fee paid', hdr_nat: 'nat.', hdr_league: 'league', hdr_level: "starters' level",
+    hdr_level: "Starters' level",
     ax_value: 'Value', ax_age: 'Age', ax_nationality: 'Nationality', ax_league: 'League', ax_potential: 'Potential', ax_overall: 'Squad level',
   },
   es: {
@@ -298,7 +390,10 @@ const I18N = {
     no_data_msg: 'No hay datos de jugadores en <code>data/raw/</code>. Mira cómo descargarlos en {link}.',
     step_edition: 'Edición FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Club',
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
-    no_clubs: 'Ningún club registrado',
+    no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
+    empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
+    dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de fichaje',
+    summary: '{n} fichajes en {h} temporadas ({per} por temporada). Valor medio pagado: {fee}; el más alto: {max}.',
     hint_unmapped: 'Mapea el club en data/club_mapping.json (seed_clubs.py) o en _OVERRIDES en api.py.',
     hist: 'Historial (temporadas)', hist_tip: 'Cuántas temporadas antes de la edición entran en el perfil de fichajes del club.',
     topn: 'Jugadores por posición', topn_tip: 'Máximo de candidatos listados por posición.',
@@ -313,10 +408,10 @@ const I18N = {
     rol_strict: 'Estricto', rol_mid: 'Medio', rol_wide: 'Amplio',
     btn_scout: 'Buscar candidatos', close: 'Cerrar', error: 'Error',
     loading_overview: 'Cargando historial de fichajes…', loading_scout: 'Buscando candidatos…',
-    see_all: 'ver todos ({n})', see_details: 'ver detalles ↗', more: 'ver más ▾', less: 'ver menos ▴',
+    see_all: 'ver todos ({n})', see_details: 'Ver historial completo', more: 'ver más ▾', less: 'ver menos ▴',
     load_more: 'cargar más ({n} restantes)',
     overview_title: 'Resumen — {club} × {ed}', profiles: 'Perfiles por posición', all_arrivals: 'Todas las llegadas ({n})',
-    c_per_season: 'Fichajes / temporada', c_nat_mode: 'Nacionalidad (moda)', c_league_mode: 'Liga de origen (moda)',
+    c_per_season: 'Fichajes / temporada', c_nat_mode: 'Nacionalidad más común', c_league_mode: 'Liga de origen más común',
     c_age_mean: 'Edad media', c_fee_mean: 'Valor medio pagado', c_fee_max: 'Valor máximo pagado',
     c_total: 'Total de llegadas', c_perm: 'Definitivos', c_loan: 'Cesiones', c_free: 'Libres',
     c_fee_perm: 'Valor medio pagado (def.)', c_spent: 'Total gastado', c_age_range: 'Rango de edad',
@@ -324,10 +419,10 @@ const I18N = {
     d_leagues: 'Ligas de origen', d_clubs: 'Clubes de origen',
     th_season: 'Temporada', th_type: 'Tipo', th_player: 'Jugador', th_pos: 'Pos.', th_fee: 'Valor pagado', th_age: 'Edad',
     th_nat: 'Nac.', th_from_club: 'Club de origen', th_from_league: 'Liga de origen', th_position: 'Posición',
-    th_nperm: 'n def.', th_age_mean: 'Edad media', th_fee_mean: 'Valor medio pagado', th_nat_mode: 'Nac. (moda)',
-    th_league_mode: 'Liga (moda)', th_club_mode: 'Club (moda)', th_name: 'Nombre', th_club: 'Club', th_league: 'Liga', th_value: 'Valor',
+    th_nperm: 'n def.', th_age_mean: 'Edad media', th_fee_mean: 'Valor medio pagado', th_nat_mode: 'Nac. típica',
+    th_league_mode: 'Liga típica', th_club_mode: 'Club típico', th_name: 'Nombre', th_club: 'Club', th_league: 'Liga', th_value: 'Valor',
     type_perm: 'compra', type_loan: 'cesión', type_free: 'libre',
-    hdr_age: 'edad', hdr_fee: 'valor pagado', hdr_nat: 'nac.', hdr_league: 'liga', hdr_level: 'nivel titular',
+    hdr_level: 'Nivel titular',
     ax_value: 'Valor', ax_age: 'Edad', ax_nationality: 'Nacionalidad', ax_league: 'Liga', ax_potential: 'Potencial', ax_overall: 'Nivel de plantilla',
   },
 };
@@ -343,8 +438,17 @@ function t(key, vars = {}) {
 function tr(key, vars = {}) {
   return esc(t(key, vars));
 }
+// '>' no início da chave = coluna numérica (alinhada à direita)
 function thead(...keys) {
-  return `<tr>${keys.map(k => `<th>${k ? esc(t(k)) : ''}</th>`).join('')}</tr>`;
+  return `<tr>${keys.map(k => {
+    const num = k.startsWith('>'), key = num ? k.slice(1) : k;
+    return `<th${num ? ' class="num"' : ''}>${key ? esc(t(key)) : ''}</th>`;
+  }).join('')}</tr>`;
+}
+// tiers de carta do FUT: bronze < 65, prata 65–74, ouro ≥ 75
+function tier(v) {
+  if (!v) return '<span class="muted">—</span>';
+  return `<span class="tier ${v >= 75 ? 'gold' : v >= 65 ? 'silver' : 'bronze'}">${v}</span>`;
 }
 
 // Países: nomes vêm em inglês (SoFIFA/TM). Tradução nativa via Intl.DisplayNames,
@@ -459,7 +563,7 @@ async function restoreFromUrl() {
   if (q.get('run')) runScout();
 }
 // qualquer mudança no formulário regrava a URL (e derruba o run=1)
-document.querySelector('.form-card').addEventListener('change', () => saveUrl());
+document.querySelectorAll('.picker, .settings').forEach(el => el.addEventListener('change', () => saveUrl()));
 
 // ── cascata de selects ────────────────────────────────────────────
 async function onEditionChange() {
@@ -574,14 +678,14 @@ function arrivalRowHtml(t) {
   return `<tr>
     <td class="muted">${arrivalDate(t)}</td>
     <td>${typeLabel(t.transfer_type)}</td>
-    <td style="font-weight:600">${esc(t.player_name)}</td>
+    <td class="player">${esc(t.player_name)}</td>
     <td><span class="badge ${posBadge(t.position_norm, false)}">${esc(t.position_norm || '?')}</span></td>
-    <td>${fmt(t.fee)}</td>
-    <td>${t.age ?? '—'}</td>
+    <td class="num">${fmt(t.fee)}</td>
+    <td class="num">${t.age ?? '—'}</td>
     <td>${esc(countryName(t.nationality) || '—')}</td>
     <td class="trunc muted" title="${esc(t.from_club)}">${esc(t.from_club || '—')}</td>
     <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
-    <td><a href="${esc(t.player_url)}" target="_blank" style="color:var(--blue);font-size:11px">TM ↗</a></td>
+    <td><a class="ext" href="${esc(t.player_url)}" target="_blank" rel="noopener">TM ↗</a></td>
   </tr>`;
 }
 function loadAllArrivals(key, btn) {
@@ -591,15 +695,13 @@ function loadAllArrivals(key, btn) {
   btn.remove();
 }
 function posBadge(pos, isFreq) {
-  if (isFreq) return 'badge-freq';
+  // cor da linha sempre; ★ marca a posição mais contratada
   const p = pos || '';
-  if (p === 'GK') return 'badge-pos-gk';
-  if (['CB','LB','RB','LWB','RWB'].includes(p)) return 'badge-pos-def';
-  if (['CDM','CM','CAM','LM','RM'].includes(p)) return 'badge-pos-mid';
-  if (['LW','RW','CF','ST','ATT'].includes(p)) return 'badge-pos-att';
-  if (['DEF'].includes(p)) return 'badge-pos-def';
-  if (['MID'].includes(p)) return 'badge-pos-mid';
-  return 'badge-pos';
+  const line = p === 'GK' ? 'gk'
+    : ['CB','LB','RB','LWB','RWB','DEF'].includes(p) ? 'def'
+    : ['CDM','CM','CAM','LM','RM','MID'].includes(p) ? 'mid'
+    : ['LW','RW','CF','ST','ATT'].includes(p) ? 'att' : '';
+  return (line ? `badge-pos-${line}` : '') + (isFreq ? ' badge-freq' : '');
 }
 function typeLabel(t) {
   if (t === 'permanent') return `<span class="badge badge-perm">${tr('type_perm')}</span>`;
@@ -706,7 +808,7 @@ async function loadOverview() {
   }
 }
 
-function distRows(obj, barColor = 'var(--blue)') {
+function distRows(obj, barColor = 'var(--pitch)') {
   const max = Math.max(...Object.values(obj));
   return Object.entries(obj).map(([k, v]) => {
     const w = Math.round(v / max * 100);
@@ -741,24 +843,19 @@ function modeKey(obj) { const k = Object.keys(obj || {}); return k.length ? k[0]
 
 function renderSimplePanel(d, history) {
   const f = d.fee_stats, a = d.age_stats;
-  const perSeason = history ? (d.total / history).toFixed(1) : '—';
-  const natMode    = modeKey(d.by_nationality);
-  const leagueMode = modeKey(d.by_from_league);
-  const chips = `<div class="chips">
-    <div class="chip"><div class="label">${tr('c_per_season')}</div><div class="value green">${perSeason}</div></div>
-    <div class="chip"><div class="label">${tr('c_nat_mode')}</div><div class="value">${esc(countryName(natMode) || '—')}</div></div>
-    <div class="chip"><div class="label">${tr('c_league_mode')}</div><div class="value">${esc(leagueMode || '—')}</div></div>
-    <div class="chip"><div class="label">${tr('c_age_mean')}</div><div class="value">${a.mean ?? '—'}</div></div>
-    <div class="chip"><div class="label">${tr('c_fee_mean')}</div><div class="value blue">${fmt(f.mean)}</div></div>
-    <div class="chip"><div class="label">${tr('c_fee_max')}</div><div class="value purple">${fmt(f.max)}</div></div>
-  </div>`;
-  return `<div class="card">
-    <div class="card-header" style="justify-content:space-between">
-      <span>📊 ${tr('overview_title', { club: d.club, ed: edLabel(d.fifa_edition) })}</span>
-      <span class="see-all" role="button" tabindex="0" style="margin:0" onclick="openOverviewModal()">${tr('see_details')}</span>
-    </div>
-    <div class="card-body">${chips}</div>
-  </div>`;
+  const per = history ? (d.total / history).toFixed(1) : '—';
+  const natMode = modeKey(d.by_nationality), leagueMode = modeKey(d.by_from_league);
+  return `<section class="dossier">
+    <h1 class="club-name">${esc(d.club)}</h1>
+    <p class="dossier-sub">${tr('dossier_sub', { ed: edLabel(d.fifa_edition), h: history })}</p>
+    <p class="dossier-summary">${tr('summary', { n: d.total, h: history, per, fee: fmt(f.mean), max: fmt(f.max) })}</p>
+    <button class="btn-secondary" onclick="openOverviewModal()">${tr('see_details')}</button>
+    <dl class="typical" aria-label="${tr('typical')}">
+      <div><dt>${tr('c_age_mean')}</dt><dd>${a.mean ?? '—'}</dd></div>
+      <div><dt>${tr('c_nat_mode')}</dt><dd>${esc(countryName(natMode) || '—')}</dd></div>
+      <div><dt>${tr('c_league_mode')}</dt><dd>${esc(leagueMode || '—')}</dd></div>
+    </dl>
+  </section>`;
 }
 
 function renderOverviewFull(d) {
@@ -779,11 +876,11 @@ function renderOverviewFull(d) {
   const bySeasonLabeled = Object.fromEntries(Object.entries(d.by_season).map(([y,n]) => [seasonLabel(y), n]));
 
   const dist = `<div class="dist-grid">
-    ${distBlock(t('d_seasons'), bySeasonLabeled, total, 'var(--blue)', 5)}
-    ${distBlock(t('d_positions'), d.by_position, total, 'var(--green)', 5)}
-    ${distBlock(t('d_nats'), countryKeys(d.by_nationality), total, 'var(--purple)', 5)}
-    ${distBlock(t('d_leagues'), d.by_from_league, total, 'var(--yellow)', 5)}
-    ${distBlock(t('d_clubs'), d.by_from_club, total, 'var(--muted)', 5)}
+    ${distBlock(t('d_seasons'), bySeasonLabeled, total, 'var(--pitch)', 5)}
+    ${distBlock(t('d_positions'), d.by_position, total, 'var(--pitch)', 5)}
+    ${distBlock(t('d_nats'), countryKeys(d.by_nationality), total, 'var(--pitch)', 5)}
+    ${distBlock(t('d_leagues'), d.by_from_league, total, 'var(--pitch)', 5)}
+    ${distBlock(t('d_clubs'), d.by_from_club, total, 'var(--pitch)', 5)}
   </div>`;
 
   const LINE_MEMBERS = {
@@ -804,32 +901,32 @@ function renderOverviewFull(d) {
     const playerRows = pa.map(t => `<tr>
       <td class="muted">${arrivalDate(t)}</td>
       <td>${typeLabel(t.transfer_type)}</td>
-      <td style="font-weight:600">${esc(t.player_name)}</td>
-      <td>${fmt(t.fee)}</td>
-      <td>${t.age ?? '—'}</td>
+      <td class="player">${esc(t.player_name)}</td>
+      <td class="num">${fmt(t.fee)}</td>
+      <td class="num">${t.age ?? '—'}</td>
       <td>${esc(countryName(t.nationality) || '—')}</td>
       <td class="trunc muted" title="${esc(t.from_club)}">${esc(t.from_club || '—')}</td>
       <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
     </tr>`).join('');
     return `<tr>
       <td><span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span></td>
-      <td>${p.n}</td><td>${p.n_permanent}</td>
-      <td>${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
-      <td>${fmt(p.fee_mean)}</td>
+      <td class="num">${p.n}</td><td class="num">${p.n_permanent}</td>
+      <td class="num">${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
+      <td class="num">${fmt(p.fee_mean)}</td>
       <td>${p.nationality_mode ? esc(countryName(p.nationality_mode)) : '<span class="muted">—</span>'}</td>
       <td class="trunc muted" title="${esc(p.from_league_mode)}">${esc(p.from_league_mode || '—')}</td>
       <td class="trunc muted" title="${esc(p.from_club_mode)}">${esc(p.from_club_mode || '—')}</td>
       <td><span class="see-all" role="button" tabindex="0" onclick="togglePosDetail('${detailId}',this)">${tr('more')}</span></td>
     </tr>
     <tr id="${detailId}" style="display:none"><td colspan="9" style="padding:0">
-      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:14px;background:#13141f;border-top:1px solid var(--border)">
-        <div class="dist-grid" style="grid-template-columns:repeat(3,1fr)">
-          ${distBlock(t('d_nats'), byNat, pa.length, 'var(--purple)', 5)}
-          ${distBlock(t('d_leagues'), byLeague, pa.length, 'var(--yellow)', 5)}
-          ${distBlock(t('d_clubs'), byClub, pa.length, 'var(--blue)', 5)}
+      <div style="padding:14px 16px;display:grid;gap:16px;background:var(--raised);border-top:1px solid var(--line)">
+        <div class="dist-grid">
+          ${distBlock(t('d_nats'), byNat, pa.length, 'var(--pitch)', 5)}
+          ${distBlock(t('d_leagues'), byLeague, pa.length, 'var(--pitch)', 5)}
+          ${distBlock(t('d_clubs'), byClub, pa.length, 'var(--pitch)', 5)}
         </div>
         <div class="table-wrap"><table>
-          <thead>${thead('th_season', 'th_type', 'th_player', 'th_fee', 'th_age', 'th_nat', 'th_from_club', 'th_from_league')}</thead>
+          <thead>${thead('th_season', 'th_type', 'th_player', '>th_fee', '>th_age', 'th_nat', 'th_from_club', 'th_from_league')}</thead>
           <tbody>${playerRows}</tbody>
         </table></div>
       </div>
@@ -837,7 +934,7 @@ function renderOverviewFull(d) {
   }).join('');
 
   const profilesTable = `<div class="table-wrap"><table>
-    <thead>${thead('th_position', 'n', 'th_nperm', 'th_age_mean', 'th_fee_mean', 'th_nat_mode', 'th_league_mode', 'th_club_mode', '')}</thead>
+    <thead>${thead('th_position', '>n', '>th_nperm', '>th_age_mean', '>th_fee_mean', 'th_nat_mode', 'th_league_mode', 'th_club_mode', '')}</thead>
     <tbody>${profileRows}</tbody>
   </table></div>`;
 
@@ -852,25 +949,24 @@ function renderOverviewFull(d) {
   const hasMore = arrivals.length > PAGE;
 
   const arrivalsTable = `<div class="table-wrap"><table class="sortable">
-    <thead>${thead('th_season', 'th_type', 'th_player', 'th_pos', 'th_fee', 'th_age', 'th_nat', 'th_from_club', 'th_from_league', '')}</thead>
+    <thead>${thead('th_season', 'th_type', 'th_player', 'th_pos', '>th_fee', '>th_age', 'th_nat', 'th_from_club', 'th_from_league', '')}</thead>
     <tbody id="${key}">${initialRows}</tbody>
   </table></div>
   ${hasMore ? `<span class="see-all" role="button" tabindex="0" onclick="loadAllArrivals('${key}', this)">${tr('load_more', { n: arrivals.length - PAGE })}</span>` : ''}`;
 
   return `
     <div class="card">
-      <div class="card-header">📊 ${tr('overview_title', { club: d.club, ed: edLabel(d.fifa_edition) })}</div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:20px">
+      <div class="card-body" style="display:grid;gap:24px">
         ${chips}
         ${dist}
       </div>
     </div>
     <div class="card">
-      <div class="card-header">📐 ${tr('profiles')}</div>
+      <div class="card-header">${tr('profiles')}</div>
       ${profilesTable}
     </div>
     <div class="card">
-      <div class="card-header">📋 ${tr('all_arrivals', { n: total })}</div>
+      <div class="card-header">${tr('all_arrivals', { n: total })}</div>
       ${arrivalsTable}
     </div>`;
 }
@@ -915,46 +1011,49 @@ async function runScout() {
 let _lastScout = null;
 function renderResults(data) {
   const nav = `<nav class="pos-nav">${data.positions.map(({ profile: p }) =>
-    `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}" href="#pos-${esc(p.position_norm)}">${esc(p.position_norm)} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
-  document.getElementById('results').innerHTML = nav + data.positions.map(renderPosition).join('');
+    `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''} href="#pos-${esc(p.position_norm)}">${esc(p.position_norm)} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
+  document.getElementById('results').innerHTML =
+    `<h2 class="section-title">${tr('candidates')}</h2>` + nav + data.positions.map(renderPosition).join('');
 }
 function scoreTip(b) {
-  // ex.: "Valor 28/36 · Idade 25/27 · Nacionalidade 0/18"
-  return Object.entries(b || {}).map(([k, [got, max]]) => `${t('ax_' + k)} ${got}/${max}`).join(' · ');
+  // uma linha por eixo, ex.: "Valor: 28 / 36"
+  return Object.entries(b || {}).map(([k, [got, max]]) => `${t('ax_' + k)}: ${got} / ${max}`).join('\n');
 }
 function renderPosition({ profile: p, candidates, team_overall }) {
-  const lvl = team_overall != null
-    ? `&nbsp;|&nbsp; ${tr('hdr_level')} <b style="color:var(--green)">${team_overall}</b>` : '';
   const rows = candidates.map((c, i) => {
     const pct = Math.round(c.score * 100);
-    const ovrCls = c.overall >= 80 ? 'high' : c.overall >= 70 ? 'mid' : 'low';
     return `<tr>
-      <td class="muted">${i+1}</td>
-      <td style="font-weight:600;max-width:160px" class="trunc" title="${esc(c.short_name)}">${esc(c.short_name)}</td>
-      <td class="trunc muted" title="${esc(c.club_name)}">${esc(c.club_name)}</td>
-      <td class="trunc muted" title="${esc(c.league_name)}">${esc(c.league_name)}</td>
-      <td>${esc(countryName(c.nationality))}</td><td>${c.age}</td>
-      <td>${fmt(c.value_eur)}</td>
-      <td class="ovr ${ovrCls}">${c.overall}</td>
-      <td class="ovr ${c.potential >= 85 ? 'high' : c.potential >= 78 ? 'mid' : 'low'}">${c.potential || '—'}</td>
-      <td title="${esc(scoreTip(c.breakdown))}" style="cursor:help"><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
-      <td>${c.sofifa_id ? `<a href="https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}" target="_blank" style="color:var(--blue);font-size:11px">SoFIFA ↗</a>` : ''}</td>
+      <td class="num muted">${i + 1}</td>
+      <td class="player trunc" title="${esc(c.short_name)}">${esc(c.short_name)}</td>
+      <td class="trunc" title="${esc(c.club_name)} (${esc(c.league_name)})">${esc(c.club_name)}<span class="sub">${esc(c.league_name)}</span></td>
+      <td>${esc(countryName(c.nationality))}</td>
+      <td class="num">${c.age}</td>
+      <td class="num">${fmt(c.value_eur)}</td>
+      <td class="num">${tier(c.overall)}</td>
+      <td class="num">${tier(c.potential)}</td>
+      <td class="num" title="${esc(scoreTip(c.breakdown))}" style="cursor:help"><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
+      <td>${c.sofifa_id ? `<a class="ext" href="https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}" target="_blank" rel="noopener">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
   }).join('');
+  const prof = [
+    [tr('th_signings'), p.n],
+    [tr('th_age'), p.age_mean?.toFixed(1) ?? '—'],
+    [tr('th_fee'), fmt(p.fee_mean)],
+    [tr('th_nat'), esc(countryName(p.nationality_mode) ?? '—')],
+    [tr('th_league'), esc(p.from_league_mode ?? '—')],
+    ...(team_overall != null ? [[tr('hdr_level'), team_overall]] : []),
+  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
 
-  return `<div class="card" id="pos-${esc(p.position_norm)}">
-    <div class="card-header">
-      <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span>
-      <span style="font-size:12px;color:var(--muted)">
-        n=${p.n} &nbsp;|&nbsp; ${tr('hdr_age')} ${p.age_mean?.toFixed(1) ?? '—'} &nbsp;|&nbsp; ${tr('hdr_fee')} ${fmt(p.fee_mean)}
-        &nbsp;|&nbsp; ${tr('hdr_nat')} ${esc(countryName(p.nationality_mode) ?? '—')} &nbsp;|&nbsp; ${tr('hdr_league')} ${esc(p.from_league_mode ?? '—')}${lvl}
-      </span>
-    </div>
+  return `<section class="card pos-section" id="pos-${esc(p.position_norm)}">
+    <header class="pos-head">
+      <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''}>${esc(p.position_norm)}</span>
+      <dl class="pos-profile">${prof}</dl>
+    </header>
     <div class="table-wrap"><table class="sortable">
-      <thead>${thead('#', 'th_name', 'th_club', 'th_league', 'th_nat', 'th_age', 'th_value', 'OVR', 'POT', 'Score', '')}</thead>
+      <thead>${thead('>#', 'th_name', 'th_club', 'th_nat', '>th_age', '>th_value', '>OVR', '>POT', '>Score', '')}</thead>
       <tbody>${rows}</tbody>
     </table></div>
-  </div>`;
+  </section>`;
 }
 
 applyI18n();
