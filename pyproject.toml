@@ -13,6 +13,9 @@ dependencies = [
     "fastapi[standard]",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [project.scripts]
 career-scout = "career_scout.cli:main"
 

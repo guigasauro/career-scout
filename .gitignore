@@ -10,3 +10,7 @@ data/processed/
 *.csv
 *.parquet
 .DS_Store
+*.xlsx
+.claude/
+plans/
+.pytest_cache/
