@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script>try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Career Scout</title>
@@ -8,38 +9,40 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* Tokens: gramado sóbrio + tiers de carta (bronze/prata/ouro) + cores de linha do jogo */
+  /* Tokens: gramado sóbrio + tiers de carta (bronze/prata/ouro) + cores de linha do jogo.
+     light-dark() escolhe pelo color-scheme: segue o sistema, ou o toggle via data-theme. */
   :root {
-    color-scheme: light;
-    --ground: #F3F6F4;  --surface: #FFFFFF;  --raised: #F8FAF9;
-    --ink: #16211C;     --muted: #56645D;    --faint: #8A9790;
-    --line: #DCE3DF;    --line-strong: #BCC8C1;
-    --pitch: #1E6B47;   --pitch-ink: #FFFFFF; --pitch-soft: #E2EFE8;
-    --focus: #2F6FDB;
-    --danger: #A8261E;  --danger-soft: #FBEAE8;
-    --gk: #8F5E0E;  --def: #2160A6;  --mid: #2A7449;  --att: #B03636;
-    --bronze: #8A4F28; --bronze-bg: #F4E4D7;
-    --silver: #59656E; --silver-bg: #E6EBEE;
-    --gold:   #876A0E; --gold-bg:   #F7EBBF;
+    color-scheme: light dark;
+    --ground: light-dark(#F3F6F4, #0F1613);
+    --surface: light-dark(#FFFFFF, #16201B);
+    --raised: light-dark(#F8FAF9, #1B2721);
+    --ink: light-dark(#16211C, #E3EAE6);
+    --muted: light-dark(#56645D, #9AA9A1);
+    --faint: light-dark(#8A9790, #6E7D75);
+    --line: light-dark(#DCE3DF, #25322B);
+    --line-strong: light-dark(#BCC8C1, #3A4A42);
+    --pitch: light-dark(#1E6B47, #4BAA78);
+    --pitch-ink: light-dark(#FFFFFF, #07130D);
+    --pitch-soft: light-dark(#E2EFE8, #1B3327);
+    --focus: light-dark(#2F6FDB, #7FA9F6);
+    --danger: light-dark(#A8261E, #F28B82);
+    --danger-soft: light-dark(#FBEAE8, #3A1E1C);
+    --gk: light-dark(#8F5E0E, #E2AD52);
+    --def: light-dark(#2160A6, #79A9E4);
+    --mid: light-dark(#2A7449, #64C18E);
+    --att: light-dark(#B03636, #EC8A84);
+    --bronze: light-dark(#8A4F28, #DDA27A);
+    --bronze-bg: light-dark(#F4E4D7, #3A2A1F);
+    --silver: light-dark(#59656E, #C1CBD2);
+    --silver-bg: light-dark(#E6EBEE, #2B3238);
+    --gold: light-dark(#876A0E, #E8C964);
+    --gold-bg: light-dark(#F7EBBF, #3A3219);
     --font: 'Barlow', system-ui, sans-serif;
     --font-cond: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
     --radius: 8px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      color-scheme: dark;
-      --ground: #0F1613;  --surface: #16201B;  --raised: #1B2721;
-      --ink: #E3EAE6;     --muted: #9AA9A1;    --faint: #6E7D75;
-      --line: #25322B;    --line-strong: #3A4A42;
-      --pitch: #4BAA78;   --pitch-ink: #07130D; --pitch-soft: #1B3327;
-      --focus: #7FA9F6;
-      --danger: #F28B82;  --danger-soft: #3A1E1C;
-      --gk: #E2AD52;  --def: #79A9E4;  --mid: #64C18E;  --att: #EC8A84;
-      --bronze: #DDA27A; --bronze-bg: #3A2A1F;
-      --silver: #C1CBD2; --silver-bg: #2B3238;
-      --gold:   #E8C964; --gold-bg:   #3A3219;
-    }
-  }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"]  { color-scheme: dark; }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--ground); color: var(--ink); font: 400 15px/1.5 var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
@@ -53,7 +56,17 @@
   .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--line); }
   .brand { display: flex; align-items: center; gap: 10px; font: 700 22px/1 var(--font-cond); letter-spacing: .01em; color: var(--ink); text-decoration: none; }
   .brand svg { color: var(--pitch); }
-  .topbar select { margin-left: auto; width: auto; }
+  .topbar select { width: auto; }
+  .icon-btn { margin-left: auto; display: inline-grid; place-items: center; width: 40px; height: 40px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; }
+  .icon-btn:hover { border-color: var(--pitch); color: var(--pitch); }
+  /* mostra o ícone do modo para o qual o clique leva */
+  .i-sun { display: none; }
+  :root[data-theme="dark"] .i-sun { display: block; }
+  :root[data-theme="dark"] .i-moon { display: none; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .i-sun { display: block; }
+    :root:not([data-theme="light"]) .i-moon { display: none; }
+  }
 
   .page { max-width: 1280px; margin: 0 auto; padding: 24px; display: grid; gap: 24px; }
 
@@ -214,6 +227,10 @@
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" rx="3" stroke="currentColor" stroke-width="2"/><line x1="13" y1="2" x2="13" y2="24" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="13" r="4.5" stroke="currentColor" stroke-width="2"/></svg>
     Career Scout
   </a>
+  <button id="btn-theme" class="icon-btn" type="button" onclick="toggleTheme()">
+    <svg class="i-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg class="i-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
   <select id="sel-lang" onchange="setLang(this.value)" aria-label="Idioma / Language / Idioma">
     <option value="pt">Português</option>
     <option value="en">English</option>
@@ -311,7 +328,7 @@ const I18N = {
     no_data_msg: 'Nenhum dado de jogadores em <code>data/raw/</code>. Veja como baixar em {link}.',
     step_edition: 'Edição FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Clube',
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
-    no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
+    no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
     empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de contratação',
     sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
@@ -351,7 +368,7 @@ const I18N = {
     no_data_msg: 'No player data in <code>data/raw/</code>. See how to download it in {link}.',
     step_edition: 'FIFA edition', step_country: 'Country', step_league: 'League', step_club: 'Club',
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
-    no_clubs: 'No clubs mapped', settings: 'Search settings', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
+    no_clubs: 'No clubs mapped', settings: 'Search settings', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
     empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
     dossier_sub: '{ed}, last {h} seasons', typical: 'Typical signing',
     sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
@@ -391,7 +408,7 @@ const I18N = {
     no_data_msg: 'No hay datos de jugadores en <code>data/raw/</code>. Mira cómo descargarlos en {link}.',
     step_edition: 'Edición FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Club',
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
-    no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
+    no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
     empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de fichaje',
     sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
@@ -497,7 +514,25 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
   document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
   document.querySelectorAll('#sel-country option').forEach(o => { if (o.value) o.textContent = countryName(o.value); });
+  labelThemeButton();
 }
+// ── tema claro/escuro: sem escolha salva, segue o sistema ──
+function isDark() {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function labelThemeButton() {
+  const btn = document.getElementById('btn-theme'), label = t(isDark() ? 'theme_light' : 'theme_dark');
+  btn.setAttribute('aria-label', label); btn.title = label;
+}
+function toggleTheme() {
+  const theme = isDark() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem('theme', theme); } catch {}
+  labelThemeButton();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', labelThemeButton);
+
 function setLang(lang) {
   LANG = lang;
   try { localStorage.setItem('lang', lang); } catch {}
