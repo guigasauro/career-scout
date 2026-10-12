@@ -224,7 +224,7 @@ O dataset/scrape do SoFIFA traz ~110 colunas; para este projeto importam princip
 - Lista de jogadores: `https://sofifa.com/players` (paginação via `offset`), com filtros por query string (posição, nacionalidade, faixa de valor/idade/overall).
 
 ### Datasets prontos (alternativa ao scraping — ver D6)
-- **Kaggle (stefanoleone992):** "FIFA 15–23 complete player dataset", ~110 atributos por jogador, todos os updates.
+- **Kaggle (stefanoleone992):** "FIFA 15–23 complete player dataset", ~110 atributos por jogador. **Os `players_XX.csv` que usamos são o elenco de lançamento** (todos os `player_url` terminam em `r=XX0002`; `club_joined` máximo = set. do ano de lançamento; transferências de janeiro, como Bruno Fernandes 2020 e Vlahović 2022, não aparecem). Verificado em 2026-10-12.
 - **HuggingFace (`jsulz/FIFA23`)** e similares: mesmo schema.
 - Útil quando a edição jogada é antiga: evita scraping inteiro.
 
