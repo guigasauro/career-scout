@@ -376,6 +376,7 @@ def scout(req: ScoutRequest):
         positions.append({
             "profile": asdict(profile),
             "team_overall": team_overall,
+            "target_overall": team_overall + req.level_offset if team_overall else None,
             "total": len(candidates),   # tamanho do rol; a lista vem cortada em top_n
             "candidates": [asdict(c) for c in candidates[:req.top_n]],
         })

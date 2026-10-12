@@ -13,14 +13,14 @@
      light-dark() escolhe pelo color-scheme: segue o sistema, ou o toggle via data-theme. */
   :root {
     color-scheme: light dark;
-    --ground: light-dark(#F3F6F4, #0F1613);
-    --surface: light-dark(#FFFFFF, #16201B);
-    --raised: light-dark(#F8FAF9, #1B2721);
-    --ink: light-dark(#16211C, #E3EAE6);
-    --muted: light-dark(#56645D, #9AA9A1);
-    --faint: light-dark(#8A9790, #6E7D75);
-    --line: light-dark(#DCE3DF, #25322B);
-    --line-strong: light-dark(#BCC8C1, #3A4A42);
+    --ground: light-dark(#F3F6F4, #0A0F0D);
+    --surface: light-dark(#FFFFFF, #17221C);
+    --raised: light-dark(#F8FAF9, #1E2B24);
+    --ink: light-dark(#16211C, #E8EEEA);
+    --muted: light-dark(#56645D, #A3B1A9);
+    --faint: light-dark(#8A9790, #808F87);
+    --line: light-dark(#DCE3DF, #2F3E36);
+    --line-strong: light-dark(#BCC8C1, #4A5B52);
     --pitch: light-dark(#1E6B47, #4BAA78);
     --pitch-ink: light-dark(#FFFFFF, #07130D);
     --pitch-soft: light-dark(#E2EFE8, #1B3327);
@@ -35,8 +35,10 @@
     --bronze-bg: light-dark(#F4E4D7, #3A2A1F);
     --silver: light-dark(#59656E, #C1CBD2);
     --silver-bg: light-dark(#E6EBEE, #2B3238);
-    --gold: light-dark(#876A0E, #E8C964);
+    --gold: light-dark(#765C0A, #E8C964);
     --gold-bg: light-dark(#F7EBBF, #3A3219);
+    --elite-bg: light-dark(#D9AE2B, #E8C964);   /* 85+: selo cheio em ouro vivo */
+    --elite-ink: light-dark(#2A2005, #1F1A06);
     --font: 'Barlow', system-ui, sans-serif;
     --font-cond: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
     --radius: 8px;
@@ -181,6 +183,10 @@
   .tier.bronze { color: var(--bronze); background: var(--bronze-bg); }
   .tier.silver { color: var(--silver); background: var(--silver-bg); }
   .tier.gold   { color: var(--gold);   background: var(--gold-bg); }
+  .tier.elite  { color: var(--elite-ink); background: var(--elite-bg); }
+  /* modo reforço: contorno = relação com o overall-alvo do elenco (cheio: atinge; tracejado: até 2 abaixo) */
+  .tier.lv-hit  { outline: 2px solid var(--pitch); outline-offset: 1px; }
+  .tier.lv-near { outline: 2px dashed var(--pitch); outline-offset: 1px; }
 
   .score-bar { display: grid; grid-template-columns: 56px 36px; align-items: center; gap: 8px; justify-content: end; }
   .score-bar .fill { background: var(--pitch); }
@@ -359,6 +365,7 @@ const I18N = {
     sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
     hint_unmapped: 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.',
     hist: 'Histórico (temporadas)', hist_tip: 'Quantas temporadas antes da edição entram no perfil de contratações do clube.',
+    lv_hit: 'Atinge o nível-alvo do elenco ({t})', lv_near: 'Até 2 abaixo do nível-alvo ({t})', lv_below: 'Abaixo do nível-alvo ({t})',
     pg_count: '{a}–{b} de {n}', pg_prev: '‹ Anterior', pg_next: 'Próxima ›', pg_cap: 'Só os {n} primeiros do ranking são listados.',
     vscale: 'Escala de valor', vscale_tip: 'Linear = diferença em euros; Log = diferença proporcional (€10M→€20M pesa como €1M→€2M).', vscale_lin: 'Linear', vscale_log: 'Log',
     pot: 'Priorizar potencial', pot_tip: 'Dá peso extra a jogadores com potencial alto (promessas). Off = só o padrão histórico do clube.',
@@ -400,6 +407,7 @@ const I18N = {
     sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
     hint_unmapped: 'Map the club in data/club_mapping.json (seed_clubs.py) or in _OVERRIDES in api.py.',
     hist: 'History (seasons)', hist_tip: "How many seasons before the edition go into the club's signing profile.",
+    lv_hit: "Meets the squad's target level ({t})", lv_near: 'Up to 2 below the target level ({t})', lv_below: 'Below the target level ({t})',
     pg_count: '{a}–{b} of {n}', pg_prev: '‹ Previous', pg_next: 'Next ›', pg_cap: 'Only the top {n} of the ranking are listed.',
     vscale: 'Value scale', vscale_tip: 'Linear = difference in euros; Log = proportional difference (€10M→€20M weighs like €1M→€2M).', vscale_lin: 'Linear', vscale_log: 'Log',
     pot: 'Prioritize potential', pot_tip: "Gives extra weight to high-potential players (wonderkids). Off = only the club's historical pattern.",
@@ -441,6 +449,7 @@ const I18N = {
     sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
     hint_unmapped: 'Mapea el club en data/club_mapping.json (seed_clubs.py) o en _OVERRIDES en api.py.',
     hist: 'Historial (temporadas)', hist_tip: 'Cuántas temporadas antes de la edición entran en el perfil de fichajes del club.',
+    lv_hit: 'Alcanza el nivel objetivo de la plantilla ({t})', lv_near: 'Hasta 2 por debajo del nivel objetivo ({t})', lv_below: 'Por debajo del nivel objetivo ({t})',
     pg_count: '{a}–{b} de {n}', pg_prev: '‹ Anterior', pg_next: 'Siguiente ›', pg_cap: 'Solo se listan los {n} primeros del ranking.',
     vscale: 'Escala de valor', vscale_tip: 'Lineal = diferencia en euros; Log = diferencia proporcional (€10M→€20M pesa como €1M→€2M).', vscale_lin: 'Lineal', vscale_log: 'Log',
     pot: 'Priorizar potencial', pot_tip: 'Da peso extra a jugadores con alto potencial (promesas). Off = solo el patrón histórico del club.',
@@ -493,9 +502,13 @@ function thead(...keys) {
   }).join('')}</tr>`;
 }
 // tiers de carta do FUT: bronze < 65, prata 65–74, ouro ≥ 75
-function tier(v) {
+// + elite ≥ 85 (selo cheio). Com `target` (modo reforço), contorno mostra a relação com o overall-alvo.
+function tier(v, target) {
   if (!v) return '<span class="muted">—</span>';
-  return `<span class="tier ${v >= 75 ? 'gold' : v >= 65 ? 'silver' : 'bronze'}">${v}</span>`;
+  const cls = v >= 85 ? 'elite' : v >= 75 ? 'gold' : v >= 65 ? 'silver' : 'bronze';
+  if (target == null) return `<span class="tier ${cls}">${v}</span>`;
+  const tgt = Math.round(target), d = v - tgt, lv = d >= 0 ? 'hit' : d >= -2 ? 'near' : 'below';
+  return `<span class="tier ${cls}${lv === 'below' ? '' : ' lv-' + lv}" title="${esc(t('lv_' + lv, { t: tgt }))}">${v}</span>`;
 }
 
 // Países: nomes vêm em inglês (SoFIFA/TM). Tradução nativa via Intl.DisplayNames,
@@ -1160,7 +1173,7 @@ function pagerRest(pos) {
 function showPosPage(pos, page, from) {
   const L = _posLists[pos];
   L.page = page;
-  document.getElementById(`tb-${pos}`).innerHTML = L.rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map(candRow).join('');
+  document.getElementById(`tb-${pos}`).innerHTML = L.rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map(c => candRow(c, L.target)).join('');
   const pager = document.getElementById(`pg-${pos}`);
   if (!pager) return;  // ≤ 10 candidatos: sem paginador
   pager.querySelector('.pg-count').textContent = pagerCount(pos);
@@ -1168,7 +1181,7 @@ function showPosPage(pos, page, from) {
   // o botão clicado foi recriado: devolve o foco a ele (ou ao outro, se ficou desabilitado)
   if (from) (pager.querySelector(`[data-pg=${from}]:not(:disabled)`) || pager.querySelector('button:not(:disabled)'))?.focus();
 }
-function candRow(c) {
+function candRow(c, target) {
     const pct = Math.round(c.score * 100);
     const sofifa = c.sofifa_id ? `https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}` : '';
     return `<tr>
@@ -1178,16 +1191,16 @@ function candRow(c) {
       <td class="hide-sm">${esc(countryName(c.nationality))}</td>
       <td class="num">${c.age}</td>
       <td class="num">${fmt(c.value_eur)}</td>
-      <td class="num">${tier(c.overall)}</td>
+      <td class="num">${tier(c.overall, target)}</td>
       <td class="num">${tier(c.potential)}</td>
       <td class="num" title="${esc(scoreTip(c.breakdown))}" style="cursor:help"><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
       <td class="hide-sm">${sofifa ? `<a class="ext" href="${sofifa}" target="_blank" rel="noopener">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
 }
-function renderPosition({ profile: p, candidates, total, team_overall }) {
+function renderPosition({ profile: p, candidates, total, team_overall, target_overall }) {
   const pos = p.position_norm;
   // rank = posição no ranking original; continua visível depois de reordenar por outra coluna
-  _posLists[pos] = { rows: candidates.map((c, i) => ({ ...c, rank: i + 1 })), total: total ?? candidates.length, page: 0 };
+  _posLists[pos] = { rows: candidates.map((c, i) => ({ ...c, rank: i + 1 })), total: total ?? candidates.length, page: 0, target: target_overall };
   const prof = [
     [tr('th_signings'), p.n],
     [tr('th_age'), p.age_mean?.toFixed(1) ?? '—'],
@@ -1204,7 +1217,7 @@ function renderPosition({ profile: p, candidates, total, team_overall }) {
     </header>
     <div class="table-wrap"><table class="sortable" data-pos="${esc(pos)}">
       <thead>${thead('~>#', 'th_name', '~th_club', '~th_nat', '>th_age', '>th_value', '>OVR', '>POT', '>Score', '~')}</thead>
-      <tbody id="tb-${esc(pos)}">${_posLists[pos].rows.slice(0, PAGE_SIZE).map(candRow).join('')}</tbody>
+      <tbody id="tb-${esc(pos)}">${_posLists[pos].rows.slice(0, PAGE_SIZE).map(c => candRow(c, target_overall)).join('')}</tbody>
     </table></div>
     ${_posLists[pos].rows.length > PAGE_SIZE ? `<footer class="pager" id="pg-${esc(pos)}">${pagerHtml(pos)}</footer>` : ''}
   </section>`;
