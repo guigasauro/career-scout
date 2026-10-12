@@ -310,6 +310,7 @@
     <!-- Ajustes da busca -->
     <aside class="settings">
       <h2 data-i18n="settings"></h2>
+      <label><span><span data-i18n="roster"></span><span class="info" tabindex="0" role="img" data-i18n-title="roster_tip" data-i18n-aria="roster_tip">i</span></span><select id="sel-roster" disabled></select></label>
       <label><span><span data-i18n="hist"></span><span class="info" tabindex="0" role="img" data-i18n-title="hist_tip" data-i18n-aria="hist_tip">i</span></span><input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
       <label><span><span data-i18n="pot"></span><span class="info" tabindex="0" role="img" data-i18n-title="pot_tip" data-i18n-aria="pot_tip">i</span></span><select id="sel-potential" disabled>
         <option value="0" data-i18n="off"></option>
@@ -383,7 +384,8 @@ const I18N = {
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
     no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', rate_limited: 'Muitas buscas seguidas. Espere alguns segundos e tente de novo.', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
     empty_lead: 'O Career Scout olha as contratações reais do clube nos últimos anos (idade, valor pago, nacionalidade e liga de origem em cada posição) e procura, na edição do jogo que você está jogando, jogadores com o mesmo perfil.',
-    how: 'Como funciona', how_ed: 'Edição', how_src: 'Fonte', how_upd: 'Elenco', how_launch: 'Lançamento',
+    how: 'Como funciona', how_ed: 'Edição', how_ver: 'Versão', how_src: 'Fonte', how_upd: 'Data do elenco',
+    roster: 'Elenco', roster_tip: 'Lançamento = elenco vigente no dia em que o jogo saiu; Último update = elenco mais recente do jogo (com as transferências da temporada).', roster_launch: 'Lançamento', roster_latest: 'Último update',
     empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de contratação',
     sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
@@ -430,7 +432,8 @@ const I18N = {
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
     no_clubs: 'No clubs mapped', settings: 'Search settings', rate_limited: 'Too many searches in a row. Wait a few seconds and try again.', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
     empty_lead: "Career Scout looks at the club's real signings over recent seasons (age, fee paid, nationality and origin league for each position) and finds players with the same profile in the edition of the game you're playing.",
-    how: 'How it works', how_ed: 'Edition', how_src: 'Source', how_upd: 'Squads', how_launch: 'Launch',
+    how: 'How it works', how_ed: 'Edition', how_ver: 'Version', how_src: 'Source', how_upd: 'Squad date',
+    roster: 'Squads', roster_tip: "Launch = squads in force on the game's release day; Latest update = the game's most recent squads (with the season's transfers).", roster_launch: 'Launch', roster_latest: 'Latest update',
     empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
     dossier_sub: '{ed}, last {h} seasons', typical: 'Typical signing',
     sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
@@ -477,7 +480,8 @@ const I18N = {
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
     no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', rate_limited: 'Demasiadas búsquedas seguidas. Espera unos segundos e inténtalo de nuevo.', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
     empty_lead: 'Career Scout analiza los fichajes reales del club en las últimas temporadas (edad, precio pagado, nacionalidad y liga de origen en cada posición) y busca, en la edición del juego que estás jugando, jugadores con el mismo perfil.',
-    how: 'Cómo funciona', how_ed: 'Edición', how_src: 'Fuente', how_upd: 'Plantillas', how_launch: 'Lanzamiento',
+    how: 'Cómo funciona', how_ed: 'Edición', how_ver: 'Versión', how_src: 'Fuente', how_upd: 'Fecha de la plantilla',
+    roster: 'Plantillas', roster_tip: 'Lanzamiento = plantillas vigentes el día en que salió el juego; Última actualización = las plantillas más recientes del juego (con los fichajes de la temporada).', roster_launch: 'Lanzamiento', roster_latest: 'Última actualización',
     empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de fichaje',
     sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
@@ -596,6 +600,7 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
   document.querySelectorAll('#sel-country option').forEach(o => { if (o.value) o.textContent = countryName(o.value); });
   document.querySelectorAll('#sel-league option').forEach(o => { if (o.value) o.textContent = leagueName(o.value); });
+  if (_dataInfo) fillRosters(document.getElementById('sel-edition').value);
   labelThemeButton();
 }
 // ── tema claro/escuro: sem escolha salva, segue o sistema ──
@@ -635,7 +640,7 @@ const HOW = {
     <h3>1. De onde vêm os dados</h3>
     <ul>
       <li><b>Contratações do clube:</b> Transfermarkt. Pegamos as chegadas das temporadas anteriores à edição (5 por padrão, ajustável em "Histórico"). Retornos de empréstimo e promoções da base ficam de fora, e um jogador que chegou duas vezes conta uma só.</li>
-      <li><b>Jogadores do jogo:</b> do FIFA 15 ao FIFA 22, dataset público do Kaggle com o elenco de lançamento de cada edição. Do FIFA 23 em diante, coletados do SoFIFA no update mais recente disponível na data da coleta.</li>
+      <li><b>Jogadores do jogo:</b> cada edição pode ter duas versões de elenco, escolhidas em "Elenco". <b>Lançamento</b> é o elenco vigente no dia em que o jogo saiu (os dados de beta e de revelação de ratings, anteriores ao lançamento, ficam de fora). <b>Último update</b> é o elenco mais recente do jogo, já com as transferências da temporada. Os elencos de lançamento do FIFA 15 ao 22 vêm de um dataset público do Kaggle; o resto é coletado do SoFIFA.</li>
     </ul>
     {versions}
     <h3>2. O perfil de cada posição</h3>
@@ -657,6 +662,7 @@ const HOW = {
     </tbody></table>
     <h3>4. Os ajustes</h3>
     <ul>
+      <li><b>Elenco:</b> qual versão dos jogadores do jogo usar, Lançamento ou Último update (fica travado quando a edição só tem uma).</li>
       <li><b>Histórico:</b> quantas temporadas entram no perfil.</li>
       <li><b>Priorizar potencial:</b> dá peso a promessas, além do padrão do clube.</li>
       <li><b>Escala de valor:</b> Linear compara a diferença em euros. Log compara a proporção, então de €10M para €20M pesa o mesmo que de €1M para €2M. O Log aceita uma faixa de preço mais larga.</li>
@@ -686,7 +692,7 @@ const HOW = {
     <h3>1. Where the data comes from</h3>
     <ul>
       <li><b>Club signings:</b> Transfermarkt. We take the arrivals from the seasons before the edition (5 by default, adjustable under "History"). Loan returns and academy promotions are left out, and a player who arrived twice counts once.</li>
-      <li><b>Game players:</b> from FIFA 15 to FIFA 22, a public Kaggle dataset with each edition's launch squads. From FIFA 23 on, collected from SoFIFA at the latest update available on the collection date.</li>
+      <li><b>Game players:</b> each edition can have two squad versions, picked under "Squads". <b>Launch</b> is the squads in force on the day the game came out (beta and ratings-reveal data from before release are left out). <b>Latest update</b> is the game's most recent squads, with the season's transfers. Launch squads for FIFA 15 to 22 come from a public Kaggle dataset; the rest is collected from SoFIFA.</li>
     </ul>
     {versions}
     <h3>2. The profile for each position</h3>
@@ -708,6 +714,7 @@ const HOW = {
     </tbody></table>
     <h3>4. The settings</h3>
     <ul>
+      <li><b>Squads:</b> which version of the game's players to use, Launch or Latest update (locked when the edition only has one).</li>
       <li><b>History:</b> how many seasons go into the profile.</li>
       <li><b>Prioritize potential:</b> gives weight to wonderkids on top of the club's pattern.</li>
       <li><b>Value scale:</b> Linear compares the difference in euros. Log compares the ratio, so €10M to €20M weighs the same as €1M to €2M. Log accepts a wider price range.</li>
@@ -737,7 +744,7 @@ const HOW = {
     <h3>1. De dónde salen los datos</h3>
     <ul>
       <li><b>Fichajes del club:</b> Transfermarkt. Tomamos las llegadas de las temporadas anteriores a la edición (5 por defecto, ajustable en "Historial"). Las vueltas de cesión y los ascensos de la cantera quedan fuera, y un jugador que llegó dos veces cuenta una sola.</li>
-      <li><b>Jugadores del juego:</b> de FIFA 15 a FIFA 22, un dataset público de Kaggle con la plantilla de lanzamiento de cada edición. Desde FIFA 23, recogidos de SoFIFA en la actualización más reciente disponible en la fecha de la recogida.</li>
+      <li><b>Jugadores del juego:</b> cada edición puede tener dos versiones de plantillas, que se eligen en "Plantillas". <b>Lanzamiento</b> son las plantillas vigentes el día en que salió el juego (los datos de beta y de revelación de medias, anteriores al lanzamiento, quedan fuera). <b>Última actualización</b> son las plantillas más recientes del juego, ya con los fichajes de la temporada. Las plantillas de lanzamiento de FIFA 15 a 22 vienen de un dataset público de Kaggle; el resto se recoge de SoFIFA.</li>
     </ul>
     {versions}
     <h3>2. El perfil de cada posición</h3>
@@ -759,6 +766,7 @@ const HOW = {
     </tbody></table>
     <h3>4. Los ajustes</h3>
     <ul>
+      <li><b>Plantillas:</b> qué versión de los jugadores del juego usar, Lanzamiento o Última actualización (queda bloqueado cuando la edición solo tiene una).</li>
       <li><b>Historial:</b> cuántas temporadas entran en el perfil.</li>
       <li><b>Priorizar potencial:</b> da peso a las promesas, además del patrón del club.</li>
       <li><b>Escala de valor:</b> Lineal compara la diferencia en euros. Log compara la proporción, así que de €10M a €20M pesa lo mismo que de €1M a €2M. Log acepta un rango de precios más amplio.</li>
@@ -785,16 +793,28 @@ const HOW = {
     </ul>`,
 };
 let _dataInfo = null;
+async function loadDataInfo() {
+  try { _dataInfo ??= await fetch('/data-info').then(r => r.json()); } catch { _dataInfo = []; }
+  return _dataInfo;
+}
+const rosterLabel = r => r.update ? `${t('roster_' + r.roster)} (${fmtUpdate(r.update)})` : t('roster_' + r.roster);
+// opções de "Elenco" da edição (a base vem primeiro = default); mantém a escolha se ainda existir
+function fillRosters(edition) {
+  const sel = document.getElementById('sel-roster'), prev = sel.value;
+  const rs = _dataInfo?.find(d => String(d.edition) === String(edition))?.rosters || [];
+  sel.innerHTML = rs.map(r => `<option value="${r.roster}">${esc(rosterLabel(r))}</option>`).join('');
+  if (rs.some(r => r.roster === prev)) sel.value = prev;
+}
 function fmtUpdate(s) {
   const d = new Date(s);  // "Oct 7, 2026" (SoFIFA, em inglês) → data no idioma da página
   return isNaN(d) ? s : d.toLocaleDateString(LOCALE[LANG], { day: 'numeric', month: 'short', year: 'numeric' });
 }
 async function openHow() {
-  try { _dataInfo ??= await fetch('/data-info').then(r => r.json()); } catch { _dataInfo = []; }
-  const rows = _dataInfo.slice().reverse().map(d => `<tr><td>${esc(edLabel(d.edition))}</td>
-    <td>${d.source === 'sofifa' ? 'SoFIFA' : 'Kaggle'}</td>
-    <td>${d.update ? esc(fmtUpdate(d.update)) : t('how_launch')}</td></tr>`).join('');
-  const versions = rows ? `<table class="how-table"><thead><tr><th>${t('how_ed')}</th><th>${t('how_src')}</th><th>${t('how_upd')}</th></tr></thead><tbody>${rows}</tbody></table>` : '';
+  await loadDataInfo();
+  const rows = _dataInfo.slice().reverse().flatMap(d => d.rosters.map(r => `<tr><td>${esc(edLabel(d.edition))}</td>
+    <td>${t('roster_' + r.roster)}</td><td>${r.source === 'sofifa' ? 'SoFIFA' : 'Kaggle'}</td>
+    <td>${r.update ? esc(fmtUpdate(r.update)) : '—'}</td></tr>`)).join('');
+  const versions = rows ? `<table class="how-table"><thead><tr><th>${t('how_ed')}</th><th>${t('how_ver')}</th><th>${t('how_src')}</th><th>${t('how_upd')}</th></tr></thead><tbody>${rows}</tbody></table>` : '';
   openModalHtml(t('how'), `<div class="how">${HOW[LANG].replace('{versions}', versions)}</div>`, 'mid');
 }
 
@@ -819,7 +839,7 @@ async function init() {
 // ── estado na URL (?ed=22&club=583…) — recarregar/compartilhar mantém a busca ──
 const URL_FIELDS = {
   ed: 'sel-edition', country: 'sel-country', league: 'sel-league',
-  hist: 'inp-history', pot: 'sel-potential', vlog: 'sel-vscale',
+  roster: 'sel-roster', hist: 'inp-history', pot: 'sel-potential', vlog: 'sel-vscale',
   real: 'sel-realism', lvl: 'sel-level', sort: 'sel-sort', rol: 'sel-rol',
 };
 function saveUrl(run = false) {
@@ -840,6 +860,7 @@ async function restoreFromUrl() {
   onRealismChange();
   if (!q.has('ed')) return;
   set('ed');      await onEditionChange();
+  set('roster');
   if (!q.has('country')) return;
   set('country'); await onCountryChange();
   if (!q.has('league')) return;
@@ -863,6 +884,8 @@ async function onEditionChange() {
   setStep('step-country', false); setStep('step-league', false); setStep('step-club', false);
   lockFooter(); clearOverview(); selectedClub = null;
   if (!edition) return;
+  await loadDataInfo();
+  fillRosters(edition);
 
   const ctrs = await fetch(`/countries?edition=${edition}`).then(r => r.json());
   const sel = document.getElementById('sel-country');
@@ -915,6 +938,7 @@ async function onClubChange() {
   if (!selectedClub) return;
   document.getElementById('inp-history').disabled  = false;
   document.getElementById('sel-potential').disabled = false;
+  document.getElementById('sel-roster').disabled = document.getElementById('sel-roster').options.length < 2;
   document.getElementById('sel-vscale').disabled = false;
   document.getElementById('sel-realism').disabled  = false;
   document.getElementById('btn-scout').disabled    = false;
@@ -938,7 +962,7 @@ function onRealismChange() {
   document.querySelectorAll('.realism-only').forEach(el => el.style.display = on ? '' : 'none');
 }
 function lockFooter() {
-  ['inp-history','sel-potential','sel-vscale','sel-realism','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
+  ['sel-roster','inp-history','sel-potential','sel-vscale','sel-realism','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
 }
 function clearOverview() {
   document.getElementById('overview').innerHTML = '';
@@ -1304,6 +1328,7 @@ async function runScout() {
   const top_n   = 50;  // 5 páginas de 10 por posição; o total do rol vem em `total`
   const potential_weight = parseFloat(document.getElementById('sel-potential').value);
   const value_log = document.getElementById('sel-vscale').value === '1';
+  const roster = document.getElementById('sel-roster').value || null;
   const realism = document.getElementById('sel-realism').value === '1';
   const level_offset = parseInt(document.getElementById('sel-level').value);
   const sort_by = realism ? document.getElementById('sel-sort').value : 'score';
@@ -1321,7 +1346,7 @@ async function runScout() {
       body: JSON.stringify({
         club_id: selectedClub.id, club_slug: selectedClub.slug,
         club_name: selectedClub.name, fifa_edition: edition, history, top_n, potential_weight,
-        realism, level_offset, sort_by, score_threshold, value_log,
+        realism, level_offset, sort_by, score_threshold, value_log, roster,
       }),
     });
     if (!res.ok) throw new Error(await apiError(res));

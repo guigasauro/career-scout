@@ -1264,5 +1264,11 @@
     "tm_id": 64,
     "league": "German 1. Bundesliga",
     "ok": true
+  },
+  "Southampton FC": {
+    "tm_slug": "fc-southampton",
+    "tm_id": 180,
+    "league": "English Premier League",
+    "ok": true
   }
 }

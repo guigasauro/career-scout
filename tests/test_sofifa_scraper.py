@@ -1,6 +1,6 @@
 import unittest
 
-from career_scout.match.sofifa_scraper import _looks_like_challenge, _parse_page, edition_number, league_label
+from career_scout.match.sofifa_scraper import _looks_like_challenge, _parse_page, edition_number, league_label, pick_update
 
 
 class TestEditionNumber(unittest.TestCase):
@@ -72,6 +72,25 @@ class TestLeagueLabel(unittest.TestCase):
         self.assertEqual(league_label("Bundesliga", "Austria"), "Bundesliga (Austria)")
         self.assertEqual(league_label("Premier League", "Ukraine"), "Premier League (Ukraine)")
         self.assertEqual(league_label("Serie A", "Ecuador"), "Serie A (Ecuador)")
+
+
+
+class TestPickUpdate(unittest.TestCase):
+    # lista real do FIFA 23 no SoFIFA (mais recente primeiro), cortada
+    ROSTERS = [("230054", "Sep 11, 2023"), ("230005", "Oct 28, 2022"), ("230004", "Oct 7, 2022"),
+               ("230003", "Sep 28, 2022"), ("230002", "Sep 26, 2022"), ("230001", "Sep 1, 2022"),
+               ("202200", "World Cup 2022")]
+
+    def test_latest_is_most_recent(self):
+        self.assertEqual(pick_update(self.ROSTERS, 23, "latest"), ("230054", "Sep 11, 2023"))
+
+    def test_launch_is_update_in_force_on_release_day(self):
+        # lançamento 30/09/2022: vale o de 28/09, não o de pré-lançamento (01/09) nem o pós (07/10)
+        self.assertEqual(pick_update(self.ROSTERS, 23, "launch"), ("230003", "Sep 28, 2022"))
+
+    def test_special_rosters_ignored(self):
+        with self.assertRaises(ValueError):
+            pick_update([("202200", "World Cup 2022")], 23, "latest")
 
 
 if __name__ == "__main__":

@@ -183,13 +183,16 @@ class TestTeamLineOverall(unittest.TestCase):
         lvl = team_line_overall(players, "FC")
         self.assertEqual(lvl["MID"], 79.0)  # ignora o reserva de 60
 
-    def test_fallback_top3_when_no_starter(self):
+    def test_fallback_starters_per_line_when_no_starter(self):
+        # sem titular marcado: N melhores por linha num 4-4-2 (GK 1, ATT 2)
         players = [
             _p(str(i), "X", 24, 0, "ST", club_name="FC", overall=ov, club_position="SUB")
             for i, ov in enumerate([70, 72, 74, 50])
-        ]
+        ] + [_p(f"g{i}", "X", 24, 0, "GK", club_name="FC", overall=ov, club_position="SUB")
+             for i, ov in enumerate([87, 70, 65])]
         lvl = team_line_overall(players, "FC")
-        self.assertEqual(lvl["ATT"], 72.0)  # top-3 (74,72,70), ignora o 50
+        self.assertEqual(lvl["ATT"], 73.0)  # top-2 (74, 72)
+        self.assertEqual(lvl["GK"], 87.0)   # só o titular; reservas não puxam pra baixo
 
     def test_line_of_pos(self):
         self.assertEqual(line_of_pos("CM"), "MID")

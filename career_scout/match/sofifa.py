@@ -37,9 +37,14 @@ def line_of_pos(pos: str) -> str:
     return _POS_LINE.get(pos, "ATT")
 
 
+_STARTERS_PER_LINE = {"GK": 1, "DEF": 4, "MID": 4, "ATT": 2}
+
+
 def team_line_overall(players: list[dict], club_name: str | None) -> dict[str, float]:
     """Overall médio dos titulares do clube por linha (club_position fora de SUB/RES).
-    Fallback por linha: top-3 por overall quando a linha não tem titular marcado."""
+    Fallback por linha (CSVs do SoFIFA não marcam titular): os N melhores, N = titulares de
+    um 4-4-2. Calibrado contra os titulares reais do Kaggle (FIFA 22, 5 grandes ligas): erro
+    médio GK 0,5 / DEF 1,0 / MID 1,0 / ATT 1,4 pontos; o antigo top-3 errava o GK em 6,6."""
     if not club_name:
         return {}
     squad = [p for p in players if p.get("club_name") == club_name]
@@ -55,7 +60,7 @@ def team_line_overall(players: list[dict], club_name: str | None) -> dict[str, f
             starters[line].append(o)
     out: dict[str, float] = {}
     for line in ("GK", "DEF", "MID", "ATT"):
-        vals = starters.get(line) or sorted(everyone.get(line, []), reverse=True)[:3]
+        vals = starters.get(line) or sorted(everyone.get(line, []), reverse=True)[:_STARTERS_PER_LINE[line]]
         if vals:
             out[line] = round(sum(vals) / len(vals), 1)
     return out
@@ -76,6 +81,27 @@ class Candidate:
     score: float = 0.0
     # eixo → [pontos obtidos, máximo], em pontos percentuais do score (somam ≈ score×100)
     breakdown: dict[str, list[int]] = field(default_factory=dict)
+
+
+# Versões de elenco por edição. players_{N}.csv é a versão "base" (Kaggle = lançamento
+# até o FIFA 22; raspados = último update do 23 em diante); a outra fica em players_{N}_{versão}.csv.
+ROSTERS = ("launch", "latest")
+
+
+def base_roster(edition: int) -> str:
+    return "launch" if edition <= 22 else "latest"
+
+
+def roster_csv(raw_dir: Path, edition: int, roster: str | None = None) -> Path:
+    roster = roster or base_roster(edition)
+    suffix = "" if roster == base_roster(edition) else f"_{roster}"
+    return raw_dir / f"players_{edition}{suffix}.csv"
+
+
+def available_rosters(raw_dir: Path, edition: int) -> list[str]:
+    """Versões com CSV em disco, a base primeiro (é o default)."""
+    order = sorted(ROSTERS, key=lambda r: r != base_roster(edition))
+    return [r for r in order if roster_csv(raw_dir, edition, r).exists()]
 
 
 @lru_cache(maxsize=8)

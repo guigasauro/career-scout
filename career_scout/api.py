@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from career_scout.extract.transfermarkt import get_arrivals
 from career_scout.match.sofifa import (
-    club_leagues, league_levels, league_names, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
+    available_rosters, club_leagues, league_levels, league_names, roster_csv, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
 )
 from career_scout.models import Transfer
 from career_scout.profile.aggregate import build_profiles, load_transfers
@@ -176,32 +176,49 @@ def index():
 @app.get("/fifa-years")
 def fifa_years():
     """Retorna as edições FIFA disponíveis (baseado nos CSVs em data/raw/)."""
-    return sorted(
-        int(p.stem.split("_")[1])
-        for p in (BASE / "raw").glob("players_*.csv")
-    )
+    # players_22.csv e players_22_latest.csv são a mesma edição
+    return sorted({int(p.stem.split("_")[1]) for p in (BASE / "raw").glob("players_*.csv")})
+
+
+def _edition_csv(edition: int, roster: str | None = None) -> Path:
+    """CSV da versão de elenco pedida; sem versão, a base (ou a única que existir)."""
+    rosters = available_rosters(BASE / "raw", edition)
+    if roster not in rosters:
+        if roster or not rosters:
+            raise HTTPException(404, f"Dataset FIFA {edition} ({roster or 'qualquer versão'}) não encontrado em data/raw/")
+        roster = rosters[0]
+    return roster_csv(BASE / "raw", edition, roster)
 
 
 def _league_country(league_name: str) -> str:
     return LEAGUE_COUNTRY.get(league_name) or SOFIFA_LEAGUE_COUNTRY.get(league_name, "Outros")
 
 
+# Data do update XX0002 de onde vêm os CSVs do Kaggle (lista de updates do SoFIFA, conferida em 2026-10-12).
+# São 1–16 dias antes do lançamento oficial; o FIFA 19 é a exceção (5 semanas antes).
+KAGGLE_UPDATES = {15: "Sep 18, 2014", 16: "Sep 21, 2015", 17: "Sep 20, 2016", 18: "Sep 18, 2017",
+                  19: "Aug 21, 2018", 20: "Sep 19, 2019", 21: "Sep 23, 2020", 22: "Sep 23, 2021"}
+
+
 @app.get("/data-info")
 def data_info():
-    """Origem e versão dos jogadores de cada edição (pro "Como funciona")."""
+    """Versões de elenco de cada edição, com origem e data (seletor "Elenco" e "Como funciona")."""
     p = BASE / "raw" / "sofifa_versions.json"
     scraped = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
-    # Kaggle (FIFA 15–22): todos os jogadores apontam pro update XX0002 = elenco de lançamento
-    return [{"edition": e, "source": "sofifa", "update": scraped[str(e)]["date"]} if str(e) in scraped
-            else {"edition": e, "source": "kaggle", "update": None}
+
+    def info(e: int, roster: str) -> dict:
+        v = scraped.get(roster_csv(BASE / "raw", e, roster).stem)
+        # sem registro de coleta = CSV do Kaggle (FIFA 15–22, elenco de lançamento: update XX0002)
+        return {"roster": roster, "source": "sofifa" if v else "kaggle",
+                "update": v["date"] if v else KAGGLE_UPDATES.get(e)}
+
+    return [{"edition": e, "rosters": [info(e, r) for r in available_rosters(BASE / "raw", e)]}
             for e in fifa_years()]
 
 
 @app.get("/countries")
 def countries(edition: int):
-    csv_path = BASE / "raw" / f"players_{edition}.csv"
-    if not csv_path.exists():
-        raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
+    csv_path = _edition_csv(edition)
     league_set = league_names(csv_path) - HIDDEN_LEAGUES
     found = sorted({_league_country(l) for l in league_set})
     # "Outros" sempre por último
@@ -210,9 +227,7 @@ def countries(edition: int):
 
 @app.get("/leagues")
 def leagues(edition: int, country: str | None = None):
-    csv_path = BASE / "raw" / f"players_{edition}.csv"
-    if not csv_path.exists():
-        raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
+    csv_path = _edition_csv(edition)
     levels = league_levels(csv_path) or SOFIFA_LEAGUE_LEVEL
     # Ordena por divisão (1ª, 2ª…) e depois por nome; sem nível conhecido vai pro fim.
     all_leagues = sorted(league_names(csv_path) - HIDDEN_LEAGUES,
@@ -227,9 +242,7 @@ def clubs(league: str | None = None, edition: int | None = None):
     if edition is None:
         return [c for c in CLUBS_DB if c.get("league") == league] if league else CLUBS_DB
     # liga vem do CSV da edição, não do mapping (que guarda a liga da 1ª edição em que o clube apareceu)
-    csv_path = BASE / "raw" / f"players_{edition}.csv"
-    if not csv_path.exists():
-        raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
+    csv_path = _edition_csv(edition)
     in_ed = club_leagues(csv_path)
     return [{**c, "league": in_ed[c["sofifa_name"]]} for c in CLUBS_DB
             if c["sofifa_name"] in in_ed and (league is None or in_ed[c["sofifa_name"]] == league)]
@@ -249,6 +262,7 @@ class ScoutRequest(BaseModel):
     sort_by: str = "score"          # "score" (encaixe) | "overall" (melhores jogadores)
     score_threshold: float = 0.0    # rol acima do threshold (0 = backend usa default no modo reforço)
     value_log: bool = False         # eixo de valor em escala log (teste A/B)
+    roster: str | None = None       # versão do elenco: "launch" | "latest" (None = base da edição)
 
 
 def _save_transfers(transfers: list[Transfer], path: Path) -> None:
@@ -345,12 +359,7 @@ def overview(req: ScoutRequest):
 
 @app.post("/scout")
 def scout(req: ScoutRequest):
-    sofifa_csv = BASE / "raw" / f"players_{req.fifa_edition}.csv"
-    if not sofifa_csv.exists():
-        raise HTTPException(
-            status_code=404,
-            detail=f"Dataset FIFA {req.fifa_edition} não encontrado. Baixe players_{req.fifa_edition}.csv em data/raw/",
-        )
+    sofifa_csv = _edition_csv(req.fifa_edition, req.roster)
 
     transfers = _extract_or_load(req)
     profiles  = build_profiles(transfers)

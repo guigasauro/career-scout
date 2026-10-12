@@ -14,10 +14,13 @@ import json
 import re
 import sys
 import time
+from datetime import date, datetime
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+from career_scout.match.sofifa import roster_csv
 
 BASE = "https://sofifa.com"
 PAGE_SIZE = 60
@@ -126,6 +129,35 @@ def fetch_editions(session: requests.Session, data_dir: Path) -> list[tuple[str,
     return _parse_select(BeautifulSoup(html, "lxml"), "version")
 
 
+# Lançamento mundial oficial (edição padrão). O elenco "de lançamento" é o último update
+# com data ≤ esta: os primeiros updates de cada edição (XX0001, agosto) são dados de
+# beta/revelação de ratings, e há elencos especiais sem data ("World Cup 2022", "UEFA Euro 2024").
+RELEASE_DATES: dict[int, date] = {
+    14: date(2013, 9, 24), 15: date(2014, 9, 23), 16: date(2015, 9, 22), 17: date(2016, 9, 27),
+    18: date(2017, 9, 29), 19: date(2018, 9, 28), 20: date(2019, 9, 27), 21: date(2020, 10, 9),
+    22: date(2021, 10, 1), 23: date(2022, 9, 30), 24: date(2023, 9, 29), 25: date(2024, 9, 27),
+    26: date(2025, 9, 26), 27: date(2026, 9, 25),
+}
+
+
+def pick_update(rosters: list[tuple[str, str]], edition: int, roster: str) -> tuple[str, str]:
+    """(r, data) do update certo: "latest" = mais recente; "launch" = vigente no lançamento."""
+    dated = []
+    for r, label in rosters:
+        try:
+            dated.append((datetime.strptime(label, "%b %d, %Y").date(), r, label))
+        except ValueError:
+            continue  # elenco especial de torneio, sem data
+    if roster == "launch":
+        if edition not in RELEASE_DATES:
+            raise ValueError(f"Sem data de lançamento cadastrada para a edição {edition} (RELEASE_DATES).")
+        dated = [d for d in dated if d[0] <= RELEASE_DATES[edition]]
+    if not dated:
+        raise ValueError(f"Nenhum update da edição {edition} serve para '{roster}'.")
+    _, r, label = max(dated)
+    return r, label
+
+
 def fetch_rosters(session: requests.Session, edition_r: str, data_dir: Path) -> list[tuple[str, str]]:
     url = f"{BASE}/players?r={edition_r}&set=true"
     cache = data_dir / "raw" / f"sofifa_edition_{edition_r}.html"
@@ -140,6 +172,13 @@ def fetch_rosters(session: requests.Session, edition_r: str, data_dir: Path) -> 
 # Cruzando os dois: club_name → league_name, pra preencher o que o scraper de
 # listagem deixa em branco. Ver `enrich_league_names`.
 
+# Ligas fora do catálogo atual do SoFIFA mas presentes em edições antigas (ids conferidos em /teams?lg=…&r=220069)
+RETIRED_LEAGUES = [
+    {"id": 349, "value": "J1 League", "nationName": "Japan"},
+    {"id": 347, "value": "Premier Division", "nationName": "South Africa"},
+]
+
+
 def fetch_league_catalog(session: requests.Session, data_dir: Path) -> list[dict]:
     """[{'league_id': int, 'league_name': str, 'nation_name': str}, ...]"""
     cache = data_dir / "raw" / "sofifa_leagues.json"
@@ -150,6 +189,11 @@ def fetch_league_catalog(session: requests.Session, data_dir: Path) -> list[dict
         resp = session.get(f"{BASE}/api/league", timeout=20)
         resp.raise_for_status()
         raw = resp.json()
+    # o catálogo é o atual: ligas que saíram do jogo somem dele, mas ainda existem nas edições antigas
+    known = {c["id"] for g in raw["data"] for c in g["childs"]}
+    missing = [c for c in RETIRED_LEAGUES if c["id"] not in known]
+    if missing or not cache.exists():
+        raw["data"][-1]["childs"].extend(missing)
         cache.write_text(json.dumps(raw), encoding="utf-8")
     return [
         {"league_id": c["id"], "league_name": c["value"], "nation_name": c.get("nationName", "")}
@@ -206,9 +250,8 @@ def build_club_league_map(session: requests.Session, r_key: str, data_dir: Path)
     return club_to_league
 
 
-def enrich_league_names(session: requests.Session, r_key: str, edition: int, data_dir: Path) -> None:
-    """Reabre players_{edition}.csv já salvo e preenche league_name via clube→liga."""
-    csv_path = data_dir / "raw" / f"players_{edition}.csv"
+def enrich_league_names(session: requests.Session, r_key: str, csv_path: Path, data_dir: Path) -> None:
+    """Reabre o CSV já salvo e preenche league_name via clube→liga."""
     club_to_league = build_club_league_map(session, r_key, data_dir)
     with open(csv_path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
@@ -442,11 +485,11 @@ def scrape_by_profile(
     return _paginate(session, params, r_key, prefix, data_dir, delay)
 
 
-def save_version(data_dir: Path, edition: int, r_key: str, date_label: str) -> None:
-    """Registra qual update do SoFIFA gerou players_{edition}.csv (mostrado no "Como funciona")."""
+def save_version(data_dir: Path, csv_path: Path, r_key: str, date_label: str) -> None:
+    """Registra qual update do SoFIFA gerou o CSV (chave = nome sem extensão; mostrado no "Como funciona")."""
     p = data_dir / "raw" / "sofifa_versions.json"
     versions = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
-    versions[str(edition)] = {"r": r_key, "date": date_label}
+    versions[csv_path.stem] = {"r": r_key, "date": date_label}
     p.write_text(json.dumps(versions, indent=2), encoding="utf-8")
 
 
@@ -473,6 +516,8 @@ if __name__ == "__main__":
                         help="Edição não-interativa (ex.: 26 = FC 26). Usa sempre o update mais recente.")
     parser.add_argument("--enrich-league", action="store_true",
                         help="Só preenche league_name num players_{edition}.csv já existente (requer --edition).")
+    parser.add_argument("--roster", choices=("latest", "launch"), default="latest",
+                        help="Com --edition: latest = update mais recente; launch = vigente na data de lançamento.")
     args = parser.parse_args()
 
     data_dir = Path(__file__).parent.parent.parent / "data"
@@ -511,7 +556,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if args.edition is not None:
-        r_key, date_label = rosters[0]  # mais recente
+        try:
+            r_key, date_label = pick_update(rosters, args.edition, args.roster)
+        except ValueError as e:
+            print(e)
+            sys.exit(1)
     else:
         print()
         for i, (k, date) in enumerate(rosters):
@@ -523,12 +572,12 @@ if __name__ == "__main__":
 
     if args.enrich_league:
         edition = edition_number(edition_label)
-        out_csv = data_dir / "raw" / f"players_{edition}.csv"
-        if edition is None or not out_csv.exists():
-            print(f"players_{edition}.csv não existe — rode o modo completo primeiro.")
+        out_csv = roster_csv(data_dir / "raw", edition, args.roster) if edition else None
+        if out_csv is None or not out_csv.exists():
+            print(f"{out_csv} não existe — rode o modo completo primeiro.")
             sys.exit(1)
         print(f"\n[ENRICH] preenchendo league_name em {out_csv}...\n")
-        enrich_league_names(session, r_key, edition, data_dir)
+        enrich_league_names(session, r_key, out_csv, data_dir)
         sys.exit(0)
 
     if not args.fast:
@@ -537,7 +586,7 @@ if __name__ == "__main__":
         if edition is None:
             print(f"Não consegui extrair o número da edição de {edition_label!r}.")
             sys.exit(1)
-        out_csv = data_dir / "raw" / f"players_{edition}.csv"
+        out_csv = roster_csv(data_dir / "raw", edition, args.roster)
         if out_csv.exists():
             print(f"Já existe: {out_csv} — apague para refazer.")
             sys.exit(0)
@@ -548,9 +597,9 @@ if __name__ == "__main__":
             print(e)
             sys.exit(1)
         save_csv(players, out_csv)
-        save_version(data_dir, edition, r_key, date_label)
+        save_version(data_dir, out_csv, r_key, date_label)
         print(f"\n{len(players)} jogadores → {out_csv}")
-        enrich_league_names(session, r_key, edition, data_dir)
+        enrich_league_names(session, r_key, out_csv, data_dir)
 
     else:
         # --- MODO RÁPIDO ---
