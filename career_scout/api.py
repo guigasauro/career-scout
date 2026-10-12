@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from career_scout.extract.transfermarkt import get_arrivals
 from career_scout.match.sofifa import (
-    league_levels, league_names, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
+    club_leagues, league_levels, league_names, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
 )
 from career_scout.models import Transfer
 from career_scout.profile.aggregate import build_profiles, load_transfers
@@ -212,10 +212,16 @@ def leagues(edition: int, country: str | None = None):
 
 
 @app.get("/clubs")
-def clubs(league: str | None = None):
-    if league:
-        return [c for c in CLUBS_DB if c.get("league") == league]
-    return CLUBS_DB
+def clubs(league: str | None = None, edition: int | None = None):
+    if edition is None:
+        return [c for c in CLUBS_DB if c.get("league") == league] if league else CLUBS_DB
+    # liga vem do CSV da edição, não do mapping (que guarda a liga da 1ª edição em que o clube apareceu)
+    csv_path = BASE / "raw" / f"players_{edition}.csv"
+    if not csv_path.exists():
+        raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
+    in_ed = club_leagues(csv_path)
+    return [{**c, "league": in_ed[c["sofifa_name"]]} for c in CLUBS_DB
+            if c["sofifa_name"] in in_ed and (league is None or in_ed[c["sofifa_name"]] == league)]
 
 
 class ScoutRequest(BaseModel):
@@ -338,7 +344,10 @@ def scout(req: ScoutRequest):
     profiles  = build_profiles(transfers)
     players = load_sofifa(sofifa_csv)
 
-    club_info = next((c for c in CLUBS_DB if c["id"] == req.club_id), None)
+    # mesmo id TM pode ter vários nomes SoFIFA ("Arsenal" no Kaggle, "Arsenal FC" no FC 26): usar o da edição
+    in_ed = club_leagues(sofifa_csv)
+    same_id = [c for c in CLUBS_DB if c["id"] == req.club_id]
+    club_info = next((c for c in same_id if c["sofifa_name"] in in_ed), same_id[0] if same_id else None)
     sofifa_name = club_info["sofifa_name"] if club_info else None
 
     team_levels = team_line_overall(players, sofifa_name) if req.realism else {}

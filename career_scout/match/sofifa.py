@@ -91,6 +91,11 @@ def league_names(csv_path: Path) -> set[str]:
     return {r["league_name"] for r in _load_sofifa_cached(str(csv_path)) if r.get("league_name")}
 
 
+def club_leagues(csv_path: Path) -> dict[str, str]:
+    """club_name → league_name na edição (a liga muda com acesso/rebaixamento)."""
+    return {r["club_name"]: r["league_name"] for r in _load_sofifa_cached(str(csv_path)) if r.get("league_name")}
+
+
 def league_levels(csv_path: Path) -> dict[str, int]:
     """league_name → divisão (1 = primeira) via coluna `league_level` do Kaggle.
     CSVs raspados sem a coluna ficam de fora (o chamador usa fallback)."""

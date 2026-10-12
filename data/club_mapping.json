@@ -910,5 +910,359 @@
     "tm_id": 3524,
     "league": "French Ligue 1",
     "ok": true
+  },
+  "Athletic Club": {
+    "tm_slug": "athletic-bilbao",
+    "tm_id": 621,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "Inter Milan": {
+    "tm_slug": "inter-mailand",
+    "tm_id": 46,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Levante UD": {
+    "tm_slug": "ud-levante",
+    "tm_id": 3368,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "Lille OSC": {
+    "tm_slug": "losc-lille",
+    "tm_id": 1082,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "Montpellier HSC": {
+    "tm_slug": "hsc-montpellier",
+    "tm_id": 382,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "RC Celta": {
+    "tm_slug": "celta-vigo",
+    "tm_id": 940,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "RC Deportivo A Coruña": {
+    "tm_slug": "rc-deportivo",
+    "tm_id": 969,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "RC Lens": {
+    "tm_slug": "rc-lens",
+    "tm_id": 826,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "RCD Espanyol": {
+    "tm_slug": "rcd-espanyol",
+    "tm_id": 714,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "SC Freiburg": {
+    "tm_slug": "sc-freiburg",
+    "tm_id": 60,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Sampdoria": {
+    "tm_slug": "sampdoria-genua",
+    "tm_id": 232,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Sassuolo": {
+    "tm_slug": "us-sassuolo-calcio",
+    "tm_id": 6591,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Torino": {
+    "tm_slug": "torino-fc",
+    "tm_id": 416,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Torino FC": {
+    "tm_slug": "torino-fc",
+    "tm_id": 416,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Toulouse FC": {
+    "tm_slug": "fc-toulouse",
+    "tm_id": 415,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "UD Almería": {
+    "tm_slug": "ud-almeria",
+    "tm_id": 3302,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "UD Las Palmas": {
+    "tm_slug": "ud-las-palmas",
+    "tm_id": 472,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "AS Roma": {
+    "tm_slug": "as-rom",
+    "tm_id": 12,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Arsenal FC": {
+    "tm_slug": "fc-arsenal",
+    "tm_id": 11,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Atalanta BC": {
+    "tm_slug": "atalanta-bergamo",
+    "tm_id": 800,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Atlético Madrid": {
+    "tm_slug": "atletico-madrid",
+    "tm_id": 13,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "Bayern München": {
+    "tm_slug": "fc-bayern-munchen",
+    "tm_id": 27,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Bologna FC": {
+    "tm_slug": "bologna-fc",
+    "tm_id": 1025,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Chelsea FC": {
+    "tm_slug": "fc-chelsea",
+    "tm_id": 631,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Everton FC": {
+    "tm_slug": "fc-everton",
+    "tm_id": 45,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Fulham FC": {
+    "tm_slug": "fc-fulham",
+    "tm_id": 931,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Hellas Verona FC": {
+    "tm_slug": "hellas-verona",
+    "tm_id": 276,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Juventus FC": {
+    "tm_slug": "juventus-turin",
+    "tm_id": 506,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Liverpool FC": {
+    "tm_slug": "fc-liverpool",
+    "tm_id": 31,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Parma Calcio": {
+    "tm_slug": "parma-calcio-1913",
+    "tm_id": 99,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Real Madrid": {
+    "tm_slug": "real-madrid",
+    "tm_id": 418,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "SS Lazio": {
+    "tm_slug": "lazio-rom",
+    "tm_id": 398,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "SSC Napoli": {
+    "tm_slug": "ssc-napoli",
+    "tm_id": 6195,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Schalke 04": {
+    "tm_slug": "fc-schalke-04",
+    "tm_id": 33,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Stade Rennais": {
+    "tm_slug": "fc-stade-rennes",
+    "tm_id": 273,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "Sunderland AFC": {
+    "tm_slug": "afc-sunderland",
+    "tm_id": 289,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "TSG 1899 Hoffenheim": {
+    "tm_slug": "tsg-1899-hoffenheim",
+    "tm_id": 533,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Udinese": {
+    "tm_slug": "udinese-calcio",
+    "tm_id": 410,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Venezia": {
+    "tm_slug": "venezia-fc",
+    "tm_id": 607,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Werder Bremen": {
+    "tm_slug": "sv-werder-bremen",
+    "tm_id": 86,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Nottingham Forest": {
+    "tm_slug": "nottingham-forest",
+    "tm_id": 703,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Monza": {
+    "tm_slug": "ac-monza",
+    "tm_id": 2919,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Cremonese": {
+    "tm_slug": "us-cremonese",
+    "tm_id": 2239,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "AC Ajaccio": {
+    "tm_slug": "ac-ajaccio",
+    "tm_id": 1147,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "AJ Auxerre": {
+    "tm_slug": "aj-auxerre",
+    "tm_id": 290,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "1. FC Heidenheim 1846": {
+    "tm_slug": "1-fc-heidenheim-1846",
+    "tm_id": 2036,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Luton Town": {
+    "tm_slug": "luton-town",
+    "tm_id": 1031,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Le Havre AC": {
+    "tm_slug": "ac-le-havre",
+    "tm_id": 738,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "Como": {
+    "tm_slug": "como-1907",
+    "tm_id": 1047,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Ipswich Town": {
+    "tm_slug": "ipswich-town",
+    "tm_id": 677,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "FC St. Pauli": {
+    "tm_slug": "fc-st-pauli",
+    "tm_id": 35,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Holstein Kiel": {
+    "tm_slug": "holstein-kiel",
+    "tm_id": 269,
+    "league": "German 1. Bundesliga",
+    "ok": true
+  },
+  "Paris FC": {
+    "tm_slug": "paris-fc",
+    "tm_id": 10004,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "Real Oviedo": {
+    "tm_slug": "real-oviedo",
+    "tm_id": 2497,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "Pisa": {
+    "tm_slug": "ac-pisa-1909",
+    "tm_id": 4172,
+    "league": "Italian Serie A",
+    "ok": true
+  },
+  "Racing Santander": {
+    "tm_slug": "racing-santander",
+    "tm_id": 630,
+    "league": "Spain Primera Division",
+    "ok": true
+  },
+  "Coventry City": {
+    "tm_slug": "coventry-city",
+    "tm_id": 990,
+    "league": "English Premier League",
+    "ok": true
+  },
+  "Le Mans FC": {
+    "tm_slug": "le-mans-fc",
+    "tm_id": 1164,
+    "league": "French Ligue 1",
+    "ok": true
+  },
+  "SV Elversberg": {
+    "tm_slug": "sv-07-elversberg",
+    "tm_id": 64,
+    "league": "German 1. Bundesliga",
+    "ok": true
   }
 }

@@ -663,7 +663,7 @@ async function onLeagueChange() {
   setStep('step-club', false); lockFooter(); clearOverview(); selectedClub = null;
   if (!league) return;
 
-  const clubs = await fetch(`/clubs?league=${encodeURIComponent(league)}`).then(r => r.json());
+  const clubs = await fetch(`/clubs?league=${encodeURIComponent(league)}&edition=${document.getElementById('sel-edition').value}`).then(r => r.json());
   const sel = document.getElementById('sel-club');
   if (!clubs.length) {
     reset('sel-club', 'no_clubs', true);
