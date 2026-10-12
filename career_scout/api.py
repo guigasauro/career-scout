@@ -385,6 +385,7 @@ def scout(req: ScoutRequest):
         "club": req.club_name,
         "fifa_edition": req.fifa_edition,
         "realism": req.realism,
+        "level_offset": req.level_offset if req.realism else 0,
         "team_levels": team_levels,
         "positions": positions,
     }

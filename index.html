@@ -193,6 +193,7 @@
   .score-bar .val { font-size: 14px; text-align: right; }
 
   /* Resultados por posição */
+  .results-intro { margin-top: 6px; color: var(--muted); max-width: 72ch; }
   .pos-nav { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0; background: var(--ground); }
   .pos-section { scroll-margin-top: 56px; }
   .pos-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
@@ -205,6 +206,7 @@
   .pos-profile { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; }
   .pos-profile div { display: flex; gap: 6px; }
   .pos-profile dt { color: var(--muted); }
+  .pos-profile dd .muted { font-weight: 400; }
   .pos-profile dd { font-weight: 600; }
   #results { display: grid; gap: 20px; }
   #overview:empty, #results:empty { display: none; }
@@ -393,7 +395,10 @@ const I18N = {
     th_nperm: 'n perm.', th_age_mean: 'Idade média', th_fee_mean: 'Valor médio pago', th_nat_mode: 'Nac. típica',
     th_league_mode: 'Liga típica', th_club_mode: 'Clube típico', th_name: 'Nome', th_club: 'Clube', th_league: 'Liga', th_value: 'Valor',
     type_perm: 'compra', type_loan: 'emprést.', type_free: 'livre',
-    hdr_level: 'Nível titular',
+    hdr_level: 'Nível titular', hdr_target: 'Nível buscado',
+    lvl_intro_up: 'Nível-alvo Upgrade: cada posição busca jogadores 3 pontos de overall acima dos titulares.',
+    lvl_intro_same: 'Nível-alvo Reforço similar: cada posição busca jogadores com o mesmo overall dos titulares.',
+    lvl_intro_cheap: 'Nível-alvo Aposta barata: cada posição busca jogadores 3 pontos de overall abaixo dos titulares.',
     ax_value: 'Valor', ax_age: 'Idade', ax_nationality: 'Nacionalidade', ax_league: 'Liga', ax_potential: 'Potencial', ax_overall: 'Nível do elenco',
   },
   en: {
@@ -435,7 +440,10 @@ const I18N = {
     th_nperm: 'n perm.', th_age_mean: 'Avg. age', th_fee_mean: 'Avg. fee paid', th_nat_mode: 'Typical nat.',
     th_league_mode: 'Typical league', th_club_mode: 'Typical club', th_name: 'Name', th_club: 'Club', th_league: 'League', th_value: 'Value',
     type_perm: 'perm', type_loan: 'loan', type_free: 'free',
-    hdr_level: "Starters' level",
+    hdr_level: "Starters' level", hdr_target: 'Target level',
+    lvl_intro_up: "Target level Upgrade: each position looks for players 3 overall points above the starters.",
+    lvl_intro_same: "Target level Similar level: each position looks for players with the starters' overall.",
+    lvl_intro_cheap: "Target level Cheap gamble: each position looks for players 3 overall points below the starters.",
     ax_value: 'Value', ax_age: 'Age', ax_nationality: 'Nationality', ax_league: 'League', ax_potential: 'Potential', ax_overall: 'Squad level',
   },
   es: {
@@ -477,7 +485,10 @@ const I18N = {
     th_nperm: 'n def.', th_age_mean: 'Edad media', th_fee_mean: 'Valor medio pagado', th_nat_mode: 'Nac. típica',
     th_league_mode: 'Liga típica', th_club_mode: 'Club típico', th_name: 'Nombre', th_club: 'Club', th_league: 'Liga', th_value: 'Valor',
     type_perm: 'compra', type_loan: 'cesión', type_free: 'libre',
-    hdr_level: 'Nivel titular',
+    hdr_level: 'Nivel titular', hdr_target: 'Nivel buscado',
+    lvl_intro_up: 'Nivel objetivo Mejora: cada posición busca jugadores 3 puntos de media por encima de los titulares.',
+    lvl_intro_same: 'Nivel objetivo Refuerzo similar: cada posición busca jugadores con la misma media de los titulares.',
+    lvl_intro_cheap: 'Nivel objetivo Apuesta barata: cada posición busca jugadores 3 puntos de media por debajo de los titulares.',
     ax_value: 'Valor', ax_age: 'Edad', ax_nationality: 'Nacionalidad', ax_league: 'Liga', ax_potential: 'Potencial', ax_overall: 'Nivel de plantilla',
   },
 };
@@ -765,7 +776,7 @@ function arrivalRowHtml(t) {
     <td class="muted">${arrivalDate(t)}</td>
     <td>${typeLabel(t.transfer_type)}</td>
     <td class="player">${esc(t.player_name)}</td>
-    <td><span class="badge ${posBadge(t.position_norm, false)}">${esc(t.position_norm || '?')}</span></td>
+    <td><span class="badge ${posBadge(t.position_norm, false)}">${esc(t.position_norm ? posName(t.position_norm) : '?')}</span></td>
     <td class="num">${fmt(t.fee)}</td>
     <td class="num">${t.age ?? '—'}</td>
     <td>${esc(countryName(t.nationality) || '—')}</td>
@@ -780,6 +791,14 @@ function loadAllArrivals(key, btn) {
   tbody.innerHTML = (window._arrivals[key] || []).map(arrivalRowHtml).join('');
   btn.remove();
 }
+// siglas de posição como no jogo em cada idioma (valor interno continua o código SoFIFA)
+const POS_I18N = {
+  pt: { GK: 'GOL', CB: 'ZAG', LB: 'LE', RB: 'LD', LWB: 'ADE', RWB: 'ADD', CDM: 'VOL', CM: 'MC', CAM: 'MEI',
+        LM: 'ME', RM: 'MD', LW: 'PE', RW: 'PD', CF: 'SA', ST: 'ATA', DEF: 'DEF', MID: 'MEIO', ATT: 'ATAQ' },
+  es: { GK: 'POR', CB: 'DFC', LB: 'LI', RB: 'LD', LWB: 'CAI', RWB: 'CAD', CDM: 'MCD', CM: 'MC', CAM: 'MCO',
+        LM: 'MI', RM: 'MD', LW: 'EI', RW: 'ED', CF: 'SD', ST: 'DC', DEF: 'DEF', MID: 'MED', ATT: 'DEL' },
+};
+const posName = code => POS_I18N[LANG]?.[code] ?? code;
 function posBadge(pos, isFreq) {
   // cor da linha sempre; ★ marca a posição mais contratada
   const p = pos || '';
@@ -986,7 +1005,7 @@ function renderOverviewFull(d) {
 
   const dist = `<div class="dist-grid">
     ${distBlock(t('d_seasons'), bySeasonLabeled, total, 'var(--pitch)', 5)}
-    ${distBlock(t('d_positions'), d.by_position, total, 'var(--pitch)', 5)}
+    ${distBlock(t('d_positions'), Object.fromEntries(Object.entries(d.by_position).map(([k, n]) => [posName(k), n])), total, 'var(--pitch)', 5)}
     ${distBlock(t('d_nats'), countryKeys(d.by_nationality), total, 'var(--pitch)', 5)}
     ${distBlock(t('d_leagues'), d.by_from_league, total, 'var(--pitch)', 5)}
     ${distBlock(t('d_clubs'), d.by_from_club, total, 'var(--pitch)', 5)}
@@ -1018,7 +1037,7 @@ function renderOverviewFull(d) {
       <td class="trunc muted" title="${esc(t.from_league)}">${esc(t.from_league || '—')}</td>
     </tr>`).join('');
     return `<tr>
-      <td><span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${p.position_norm}</span></td>
+      <td><span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}">${esc(posName(p.position_norm))}</span></td>
       <td class="num">${p.n}</td><td class="num">${p.n_permanent}</td>
       <td class="num">${p.age_mean != null ? p.age_mean.toFixed(1) : '—'}</td>
       <td class="num">${fmt(p.fee_mean)}</td>
@@ -1123,11 +1142,14 @@ async function runScout() {
 }
 
 let _lastScout = null;
+// sufixo do Nível-alvo pelo sinal do offset: up (+3) / same (0) / cheap (−3)
+const lvlKey = (prefix, off) => prefix + (off > 0.5 ? 'up' : off < -0.5 ? 'cheap' : 'same');
 function renderResults(data) {
   const nav = `<nav class="pos-nav">${data.positions.map(({ profile: p }) =>
-    `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''} href="#pos-${esc(p.position_norm)}">${esc(p.position_norm)} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
+    `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''} href="#pos-${esc(p.position_norm)}">${esc(posName(p.position_norm))} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
   document.getElementById('results').innerHTML =
-    `<h2 class="section-title">${tr('candidates')}</h2>` + nav + data.positions.map(renderPosition).join('');
+    `<h2 class="section-title">${tr('candidates')}</h2>` +
+    (data.realism ? `<p class="results-intro">${tr(lvlKey('lvl_intro_', data.level_offset))}</p>` : '') + nav + data.positions.map(renderPosition).join('');
 }
 function scoreTip(b) {
   // uma linha por eixo, ex.: "Valor: 28 / 36"
@@ -1208,11 +1230,13 @@ function renderPosition({ profile: p, candidates, total, team_overall, target_ov
     [tr('th_nat'), esc(countryName(p.nationality_mode) ?? '—')],
     [tr('th_league'), esc(p.from_league_mode ?? '—')],
     ...(team_overall != null ? [[tr('hdr_level'), team_overall]] : []),
+    // alvo explícito: overall dos titulares ± offset do Nível-alvo
+    ...(target_overall != null ? [[tr('hdr_target'), `${Math.round(target_overall)} <span class="muted">(${tr(lvlKey('lvl_', target_overall - team_overall))})</span>`]] : []),
   ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
 
   return `<section class="card pos-section" id="pos-${esc(p.position_norm)}">
     <header class="pos-head">
-      <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''}>${esc(p.position_norm)}</span>
+      <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''}>${esc(posName(p.position_norm))}</span>
       <dl class="pos-profile">${prof}</dl>
     </header>
     <div class="table-wrap"><table class="sortable" data-pos="${esc(pos)}">
