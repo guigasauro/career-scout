@@ -59,7 +59,10 @@
   .brand { display: flex; align-items: center; gap: 10px; font: 700 22px/1 var(--font-cond); letter-spacing: .01em; color: var(--ink); text-decoration: none; }
   .brand svg { color: var(--pitch); }
   .topbar select { width: auto; }
-  .icon-btn { margin-left: auto; display: inline-grid; place-items: center; width: 40px; height: 40px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; }
+  .how-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; font-size: 14px; }
+  .how-btn:hover { border-color: var(--pitch); color: var(--pitch); }
+  .how-q { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 50%; font-size: 12px; }
+  .icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; }
   .icon-btn:hover { border-color: var(--pitch); color: var(--pitch); }
   /* mostra o ícone do modo para o qual o clique leva */
   .i-sun { display: none; }
@@ -113,6 +116,7 @@
   .empty { padding: 48px 32px; text-align: center; border: 1px dashed var(--line-strong); border-radius: var(--radius); color: var(--muted); }
   .empty h2 { font: 600 24px/1.2 var(--font-cond); color: var(--ink); margin-bottom: 6px; }
   .empty p { max-width: 46ch; margin: 0 auto; }
+  .empty .empty-lead { max-width: 60ch; margin-bottom: 12px; color: var(--ink); }
   #status-overview[style*="block"] ~ .empty, #overview:not(:empty) ~ .empty { display: none; }
 
   /* Dossiê do clube — o elemento de destaque da página */
@@ -215,6 +219,15 @@
   .modal-overlay { position: fixed; inset: 0; background: rgb(8 14 11 / .55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
   .modal-overlay.hidden { display: none; }
   .modal-box { background: var(--ground); border: 1px solid var(--line); border-radius: 10px; width: min(480px, 100%); max-height: 85vh; max-height: 85dvh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgb(0 0 0 / .25); }
+  .modal-box.mid { width: min(760px, 100%); max-height: 90vh; max-height: 90dvh; }
+  .how { display: grid; gap: 12px; line-height: 1.6; }
+  .how h3 { font: 600 19px/1.2 var(--font-cond); margin-top: 8px; }
+  .how ul { padding-left: 20px; display: grid; gap: 6px; }
+  .how ul ul { margin-top: 6px; }
+  .how-table { font-size: 14px; }
+  .how { min-width: 0; }
+  .how-table td { vertical-align: top; white-space: normal; }
+  .how-table td:first-child { white-space: nowrap; }
   .modal-box.wide { width: min(1100px, 100%); max-height: 90vh; max-height: 90dvh; }
   .modal-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; font: 600 20px/1.2 var(--font-cond); background: var(--surface); border-radius: 10px 10px 0 0; }
   .modal-close { background: none; border: 0; color: var(--muted); font-size: 24px; line-height: 1; padding: 2px 8px; }
@@ -233,6 +246,11 @@
     .settings { position: static; }
   }
   @media (max-width: 520px) {
+    .how-label { display: none; }
+    .topbar { padding: 12px 16px; gap: 8px; }
+    .brand { white-space: nowrap; }
+    .topbar select { padding-left: 8px; padding-right: 4px; }
+    .how-btn { width: 40px; padding: 0; justify-content: center; }
     .page { padding: 16px; }
     .topbar { padding: 12px 16px; }
     .picker { grid-template-columns: 1fr; }
@@ -255,6 +273,7 @@
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" rx="3" stroke="currentColor" stroke-width="2"/><line x1="13" y1="2" x2="13" y2="24" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="13" r="4.5" stroke="currentColor" stroke-width="2"/></svg>
     Career Scout
   </a>
+  <button id="btn-how" class="how-btn" type="button" onclick="openHow()" data-i18n-aria="how"><span class="how-q" aria-hidden="true">?</span><span class="how-label" data-i18n="how"></span></button>
   <button id="btn-theme" class="icon-btn" type="button" onclick="toggleTheme()">
     <svg class="i-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     <svg class="i-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -331,6 +350,7 @@
       <div id="overview"></div>
       <div class="empty">
         <h2 data-i18n="empty_title"></h2>
+        <p class="empty-lead" data-i18n="empty_lead"></p>
         <p data-i18n="empty_body"></p>
       </div>
       <div id="status-scout" class="status-bar" role="status"></div>
@@ -362,6 +382,8 @@ const I18N = {
     step_edition: 'Edição FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Clube',
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
     no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', rate_limited: 'Muitas buscas seguidas. Espere alguns segundos e tente de novo.', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
+    empty_lead: 'O Career Scout olha as contratações reais do clube nos últimos anos (idade, valor pago, nacionalidade e liga de origem em cada posição) e procura, na edição do jogo que você está jogando, jogadores com o mesmo perfil.',
+    how: 'Como funciona', how_ed: 'Edição', how_src: 'Fonte', how_upd: 'Elenco', how_launch: 'Lançamento',
     empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de contratação',
     sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
@@ -407,6 +429,8 @@ const I18N = {
     step_edition: 'FIFA edition', step_country: 'Country', step_league: 'League', step_club: 'Club',
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
     no_clubs: 'No clubs mapped', settings: 'Search settings', rate_limited: 'Too many searches in a row. Wait a few seconds and try again.', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
+    empty_lead: "Career Scout looks at the club's real signings over recent seasons (age, fee paid, nationality and origin league for each position) and finds players with the same profile in the edition of the game you're playing.",
+    how: 'How it works', how_ed: 'Edition', how_src: 'Source', how_upd: 'Squads', how_launch: 'Launch',
     empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
     dossier_sub: '{ed}, last {h} seasons', typical: 'Typical signing',
     sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
@@ -452,6 +476,8 @@ const I18N = {
     step_edition: 'Edición FIFA', step_country: 'País', step_league: 'Liga', step_club: 'Club',
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
     no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', rate_limited: 'Demasiadas búsquedas seguidas. Espera unos segundos e inténtalo de nuevo.', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
+    empty_lead: 'Career Scout analiza los fichajes reales del club en las últimas temporadas (edad, precio pagado, nacionalidad y liga de origen en cada posición) y busca, en la edición del juego que estás jugando, jugadores con el mismo perfil.',
+    how: 'Cómo funciona', how_ed: 'Edición', how_src: 'Fuente', how_upd: 'Plantillas', how_launch: 'Lanzamiento',
     empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
     dossier_sub: '{ed}, últimas {h} temporadas', typical: 'Perfil típico de fichaje',
     sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
@@ -600,6 +626,177 @@ function setLang(lang) {
   if (!document.getElementById('modal').classList.contains('hidden')) hideModal();
 }
 
+
+// ── "Como funciona" (header) ─────────────────────────────────────
+// Texto fixo por idioma; {versions} vira a tabela de origem/versão dos dados (GET /data-info).
+const HOW = {
+  pt: `
+    <p>O Career Scout aprende o padrão de contratações de um clube no mundo real e usa esse padrão para sugerir jogadores no seu Modo Carreira, na edição do jogo que você está jogando.</p>
+    <h3>1. De onde vêm os dados</h3>
+    <ul>
+      <li><b>Contratações do clube:</b> Transfermarkt. Pegamos as chegadas das temporadas anteriores à edição (5 por padrão, ajustável em "Histórico"). Retornos de empréstimo e promoções da base ficam de fora, e um jogador que chegou duas vezes conta uma só.</li>
+      <li><b>Jogadores do jogo:</b> do FIFA 15 ao FIFA 22, dataset público do Kaggle com o elenco de lançamento de cada edição. Do FIFA 23 em diante, coletados do SoFIFA no update mais recente disponível na data da coleta.</li>
+    </ul>
+    {versions}
+    <h3>2. O perfil de cada posição</h3>
+    <p>As contratações são agrupadas por posição. Se uma posição tem menos de 3 contratações, ela entra na linha (defesa, meio ou ataque). Para cada grupo calculamos:</p>
+    <ul>
+      <li><b>Idade média</b> na chegada.</li>
+      <li><b>Valor médio pago</b>, só com compras. Transferências livres e empréstimos não entram nessa média.</li>
+      <li><b>Nacionalidade e liga de origem mais frequentes</b>, que só contam se aparecem pelo menos 2 vezes. Sem um padrão claro, o critério é ignorado.</li>
+    </ul>
+    <h3>3. O score</h3>
+    <p>Cada jogador do jogo na mesma posição recebe pontos em cada critério, conforme a proximidade ao perfil. O score é a soma, convertida em 0–100% considerando só os critérios que o perfil tem. Passe o mouse (ou toque) no score para ver quanto cada critério rendeu.</p>
+    <table class="how-table"><thead><tr><th>Critério</th><th class="num">Peso</th><th>Como pontua</th></tr></thead><tbody>
+      <tr><td>Valor</td><td class="num">40</td><td>Proximidade ao valor médio pago × 0,8. O desconto existe porque o valor pago costuma vir uns 25% acima do valor de mercado, que é o que o jogo mostra.</td></tr>
+      <tr><td>Idade</td><td class="num">30</td><td>Proximidade à idade média.</td></tr>
+      <tr><td>Nacionalidade</td><td class="num">20</td><td>Pontuação cheia se for a nacionalidade mais contratada.</td></tr>
+      <tr><td>Liga</td><td class="num">10</td><td>Pontuação cheia se joga na liga de onde o clube mais contrata.</td></tr>
+      <tr><td>Overall</td><td class="num">45</td><td>Só com "Ajustar ao elenco": proximidade ao nível-alvo.</td></tr>
+      <tr><td>Potencial</td><td class="num">0–50</td><td>Só com "Priorizar potencial": quanto maior o potencial, mais pontos.</td></tr>
+    </tbody></table>
+    <h3>4. Os ajustes</h3>
+    <ul>
+      <li><b>Histórico:</b> quantas temporadas entram no perfil.</li>
+      <li><b>Priorizar potencial:</b> dá peso a promessas, além do padrão do clube.</li>
+      <li><b>Escala de valor:</b> Linear compara a diferença em euros. Log compara a proporção, então de €10M para €20M pesa o mesmo que de €1M para €2M. O Log aceita uma faixa de preço mais larga.</li>
+      <li><b>Ajustar ao elenco:</b> calcula o nível titular (overall médio dos titulares de cada linha no jogo) e adiciona o critério de overall. Com ele ligado aparecem:
+        <ul>
+          <li><b>Nível-alvo:</b> Reforço similar (o nível titular), Upgrade (+3) ou Aposta barata (−3). No Upgrade e na Aposta barata, o valor-alvo sobe ou desce na mesma proporção do preço de mercado.</li>
+          <li><b>Tamanho do rol:</b> score mínimo para entrar na lista. Estrito 60%, Médio 45%, Amplo 30%.</li>
+          <li><b>Ordenar por:</b> Melhor encaixe (score) ou Melhores jogadores (overall), dentro do rol.</li>
+        </ul>
+      </li>
+    </ul>
+    <h3>5. Lendo os resultados</h3>
+    <ul>
+      <li>Cada posição mostra 10 jogadores por página, até 50. O contador indica quantos passaram no corte.</li>
+      <li>A coluna # é a posição no ranking e continua igual se você reordenar por outra coluna.</li>
+      <li>Selos de overall e potencial: bronze (até 64), prata (65–74), ouro (75–84) e elite (85+, selo cheio).</li>
+      <li>Com "Ajustar ao elenco", o contorno do overall mostra a relação com o nível-alvo: cheio quando atinge, tracejado quando fica até 2 abaixo.</li>
+    </ul>
+    <h3>6. Limites</h3>
+    <ul>
+      <li>Só os clubes das 5 grandes ligas (Inglaterra, Espanha, Itália, Alemanha e França) podem ser escolhidos. Os candidatos vêm de todas as ligas do jogo.</li>
+      <li>Os dados do jogo são de um update específico e podem não bater com o seu save.</li>
+      <li>Contratações com valor não divulgado ficam fora da média de valor.</li>
+    </ul>`,
+  en: `
+    <p>Career Scout learns a club's real-world signing pattern and uses it to suggest players for your Career Mode, in the edition of the game you're playing.</p>
+    <h3>1. Where the data comes from</h3>
+    <ul>
+      <li><b>Club signings:</b> Transfermarkt. We take the arrivals from the seasons before the edition (5 by default, adjustable under "History"). Loan returns and academy promotions are left out, and a player who arrived twice counts once.</li>
+      <li><b>Game players:</b> from FIFA 15 to FIFA 22, a public Kaggle dataset with each edition's launch squads. From FIFA 23 on, collected from SoFIFA at the latest update available on the collection date.</li>
+    </ul>
+    {versions}
+    <h3>2. The profile for each position</h3>
+    <p>Signings are grouped by position. If a position has fewer than 3 signings, it joins its line (defence, midfield or attack). For each group we compute:</p>
+    <ul>
+      <li><b>Average age</b> on arrival.</li>
+      <li><b>Average fee paid</b>, purchases only. Free transfers and loans are left out of this average.</li>
+      <li><b>Most frequent nationality and origin league</b>, which only count if they appear at least twice. Without a clear pattern, the criterion is ignored.</li>
+    </ul>
+    <h3>3. The score</h3>
+    <p>Every player in the game at the same position earns points on each criterion, based on how close they are to the profile. The score is the sum, scaled to 0–100% using only the criteria the profile has. Hover (or tap) the score to see what each criterion contributed.</p>
+    <table class="how-table"><thead><tr><th>Criterion</th><th class="num">Weight</th><th>How it scores</th></tr></thead><tbody>
+      <tr><td>Value</td><td class="num">40</td><td>Closeness to the average fee paid × 0.8. The discount exists because fees usually run about 25% above market value, which is what the game shows.</td></tr>
+      <tr><td>Age</td><td class="num">30</td><td>Closeness to the average age.</td></tr>
+      <tr><td>Nationality</td><td class="num">20</td><td>Full points if it's the most signed nationality.</td></tr>
+      <tr><td>League</td><td class="num">10</td><td>Full points if they play in the league the club signs from most.</td></tr>
+      <tr><td>Overall</td><td class="num">45</td><td>Only with "Match squad level": closeness to the target level.</td></tr>
+      <tr><td>Potential</td><td class="num">0–50</td><td>Only with "Prioritize potential": higher potential, more points.</td></tr>
+    </tbody></table>
+    <h3>4. The settings</h3>
+    <ul>
+      <li><b>History:</b> how many seasons go into the profile.</li>
+      <li><b>Prioritize potential:</b> gives weight to wonderkids on top of the club's pattern.</li>
+      <li><b>Value scale:</b> Linear compares the difference in euros. Log compares the ratio, so €10M to €20M weighs the same as €1M to €2M. Log accepts a wider price range.</li>
+      <li><b>Match squad level:</b> computes the starters' level (average overall of the starters in each line in the game) and adds the overall criterion. When on, you also get:
+        <ul>
+          <li><b>Target level:</b> Similar level (the starters' level), Upgrade (+3) or Cheap gamble (−3). With Upgrade and Cheap gamble, the value target moves up or down in line with market prices.</li>
+          <li><b>List size:</b> minimum score to make the list. Strict 60%, Medium 45%, Broad 30%.</li>
+          <li><b>Sort by:</b> Best fit (score) or Best players (overall), within the list.</li>
+        </ul>
+      </li>
+    </ul>
+    <h3>5. Reading the results</h3>
+    <ul>
+      <li>Each position shows 10 players per page, up to 50. The counter shows how many passed the cut.</li>
+      <li>The # column is the ranking position and stays the same if you sort by another column.</li>
+      <li>Overall and potential badges: bronze (up to 64), silver (65–74), gold (75–84) and elite (85+, filled badge).</li>
+      <li>With "Match squad level", the outline on the overall shows how it compares to the target level: solid when it meets it, dashed when it's up to 2 below.</li>
+    </ul>
+    <h3>6. Limits</h3>
+    <ul>
+      <li>Only clubs from the big 5 leagues (England, Spain, Italy, Germany and France) can be picked. Candidates come from every league in the game.</li>
+      <li>Game data comes from a specific update and may not match your save.</li>
+      <li>Signings with an undisclosed fee are left out of the value average.</li>
+    </ul>`,
+  es: `
+    <p>Career Scout aprende el patrón de fichajes de un club en el mundo real y lo usa para sugerir jugadores en tu Modo Carrera, en la edición del juego que estás jugando.</p>
+    <h3>1. De dónde salen los datos</h3>
+    <ul>
+      <li><b>Fichajes del club:</b> Transfermarkt. Tomamos las llegadas de las temporadas anteriores a la edición (5 por defecto, ajustable en "Historial"). Las vueltas de cesión y los ascensos de la cantera quedan fuera, y un jugador que llegó dos veces cuenta una sola.</li>
+      <li><b>Jugadores del juego:</b> de FIFA 15 a FIFA 22, un dataset público de Kaggle con la plantilla de lanzamiento de cada edición. Desde FIFA 23, recogidos de SoFIFA en la actualización más reciente disponible en la fecha de la recogida.</li>
+    </ul>
+    {versions}
+    <h3>2. El perfil de cada posición</h3>
+    <p>Los fichajes se agrupan por posición. Si una posición tiene menos de 3 fichajes, entra en su línea (defensa, medio o ataque). Para cada grupo calculamos:</p>
+    <ul>
+      <li><b>Edad media</b> a la llegada.</li>
+      <li><b>Precio medio pagado</b>, solo compras. Los fichajes libres y las cesiones no entran en esta media.</li>
+      <li><b>Nacionalidad y liga de origen más frecuentes</b>, que solo cuentan si aparecen al menos 2 veces. Sin un patrón claro, el criterio se ignora.</li>
+    </ul>
+    <h3>3. El score</h3>
+    <p>Cada jugador del juego en la misma posición suma puntos en cada criterio según lo cerca que esté del perfil. El score es la suma, convertida a 0–100% teniendo en cuenta solo los criterios que tiene el perfil. Pasa el ratón (o toca) sobre el score para ver cuánto aportó cada criterio.</p>
+    <table class="how-table"><thead><tr><th>Criterio</th><th class="num">Peso</th><th>Cómo puntúa</th></tr></thead><tbody>
+      <tr><td>Valor</td><td class="num">40</td><td>Cercanía al precio medio pagado × 0,8. El descuento existe porque el precio pagado suele estar un 25% por encima del valor de mercado, que es lo que muestra el juego.</td></tr>
+      <tr><td>Edad</td><td class="num">30</td><td>Cercanía a la edad media.</td></tr>
+      <tr><td>Nacionalidad</td><td class="num">20</td><td>Puntuación completa si es la nacionalidad más fichada.</td></tr>
+      <tr><td>Liga</td><td class="num">10</td><td>Puntuación completa si juega en la liga de la que más ficha el club.</td></tr>
+      <tr><td>Media</td><td class="num">45</td><td>Solo con "Ajustar a la plantilla": cercanía al nivel objetivo.</td></tr>
+      <tr><td>Potencial</td><td class="num">0–50</td><td>Solo con "Priorizar potencial": cuanto más potencial, más puntos.</td></tr>
+    </tbody></table>
+    <h3>4. Los ajustes</h3>
+    <ul>
+      <li><b>Historial:</b> cuántas temporadas entran en el perfil.</li>
+      <li><b>Priorizar potencial:</b> da peso a las promesas, además del patrón del club.</li>
+      <li><b>Escala de valor:</b> Lineal compara la diferencia en euros. Log compara la proporción, así que de €10M a €20M pesa lo mismo que de €1M a €2M. Log acepta un rango de precios más amplio.</li>
+      <li><b>Ajustar a la plantilla:</b> calcula el nivel titular (media de los titulares de cada línea en el juego) y añade el criterio de media. Al activarlo aparecen:
+        <ul>
+          <li><b>Nivel objetivo:</b> Refuerzo similar (el nivel titular), Mejora (+3) o Apuesta barata (−3). En Mejora y Apuesta barata, el valor objetivo sube o baja en la misma proporción que el precio de mercado.</li>
+          <li><b>Tamaño de la lista:</b> score mínimo para entrar. Estricto 60%, Medio 45%, Amplio 30%.</li>
+          <li><b>Ordenar por:</b> Mejor encaje (score) o Mejores jugadores (media), dentro de la lista.</li>
+        </ul>
+      </li>
+    </ul>
+    <h3>5. Cómo leer los resultados</h3>
+    <ul>
+      <li>Cada posición muestra 10 jugadores por página, hasta 50. El contador indica cuántos pasaron el corte.</li>
+      <li>La columna # es la posición en el ranking y no cambia si ordenas por otra columna.</li>
+      <li>Insignias de media y potencial: bronce (hasta 64), plata (65–74), oro (75–84) y élite (85+, insignia rellena).</li>
+      <li>Con "Ajustar a la plantilla", el contorno de la media indica la relación con el nivel objetivo: continuo si lo alcanza, discontinuo si queda hasta 2 por debajo.</li>
+    </ul>
+    <h3>6. Límites</h3>
+    <ul>
+      <li>Solo se pueden elegir clubes de las 5 grandes ligas (Inglaterra, España, Italia, Alemania y Francia). Los candidatos salen de todas las ligas del juego.</li>
+      <li>Los datos del juego son de una actualización concreta y pueden no coincidir con tu partida.</li>
+      <li>Los fichajes con precio no revelado quedan fuera de la media de valor.</li>
+    </ul>`,
+};
+let _dataInfo = null;
+function fmtUpdate(s) {
+  const d = new Date(s);  // "Oct 7, 2026" (SoFIFA, em inglês) → data no idioma da página
+  return isNaN(d) ? s : d.toLocaleDateString(LOCALE[LANG], { day: 'numeric', month: 'short', year: 'numeric' });
+}
+async function openHow() {
+  try { _dataInfo ??= await fetch('/data-info').then(r => r.json()); } catch { _dataInfo = []; }
+  const rows = _dataInfo.slice().reverse().map(d => `<tr><td>${esc(edLabel(d.edition))}</td>
+    <td>${d.source === 'sofifa' ? 'SoFIFA' : 'Kaggle'}</td>
+    <td>${d.update ? esc(fmtUpdate(d.update)) : t('how_launch')}</td></tr>`).join('');
+  const versions = rows ? `<table class="how-table"><thead><tr><th>${t('how_ed')}</th><th>${t('how_src')}</th><th>${t('how_upd')}</th></tr></thead><tbody>${rows}</tbody></table>` : '';
+  openModalHtml(t('how'), `<div class="how">${HOW[LANG].replace('{versions}', versions)}</div>`, 'mid');
+}
 
 // ── init ─────────────────────────────────────────────────────────
 async function init() {
@@ -884,7 +1081,8 @@ function openModal(title, obj, barColor) {
 }
 let _modalOpener = null;
 function openModalHtml(title, html, wide) {
-  document.getElementById('modal-box').classList.toggle('wide', !!wide);
+  // wide: true = largo (visão geral); string = classe de largura (ex.: 'mid' pro texto do Como funciona)
+  document.getElementById('modal-box').className = 'modal-box' + (wide ? ' ' + (wide === true ? 'wide' : wide) : '');
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal').classList.remove('hidden');

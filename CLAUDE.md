@@ -357,7 +357,7 @@ ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
 10. ✅ **Eixos de score** — normalização por eixos ativos, knob de potencial, desconto D2 (`fee_discount`) e **modo reforço** (ver §10.1). Cobertos por `tests/test_sofifa.py`.
 13. ✅ **i18n do frontend (pt-BR / en / es)** — dicionário `I18N` + `t()` no `index.html`, seletor no cabeçalho (salvo em `localStorage`, default = idioma do navegador). Países/nacionalidades traduzidos via `Intl.DisplayNames` (mapa nome-inglês → ISO montado do próprio Intl + `COUNTRY_ISO_ALIAS` para nomes do SoFIFA/TM tipo "Korea Republic"; `COUNTRY_NON_ISO` para Inglaterra/Escócia/Gales/Irlanda do Norte). Siglas de posição traduzidas via `POS_I18N`/`posName` (pt: ZAG, VOL, MEI, PE, ATA…; es: DFC, MCD, MCO, EI, DC…; linhas de fallback DEF/MEIO/ATAQ e DEF/MED/DEL). Valores enviados à API continuam em inglês — só o rótulo traduz.
 11. **Seletor de versão de elenco** (`?r=` do SoFIFA) — backlog; cada FIFA tem múltiplos snapshots durante a temporada.
-12. ✅ **Scraping ao vivo do SoFIFA para FIFA 23/FC 24/25/26** — `sofifa_scraper.py`, autenticado via cookies manuais (Cloudflare bloqueia requests puro e soccerdata; ver D6). CLI gera `data/raw/players_{edition}.csv` no mesmo formato dos CSVs Kaggle, sem tocar em `api.py`/`sofifa.py`. `club_position` fica vazio de propósito — `team_line_overall` já tem fallback (top-3 por overall) pra isso.
+12. ✅ **Scraping ao vivo do SoFIFA para FIFA 23/FC 24/25/26** — `sofifa_scraper.py`, autenticado via cookies manuais (Cloudflare bloqueia requests puro e soccerdata; ver D6). CLI gera `data/raw/players_{edition}.csv` no mesmo formato dos CSVs Kaggle, sem tocar em `api.py`/`sofifa.py`. O modo completo grava o update usado (`r` + data) em `data/raw/sofifa_versions.json`. `club_position` fica vazio de propósito — `team_line_overall` já tem fallback (top-3 por overall) pra isso.
 
 ---
 
@@ -415,6 +415,7 @@ Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o est�
 |--------|------|-----------|
 | `GET`  | `/` | Serve `index.html` |
 | `GET`  | `/fifa-years` | Edições disponíveis (baseado nos CSVs em `data/raw/`) |
+| `GET`  | `/data-info` | Origem e versão dos jogadores por edição (Kaggle = elenco de lançamento; SoFIFA = data do update, de `data/raw/sofifa_versions.json`). Usado no "Como funciona" do header |
 | `GET`  | `/countries?edition=N` | Países disponíveis para a edição (via `LEAGUE_COUNTRY`) |
 | `GET`  | `/leagues?edition=N&country=X` | Ligas da edição, filtradas por país |
 | `GET`  | `/clubs?league=X` | Clubes com mapeamento TM válido na liga |

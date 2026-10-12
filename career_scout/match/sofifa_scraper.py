@@ -442,6 +442,14 @@ def scrape_by_profile(
     return _paginate(session, params, r_key, prefix, data_dir, delay)
 
 
+def save_version(data_dir: Path, edition: int, r_key: str, date_label: str) -> None:
+    """Registra qual update do SoFIFA gerou players_{edition}.csv (mostrado no "Como funciona")."""
+    p = data_dir / "raw" / "sofifa_versions.json"
+    versions = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    versions[str(edition)] = {"r": r_key, "date": date_label}
+    p.write_text(json.dumps(versions, indent=2), encoding="utf-8")
+
+
 def save_csv(players: list[dict], path: Path) -> None:
     if not players:
         return
@@ -540,6 +548,7 @@ if __name__ == "__main__":
             print(e)
             sys.exit(1)
         save_csv(players, out_csv)
+        save_version(data_dir, edition, r_key, date_label)
         print(f"\n{len(players)} jogadores → {out_csv}")
         enrich_league_names(session, r_key, edition, data_dir)
 

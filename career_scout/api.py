@@ -186,6 +186,17 @@ def _league_country(league_name: str) -> str:
     return LEAGUE_COUNTRY.get(league_name) or SOFIFA_LEAGUE_COUNTRY.get(league_name, "Outros")
 
 
+@app.get("/data-info")
+def data_info():
+    """Origem e versão dos jogadores de cada edição (pro "Como funciona")."""
+    p = BASE / "raw" / "sofifa_versions.json"
+    scraped = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    # Kaggle (FIFA 15–22): todos os jogadores apontam pro update XX0002 = elenco de lançamento
+    return [{"edition": e, "source": "sofifa", "update": scraped[str(e)]["date"]} if str(e) in scraped
+            else {"edition": e, "source": "kaggle", "update": None}
+            for e in fifa_years()]
+
+
 @app.get("/countries")
 def countries(edition: int):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
