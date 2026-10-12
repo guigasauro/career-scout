@@ -624,8 +624,8 @@
     "ok": true
   },
   "Carpi": {
-    "tm_slug": "burgos-cf",
-    "tm_id": 1536,
+    "tm_slug": "carpi-fc-1909",
+    "tm_id": 4102,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -654,8 +654,8 @@
     "ok": true
   },
   "GFC Ajaccio": {
-    "tm_slug": "gfc-ajaccio-u19",
-    "tm_id": 49984,
+    "tm_slug": "gfc-ajaccio",
+    "tm_id": 3558,
     "league": "French Ligue 1",
     "ok": true
   },
