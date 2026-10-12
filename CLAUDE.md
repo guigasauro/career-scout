@@ -373,7 +373,7 @@ ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
 | **D3** — granularidade | Posição fina com fallback para linha (config `min_sample`, default 3) |
 | **D5** — janela | **5 temporadas** de histórico (configurável via `--history`). Fórmula: `range(season_ceil - history + 1, season_ceil + 1)` onde `season_ceil = 2000 + fifa_edition - 1`. FIFA 17 → temporadas 2012/13–2016/17. |
 | **D6** — SoFIFA | **Dataset Kaggle `players_{year}.csv`** para FIFA 15–22 (baixado em `data/raw/`). `sofifa_scraper.py` para FIFA 23+/FC 24-26, autenticado via cookies manuais (ver §4 D6 — Cloudflare bloqueia `requests` puro e `soccerdata`). Liga disponível via `league_name` no Kaggle — `_normalize_league` faz o mapeamento TM → Kaggle (ex.: "Ligue 1" → "French Ligue 1", "Eredivisie" → "Holland Eredivisie"). O scraper não preenche `league_name` (não disponível na listagem do SoFIFA). |
-| **transfer_type** | Campo adicionado: `"permanent"` \| `"loan"` \| `"free"`. `fee_mean` no Estágio 2 considera só permanent+free onde fee não é None. `"loan_return"` é descartado no parser (retornos de empréstimo — "End of loan" no TM). |
+| **transfer_type** | Campo adicionado: `"permanent"` \| `"loan"` \| `"free"`. `fee_mean` no Estágio 2 considera só `permanent` com fee > 0 (livres ficam fora da média de valor, mas contam para idade/nac/liga e para `n_permanent`). `"loan_return"` é descartado no parser (retornos de empréstimo — "End of loan" no TM). |
 
 ## 15. Schema travado do Estágio 1 (Transfer)
 

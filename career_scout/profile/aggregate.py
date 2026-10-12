@@ -54,7 +54,8 @@ def build_profiles(
             continue
 
         permanent = [t for t in group if t.transfer_type in ("permanent", "free")]
-        fees = [t.fee for t in permanent if t.fee is not None]
+        # livres (fee 0) puxariam o alvo de valor pra baixo — só compras pagas entram na média
+        fees = [t.fee for t in group if t.transfer_type == "permanent" and t.fee]
         ages = [t.age for t in group if t.age is not None]
 
         profiles.append(PositionProfile(

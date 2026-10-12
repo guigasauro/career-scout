@@ -36,6 +36,17 @@ class TestBuildProfiles(unittest.TestCase):
         self.assertEqual(cb.nationality_mode, "France")
         self.assertEqual(cb.age_mean, 24.0)
 
+    def test_free_transfer_out_of_fee_mean(self):
+        # caso real (Tottenham LB): 3 compras ~€16M + Robertson livre não pode puxar a média pra €12M
+        transfers = [
+            _t("A", "LB", fee=18_000_000.0), _t("B", "LB", fee=14_700_000.0),
+            _t("C", "LB", fee=15_000_000.0), _t("D", "LB", age=32, transfer_type="free", fee=0.0),
+        ]
+        lb = next(p for p in build_profiles(transfers, min_sample=3) if p.position_norm == "LB")
+        self.assertEqual(lb.fee_mean, 15_900_000)
+        self.assertEqual(lb.n_permanent, 4)      # livre continua contando como chegada definitiva
+        self.assertEqual(lb.age_mean, 26.0)      # e entra na idade
+
     def test_single_below_sample_folds_into_line(self):
         transfers = [_t("Solo", "LW")]
         profiles = build_profiles(transfers, min_sample=3, min_support=2)

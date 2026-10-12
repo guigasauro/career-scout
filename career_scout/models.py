@@ -25,7 +25,7 @@ class PositionProfile:
     n: int                          # total de chegadas (permanent + loan + free)
     n_permanent: int                # só permanentes + free (base do fee_mean)
     age_mean: Optional[float]
-    fee_mean: Optional[float]       # média da fee paga em contratações definitivas/free (EUR)
+    fee_mean: Optional[float]       # média da fee paga em contratações definitivas (EUR; livres fora)
     nationality_mode: Optional[str]
     from_league_mode: Optional[str]
     from_club_mode: Optional[str]
