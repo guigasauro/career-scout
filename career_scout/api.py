@@ -99,6 +99,27 @@ def _load_sofifa_league_country() -> dict[str, str]:
 
 SOFIFA_LEAGUE_COUNTRY: dict[str, str] = _load_sofifa_league_country()
 
+
+def _load_sofifa_league_level() -> dict[str, int]:
+    """Divisão das ligas raspadas (CSVs sem `league_level`). O catálogo do SoFIFA
+    lista as ligas de cada país da 1ª para baixo (grupo TOP 5 antes do A-Z),
+    então a posição dentro do país = divisão. Rótulo igual ao gravado no CSV."""
+    from career_scout.match.sofifa_scraper import league_label
+    p = BASE / "raw" / "sofifa_leagues.json"
+    if not p.exists():
+        return {}
+    levels: dict[str, int] = {}
+    per_nation: Counter = Counter()
+    for group in json.loads(p.read_text(encoding="utf-8"))["data"]:
+        for c in group["childs"]:
+            nation = c.get("nationName", "")
+            per_nation[nation] += 1
+            levels[league_label(c["value"], nation)] = per_nation[nation]
+    return levels
+
+
+SOFIFA_LEAGUE_LEVEL: dict[str, int] = _load_sofifa_league_level()
+
 # Ligas que o CSV Kaggle rotula mas que não existem como liga jogável no FIFA
 # (ex.: Wrexham marcado como National League no FIFA 22 — no jogo fica em Resto do Mundo).
 HIDDEN_LEAGUES: set[str] = {"English National League"}
@@ -181,7 +202,7 @@ def leagues(edition: int, country: str | None = None):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
     if not csv_path.exists():
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
-    levels = league_levels(csv_path)
+    levels = league_levels(csv_path) or SOFIFA_LEAGUE_LEVEL
     # Ordena por divisão (1ª, 2ª…) e depois por nome; sem nível conhecido vai pro fim.
     all_leagues = sorted(league_names(csv_path) - HIDDEN_LEAGUES,
                          key=lambda l: (levels.get(l, 99), l))

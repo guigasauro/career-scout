@@ -171,6 +171,10 @@ def _parse_teams_page(html: str) -> list[str]:
     return names
 
 
+_KAGGLE_PREFIX = {"England": "English", "Spain": "Spain", "France": "French",
+                  "Germany": "German", "Italy": "Italian", "Netherlands": "Holland"}
+
+
 def league_label(league_name: str, nation_name: str) -> str:
     """Nome de liga pra gravar no CSV. As 5 grandes ligas usam o alias Kaggle
     já existente em sofifa.py::_normalize_league — é o nome que CLUBS_DB (e
@@ -181,7 +185,9 @@ def league_label(league_name: str, nation_name: str) -> str:
     resolve ('Premier League' existe na Inglaterra E na Ucrânia, por exemplo)."""
     from career_scout.match.sofifa import _normalize_league
     kaggle_name = _normalize_league(league_name)
-    if kaggle_name != league_name:
+    # só aplica o alias no país certo: "Bundesliga" também é a da Áustria,
+    # "Premier League" a da Ucrânia, "Serie A" a do Equador.
+    if kaggle_name != league_name and kaggle_name.startswith(_KAGGLE_PREFIX.get(nation_name, "\0")):
         return kaggle_name
     return f"{league_name} ({nation_name})" if nation_name else league_name
 

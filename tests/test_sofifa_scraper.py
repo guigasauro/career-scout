@@ -1,6 +1,6 @@
 import unittest
 
-from career_scout.match.sofifa_scraper import _looks_like_challenge, _parse_page, edition_number
+from career_scout.match.sofifa_scraper import _looks_like_challenge, _parse_page, edition_number, league_label
 
 
 class TestEditionNumber(unittest.TestCase):
@@ -54,6 +54,15 @@ class TestParsePageEditionFilter(unittest.TestCase):
         rows, raw_count = _parse_page(html, "260043")
         self.assertEqual(rows, [])
         self.assertEqual(raw_count, 1)  # página real, não pode parecer "fim da lista"
+
+
+
+class TestLeagueLabel(unittest.TestCase):
+    def test_top5_alias_only_in_right_country(self):
+        self.assertEqual(league_label("Bundesliga", "Germany"), "German 1. Bundesliga")
+        self.assertEqual(league_label("Bundesliga", "Austria"), "Bundesliga (Austria)")
+        self.assertEqual(league_label("Premier League", "Ukraine"), "Premier League (Ukraine)")
+        self.assertEqual(league_label("Serie A", "Ecuador"), "Serie A (Ecuador)")
 
 
 if __name__ == "__main__":
