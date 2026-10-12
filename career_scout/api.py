@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from career_scout.extract.transfermarkt import get_arrivals
 from career_scout.match.sofifa import (
-    league_names, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
+    league_levels, league_names, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
 )
 from career_scout.models import Transfer
 from career_scout.profile.aggregate import build_profiles, load_transfers
@@ -25,7 +25,6 @@ LEAGUE_COUNTRY: dict[str, str] = {
     "English League Championship":     "England",
     "English League One":              "England",
     "English League Two":              "England",
-    "English National League":         "England",
     "Spain Primera Division":          "Spain",
     "Spanish Segunda División":        "Spain",
     "French Ligue 1":                  "France",
@@ -100,6 +99,10 @@ def _load_sofifa_league_country() -> dict[str, str]:
 
 SOFIFA_LEAGUE_COUNTRY: dict[str, str] = _load_sofifa_league_country()
 
+# Ligas que o CSV Kaggle rotula mas que não existem como liga jogável no FIFA
+# (ex.: Wrexham marcado como National League no FIFA 22 — no jogo fica em Resto do Mundo).
+HIDDEN_LEAGUES: set[str] = {"English National League"}
+
 # Overrides manuais: prevalecem sobre o club_mapping.json (para correções de nome)
 _OVERRIDES: list[dict] = [
     {"name": "PSG", "slug": "paris-saint-germain", "id": 583,
@@ -167,7 +170,7 @@ def countries(edition: int):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
     if not csv_path.exists():
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
-    league_set = league_names(csv_path)
+    league_set = league_names(csv_path) - HIDDEN_LEAGUES
     found = sorted({_league_country(l) for l in league_set})
     # "Outros" sempre por último
     return [c for c in found if c != "Outros"] + (["Outros"] if "Outros" in found else [])
@@ -178,7 +181,10 @@ def leagues(edition: int, country: str | None = None):
     csv_path = BASE / "raw" / f"players_{edition}.csv"
     if not csv_path.exists():
         raise HTTPException(404, f"Dataset FIFA {edition} não encontrado")
-    all_leagues = sorted(league_names(csv_path))
+    levels = league_levels(csv_path)
+    # Ordena por divisão (1ª, 2ª…) e depois por nome; sem nível conhecido vai pro fim.
+    all_leagues = sorted(league_names(csv_path) - HIDDEN_LEAGUES,
+                         key=lambda l: (levels.get(l, 99), l))
     if country:
         all_leagues = [l for l in all_leagues if _league_country(l) == country]
     return all_leagues

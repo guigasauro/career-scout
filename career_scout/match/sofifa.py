@@ -91,6 +91,17 @@ def league_names(csv_path: Path) -> set[str]:
     return {r["league_name"] for r in _load_sofifa_cached(str(csv_path)) if r.get("league_name")}
 
 
+def league_levels(csv_path: Path) -> dict[str, int]:
+    """league_name → divisão (1 = primeira) via coluna `league_level` do Kaggle.
+    CSVs raspados sem a coluna ficam de fora (o chamador usa fallback)."""
+    levels: dict[str, int] = {}
+    for r in _load_sofifa_cached(str(csv_path)):
+        lvl = (r.get("league_level") or "").split(".")[0]
+        if r.get("league_name") and lvl.isdigit():
+            levels.setdefault(r["league_name"], int(lvl))
+    return levels
+
+
 def _parse_positions(raw: str) -> list[str]:
     return [p.strip() for p in raw.split(",") if p.strip()]
 
