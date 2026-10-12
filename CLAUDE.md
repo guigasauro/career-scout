@@ -309,6 +309,12 @@ ligado, adiciona um eixo de **proximidade ao overall dos titulares** da linha.
   há XI marcado (raro no Kaggle; cobre edições futuras sem `club_position`).
 - **`level_offset` (ambição):** desloca o overall-alvo — `0` reforço similar,
   `+3` upgrade, `−3` aposta barata.
+- **Valor-alvo acompanha o offset:** com `level_offset ≠ 0`, o alvo de valor
+  (`fee_mean × fee_discount`) é multiplicado pela razão de preço de mercado da
+  posição — mediana de `value_eur` a ±1 do overall-alvo ÷ a ±1 do overall do
+  elenco. Sem isso o eixo de valor (histórico barato) anulava o Upgrade.
+- **`value_log` (toggle "Escala de valor"):** mede a distância de valor em log
+  (razão, não euros). Default linear; em teste A/B.
 - **`score_threshold` (tamanho do rol):** corte mínimo de score; retorna o **rol**
   acima do threshold em vez de top-N puro. Frontend expõe Estrito 0.6 / Médio 0.45
   / Amplo 0.3. É o que impede "vazamento de estrelas" no sort por overall.
@@ -425,7 +431,7 @@ Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o est�
 - `fifa_edition` = número da edição (22 = FIFA 22); mapeia para `players_22.csv` e seasons até 2021 (`2000 + edition - 1`)
 - Cache de chegadas em `data/processed/arrivals_{club_id}_{edition}_h{history}.csv` — segunda chamada não raspa o TM
 - Campos de matching (só usados por `/scout`): `potential_weight` (knob de potencial), `fee_discount` (desconto D2), e o **modo reforço** — `realism` (liga a ancoragem no overall do elenco), `level_offset` (ambição: 0/+3/−3), `sort_by` (`score`|`overall`), `score_threshold` (corte do rol; 0 → backend usa 0.4 quando `realism`). Ver §10–10.1.
-- Resposta de `/scout` inclui `team_levels` (overall titular por linha) e, por posição, `team_overall`. Resposta de `/overview` traz `by_season`, modas (`by_nationality`/`by_from_league`), `age_stats`, `fee_stats`, perfis e chegadas.
+- Resposta de `/scout` inclui `team_levels` (overall titular por linha) e, por posição, `team_overall` e `total` (tamanho do rol inteiro; `candidates` vem cortado em `top_n`). O frontend pede `top_n=50` e pagina 10 por vez dentro do cartão da posição; ordenar por coluna reordena os 50, não só a página. Resposta de `/overview` traz `by_season`, modas (`by_nationality`/`by_from_league`), `age_stats`, `fee_stats`, perfis e chegadas.
 
 ### Estrutura de clubes (`CLUBS_DB`)
 Carregada na inicialização a partir de `data/club_mapping.json` + `_OVERRIDES` (lista manual em `api.py` que prevalece).  

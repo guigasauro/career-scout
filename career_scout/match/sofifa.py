@@ -1,8 +1,10 @@
 """Estágio 3 — matching de jogadores SoFIFA contra perfis do Estágio 2."""
 import csv
+import math
 from collections import defaultdict
 from dataclasses import dataclass, field
 from functools import lru_cache
+from statistics import median
 from pathlib import Path
 from typing import Optional
 
@@ -125,10 +127,17 @@ def _normalize_league(league: str) -> str:
     return aliases.get(league, league)
 
 
+def _median_value_near(pool: list[dict], ovr: float) -> float | None:
+    """Mediana do value_eur dos jogadores do pool a ±1 de overall."""
+    vs = [v for p in pool if p.get("overall") and abs(int(p["overall"]) - ovr) <= 1
+          and (v := float(p.get("value_eur") or 0)) > 0]
+    return median(vs) if vs else None
+
+
 def rank_candidates(
     profile: PositionProfile,
     players: list[dict],
-    top_n: int = 20,
+    top_n: int | None = 20,   # None = rol inteiro
     weights: dict[str, float] | None = None,
     exclude_club: str | None = None,
     potential_weight: float = 0.0,
@@ -137,6 +146,7 @@ def rank_candidates(
     level_offset: int = 0,
     score_threshold: float = 0.0,
     sort_by: str = "score",
+    value_log: bool = False,
 ) -> list[Candidate]:
     w = dict(weights or DEFAULT_WEIGHTS)
     w["potential"] = potential_weight   # knob do usuário (0 = ignorar potencial)
@@ -157,7 +167,11 @@ def rank_candidates(
 
     # valores para normalização (z-score simples)
     ages   = [int(p["age"])       for p in pool if p.get("age")]
-    values = [float(p["value_eur"]) for p in pool if p.get("value_eur") and p["value_eur"]]
+    # log: distância vira razão (€10M→€20M pesa como €1M→€2M); sem isso a massa de
+    # jogadores quase sem valor deixa o std pequeno e zera o eixo pra quem custa >€25M
+    vscale = math.log if value_log else float
+    # "0.0" (string) passa no teste de verdade — filtra pelo número (log(0) quebra)
+    values = [vscale(v) for p in pool if (v := float(p.get("value_eur") or 0)) > 0]
 
     age_mean   = sum(ages)   / len(ages)   if ages   else 0
     age_std    = (sum((a - age_mean)**2 for a in ages) / len(ages)) ** 0.5 or 1
@@ -174,6 +188,12 @@ def rank_candidates(
     # SoFIFA é market value, não preço pago. Desconta a fee para comparar
     # market value ↔ market value. ponytail: α global; vira por-posição se medir que vale.
     target_value = profile.fee_mean * fee_discount if profile.fee_mean else None
+    # Upgrade/Aposta barata: o valor-alvo acompanha o nível pedido, na proporção
+    # do preço de mercado da posição (mediana no overall-alvo ÷ no overall do elenco)
+    if target_value and target_overall and level_offset:
+        base, up = _median_value_near(pool, team_overall), _median_value_near(pool, target_overall)
+        if base and up:
+            target_value *= up / base
 
     # peso total dos eixos que este perfil consegue pontuar — normaliza o score
     # para [0,1] e o torna comparável entre posições (perfil sem fee/nac/liga
@@ -193,9 +213,9 @@ def rank_candidates(
         got = dict.fromkeys(axis_max, 0.0)
 
         # similaridade de valor (1 - distância z normalizada → [0,1])
-        if target_value and p.get("value_eur") and p["value_eur"]:
-            v = float(p["value_eur"])
-            dist = abs(v - target_value) / val_std
+        v = float(p.get("value_eur") or 0)
+        if target_value and v > 0:
+            dist = abs(vscale(v) - vscale(target_value)) / val_std
             got["value"] = w["value"] * max(0.0, 1 - dist / 3)
 
         # similaridade de idade

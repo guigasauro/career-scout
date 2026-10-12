@@ -191,6 +191,11 @@
   .pos-section { scroll-margin-top: 56px; }
   .pos-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
   .pos-head .badge { font-size: 17px; }
+  .pager { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; }
+  .pager .pg-count { font-variant-numeric: tabular-nums; }
+  .pager .pg-rest { display: contents; }
+  .pager .pg-btns { display: flex; gap: 8px; margin-left: auto; }
+  .pager .btn-secondary { padding: 6px 12px; font-size: 13px; }
   .pos-profile { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; }
   .pos-profile div { display: flex; gap: 6px; }
   .pos-profile dt { color: var(--muted); }
@@ -279,12 +284,15 @@
     <aside class="settings">
       <h2 data-i18n="settings"></h2>
       <label><span><span data-i18n="hist"></span><span class="info" tabindex="0" role="img" data-i18n-title="hist_tip" data-i18n-aria="hist_tip">i</span></span><input type="number" id="inp-history" value="5" min="2" max="15" disabled onchange="loadOverview()"></label>
-      <label><span><span data-i18n="topn"></span><span class="info" tabindex="0" role="img" data-i18n-title="topn_tip" data-i18n-aria="topn_tip">i</span></span><input type="number" id="inp-topn" value="10" min="5" max="50" disabled></label>
       <label><span><span data-i18n="pot"></span><span class="info" tabindex="0" role="img" data-i18n-title="pot_tip" data-i18n-aria="pot_tip">i</span></span><select id="sel-potential" disabled>
         <option value="0" data-i18n="off"></option>
         <option value="0.15" data-i18n="low"></option>
         <option value="0.3" data-i18n="mid"></option>
         <option value="0.5" data-i18n="high"></option>
+      </select></label>
+      <label><span><span data-i18n="vscale"></span><span class="info" tabindex="0" role="img" data-i18n-title="vscale_tip" data-i18n-aria="vscale_tip">i</span></span><select id="sel-vscale" disabled>
+        <option value="0" data-i18n="vscale_lin"></option>
+        <option value="1" data-i18n="vscale_log"></option>
       </select></label>
       <label><span><span data-i18n="realism"></span><span class="info" tabindex="0" role="img" data-i18n-title="realism_tip" data-i18n-aria="realism_tip">i</span></span><select id="sel-realism" disabled onchange="onRealismChange()">
         <option value="0" data-i18n="off"></option>
@@ -351,7 +359,8 @@ const I18N = {
     sum_signings: '{n} contratações em {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor médio pago: {fee}', sum_fee_max: 'Contratação mais cara: {max}',
     hint_unmapped: 'Mapeie o clube em data/club_mapping.json (seed_clubs.py) ou em _OVERRIDES no api.py.',
     hist: 'Histórico (temporadas)', hist_tip: 'Quantas temporadas antes da edição entram no perfil de contratações do clube.',
-    topn: 'Jogadores por posição', topn_tip: 'Máximo de candidatos listados em cada posição.',
+    pg_count: '{a}–{b} de {n}', pg_prev: '‹ Anterior', pg_next: 'Próxima ›', pg_cap: 'Só os {n} primeiros do ranking são listados.',
+    vscale: 'Escala de valor', vscale_tip: 'Linear = diferença em euros; Log = diferença proporcional (€10M→€20M pesa como €1M→€2M).', vscale_lin: 'Linear', vscale_log: 'Log',
     pot: 'Priorizar potencial', pot_tip: 'Dá peso extra a jogadores com potencial alto (promessas). Off = só o padrão histórico do clube.',
     off: 'Off', on: 'On', low: 'Baixo', mid: 'Médio', high: 'Alto',
     realism: 'Ajustar ao elenco', realism_tip: 'Ancora as sugestões no overall médio dos titulares de cada linha, para não sugerir jogadores abaixo do nível do elenco.',
@@ -391,7 +400,8 @@ const I18N = {
     sum_signings: '{n} signings over {h} seasons ({per} per season)', sum_fee_mean: 'Average fee paid: {fee}', sum_fee_max: 'Most expensive signing: {max}',
     hint_unmapped: 'Map the club in data/club_mapping.json (seed_clubs.py) or in _OVERRIDES in api.py.',
     hist: 'History (seasons)', hist_tip: "How many seasons before the edition go into the club's signing profile.",
-    topn: 'Players per position', topn_tip: 'Maximum number of candidates listed per position.',
+    pg_count: '{a}–{b} of {n}', pg_prev: '‹ Previous', pg_next: 'Next ›', pg_cap: 'Only the top {n} of the ranking are listed.',
+    vscale: 'Value scale', vscale_tip: 'Linear = difference in euros; Log = proportional difference (€10M→€20M weighs like €1M→€2M).', vscale_lin: 'Linear', vscale_log: 'Log',
     pot: 'Prioritize potential', pot_tip: "Gives extra weight to high-potential players (wonderkids). Off = only the club's historical pattern.",
     off: 'Off', on: 'On', low: 'Low', mid: 'Medium', high: 'High',
     realism: 'Match squad level', realism_tip: "Anchors suggestions to the average overall of each line's starters, so it doesn't suggest players below the squad's level.",
@@ -431,7 +441,8 @@ const I18N = {
     sum_signings: '{n} fichajes en {h} temporadas ({per} por temporada)', sum_fee_mean: 'Valor medio pagado: {fee}', sum_fee_max: 'Fichaje más caro: {max}',
     hint_unmapped: 'Mapea el club en data/club_mapping.json (seed_clubs.py) o en _OVERRIDES en api.py.',
     hist: 'Historial (temporadas)', hist_tip: 'Cuántas temporadas antes de la edición entran en el perfil de fichajes del club.',
-    topn: 'Jugadores por posición', topn_tip: 'Máximo de candidatos listados por posición.',
+    pg_count: '{a}–{b} de {n}', pg_prev: '‹ Anterior', pg_next: 'Siguiente ›', pg_cap: 'Solo se listan los {n} primeros del ranking.',
+    vscale: 'Escala de valor', vscale_tip: 'Lineal = diferencia en euros; Log = diferencia proporcional (€10M→€20M pesa como €1M→€2M).', vscale_lin: 'Lineal', vscale_log: 'Log',
     pot: 'Priorizar potencial', pot_tip: 'Da peso extra a jugadores con alto potencial (promesas). Off = solo el patrón histórico del club.',
     off: 'Off', on: 'On', low: 'Bajo', mid: 'Medio', high: 'Alto',
     realism: 'Ajustar a la plantilla', realism_tip: 'Ancla las sugerencias en el overall medio de los titulares de cada línea, para no sugerir jugadores por debajo del nivel de la plantilla.',
@@ -587,7 +598,7 @@ async function init() {
 // ── estado na URL (?ed=22&club=583…) — recarregar/compartilhar mantém a busca ──
 const URL_FIELDS = {
   ed: 'sel-edition', country: 'sel-country', league: 'sel-league',
-  hist: 'inp-history', top: 'inp-topn', pot: 'sel-potential',
+  hist: 'inp-history', pot: 'sel-potential', vlog: 'sel-vscale',
   real: 'sel-realism', lvl: 'sel-level', sort: 'sel-sort', rol: 'sel-rol',
 };
 function saveUrl(run = false) {
@@ -604,7 +615,7 @@ function saveUrl(run = false) {
 async function restoreFromUrl() {
   const q = new URLSearchParams(location.search);
   const set = k => { if (q.has(k)) document.getElementById(URL_FIELDS[k]).value = q.get(k); };
-  ['hist', 'top', 'pot', 'real', 'lvl', 'sort', 'rol'].forEach(set);
+  ['hist', 'pot', 'vlog', 'real', 'lvl', 'sort', 'rol'].forEach(set);
   onRealismChange();
   if (!q.has('ed')) return;
   set('ed');      await onEditionChange();
@@ -682,8 +693,8 @@ async function onClubChange() {
   lockFooter(); clearOverview();
   if (!selectedClub) return;
   document.getElementById('inp-history').disabled  = false;
-  document.getElementById('inp-topn').disabled     = false;
   document.getElementById('sel-potential').disabled = false;
+  document.getElementById('sel-vscale').disabled = false;
   document.getElementById('sel-realism').disabled  = false;
   document.getElementById('btn-scout').disabled    = false;
   await loadOverview();
@@ -706,7 +717,7 @@ function onRealismChange() {
   document.querySelectorAll('.realism-only').forEach(el => el.style.display = on ? '' : 'none');
 }
 function lockFooter() {
-  ['inp-history','inp-topn','sel-potential','sel-realism','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
+  ['inp-history','sel-potential','sel-vscale','sel-realism','btn-scout'].forEach(id => document.getElementById(id).disabled = true);
 }
 function clearOverview() {
   document.getElementById('overview').innerHTML = '';
@@ -802,6 +813,7 @@ document.addEventListener('click', e => {
   th.parentElement.querySelectorAll('th').forEach(h => delete h.dataset.dir);
   th.dataset.dir = dir;
   const sign = dir === 'asc' ? 1 : -1;
+  if (th.closest('table').dataset.pos) return sortPosList(th.closest('table').dataset.pos, i, sign);
   const rows = [...tbody.rows].map(r => [cellKey(r.cells[i]), r]);
   rows.sort(([a], [b]) => {
     const na = typeof a === 'number', nb = typeof b === 'number';
@@ -1059,8 +1071,9 @@ function renderOverviewFull(d) {
 async function runScout() {
   const edition = parseInt(document.getElementById('sel-edition').value);
   const history = parseInt(document.getElementById('inp-history').value);
-  const top_n   = parseInt(document.getElementById('inp-topn').value);
+  const top_n   = 50;  // 5 páginas de 10 por posição; o total do rol vem em `total`
   const potential_weight = parseFloat(document.getElementById('sel-potential').value);
+  const value_log = document.getElementById('sel-vscale').value === '1';
   const realism = document.getElementById('sel-realism').value === '1';
   const level_offset = parseInt(document.getElementById('sel-level').value);
   const sort_by = realism ? document.getElementById('sel-sort').value : 'score';
@@ -1078,7 +1091,7 @@ async function runScout() {
       body: JSON.stringify({
         club_id: selectedClub.id, club_slug: selectedClub.slug,
         club_name: selectedClub.name, fifa_edition: edition, history, top_n, potential_weight,
-        realism, level_offset, sort_by, score_threshold,
+        realism, level_offset, sort_by, score_threshold, value_log,
       }),
     });
     if (!res.ok) throw new Error(await apiError(res));
@@ -1107,12 +1120,59 @@ function scoreTip(b) {
   // uma linha por eixo, ex.: "Valor: 28 / 36"
   return Object.entries(b || {}).map(([k, [got, max]]) => `${t('ax_' + k)}: ${got} / ${max}`).join('\n');
 }
-function renderPosition({ profile: p, candidates, team_overall }) {
-  const rows = candidates.map((c, i) => {
+// ── paginação dos candidatos (10 por página, dentro de cada cartão) ──
+const PAGE_SIZE = 10;
+const _posLists = {};  // posição → { rows, total, page }
+// chave de ordenação por coluna da tabela de candidatos (mesma ordem do thead)
+const POS_SORT_KEYS = [
+  c => c.rank, c => c.short_name.toLowerCase(), c => c.club_name.toLowerCase(),
+  c => countryName(c.nationality)?.toLowerCase(), c => c.age, c => c.value_eur,
+  c => c.overall, c => c.potential, c => c.score,
+];
+function sortPosList(pos, col, sign) {
+  const key = POS_SORT_KEYS[col], L = _posLists[pos];
+  if (!key || !L) return;
+  L.rows.sort((a, b) => {
+    const ka = key(a), kb = key(b), na = ka == null || ka === '', nb = kb == null || kb === '';
+    if (na !== nb) return na ? 1 : -1;  // sem valor sempre no fim
+    return sign * (typeof ka === 'number' ? ka - kb : String(ka).localeCompare(kb, LOCALE[LANG]));
+  });
+  showPosPage(pos, 0);
+}
+// contador (aria-live) fica fixo no DOM — região recriada não é anunciada; só o resto é refeito
+function pagerHtml(pos) {
+  return `<span class="pg-count" aria-live="polite">${pagerCount(pos)}</span><span class="pg-rest">${pagerRest(pos)}</span>`;
+}
+function pagerCount(pos) {
+  const { rows, total, page } = _posLists[pos];
+  const a = page * PAGE_SIZE + 1, b = Math.min(rows.length, a + PAGE_SIZE - 1);
+  return t('pg_count', { a, b, n: new Intl.NumberFormat(LOCALE[LANG]).format(total) });
+}
+function pagerRest(pos) {
+  const { rows, total, page } = _posLists[pos];
+  const last = Math.max(0, Math.ceil(rows.length / PAGE_SIZE) - 1);
+  const cap = page === last && total > rows.length ? `<span class="muted pg-cap">${t('pg_cap', { n: rows.length })}</span>` : '';
+  return `${cap}<span class="pg-btns">
+      <button class="btn-secondary" data-pg="prev" onclick="showPosPage('${pos}', ${page - 1}, 'prev')"${page === 0 ? ' disabled' : ''}>${t('pg_prev')}</button>
+      <button class="btn-secondary" data-pg="next" onclick="showPosPage('${pos}', ${page + 1}, 'next')"${page >= last ? ' disabled' : ''}>${t('pg_next')}</button>
+    </span>`;
+}
+function showPosPage(pos, page, from) {
+  const L = _posLists[pos];
+  L.page = page;
+  document.getElementById(`tb-${pos}`).innerHTML = L.rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map(candRow).join('');
+  const pager = document.getElementById(`pg-${pos}`);
+  if (!pager) return;  // ≤ 10 candidatos: sem paginador
+  pager.querySelector('.pg-count').textContent = pagerCount(pos);
+  pager.querySelector('.pg-rest').innerHTML = pagerRest(pos);
+  // o botão clicado foi recriado: devolve o foco a ele (ou ao outro, se ficou desabilitado)
+  if (from) (pager.querySelector(`[data-pg=${from}]:not(:disabled)`) || pager.querySelector('button:not(:disabled)'))?.focus();
+}
+function candRow(c) {
     const pct = Math.round(c.score * 100);
     const sofifa = c.sofifa_id ? `https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}` : '';
     return `<tr>
-      <td class="num muted hide-sm">${i + 1}</td>
+      <td class="num muted hide-sm">${c.rank}</td>
       <td class="player trunc">${sofifa ? `<a href="${sofifa}" target="_blank" rel="noopener">${esc(c.short_name)}</a>` : esc(c.short_name)}<span class="sub show-sm">${esc(c.club_name)}</span></td>
       <td class="trunc hide-sm" title="${esc(c.club_name)} (${esc(leagueName(c.league_name))})">${esc(c.club_name)}<span class="sub">${esc(leagueName(c.league_name))}</span></td>
       <td class="hide-sm">${esc(countryName(c.nationality))}</td>
@@ -1123,7 +1183,11 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <td class="num" title="${esc(scoreTip(c.breakdown))}" style="cursor:help"><div class="score-bar"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="val">${pct}%</span></div></td>
       <td class="hide-sm">${sofifa ? `<a class="ext" href="${sofifa}" target="_blank" rel="noopener">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
-  }).join('');
+}
+function renderPosition({ profile: p, candidates, total, team_overall }) {
+  const pos = p.position_norm;
+  // rank = posição no ranking original; continua visível depois de reordenar por outra coluna
+  _posLists[pos] = { rows: candidates.map((c, i) => ({ ...c, rank: i + 1 })), total: total ?? candidates.length, page: 0 };
   const prof = [
     [tr('th_signings'), p.n],
     [tr('th_age'), p.age_mean?.toFixed(1) ?? '—'],
@@ -1138,10 +1202,11 @@ function renderPosition({ profile: p, candidates, team_overall }) {
       <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''}>${esc(p.position_norm)}</span>
       <dl class="pos-profile">${prof}</dl>
     </header>
-    <div class="table-wrap"><table class="sortable">
+    <div class="table-wrap"><table class="sortable" data-pos="${esc(pos)}">
       <thead>${thead('~>#', 'th_name', '~th_club', '~th_nat', '>th_age', '>th_value', '>OVR', '>POT', '>Score', '~')}</thead>
-      <tbody>${rows}</tbody>
+      <tbody id="tb-${esc(pos)}">${_posLists[pos].rows.slice(0, PAGE_SIZE).map(candRow).join('')}</tbody>
     </table></div>
+    ${_posLists[pos].rows.length > PAGE_SIZE ? `<footer class="pager" id="pg-${esc(pos)}">${pagerHtml(pos)}</footer>` : ''}
   </section>`;
 }
 

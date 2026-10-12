@@ -84,6 +84,29 @@ class TestRankCandidates(unittest.TestCase):
                  rank_candidates(self.profile, players, fee_discount=1.0)}
         self.assertGreater(by_id["at10"], by_id["at8"])
 
+    def test_value_log_keeps_expensive_player_in_play(self):
+        # pool dominado por jogadores baratos: std linear pequeno zera o eixo de valor
+        # pra quem custa 5× o alvo (8M); em log ele ainda pontua
+        players = [_p(str(i), "Brazil", 24, 500_000, "CB") for i in range(20)]
+        players.append(_p("star", "Brazil", 24, 40_000_000, "CB"))
+        def value_pts(**kw):
+            c = next(c for c in rank_candidates(self.profile, players, top_n=50, **kw) if c.sofifa_id == "star")
+            return c.breakdown["value"][0]
+        self.assertEqual(value_pts(), 0)
+        self.assertGreater(value_pts(value_log=True), 0)
+
+    def test_upgrade_scales_value_target(self):
+        # mercado: overall 80 vale 8M, overall 83 vale 16M; alvo do histórico = 8M.
+        # Upgrade (+3 sobre elenco 80) dobra o valor-alvo → quem vale 16M casa no valor.
+        players = [_p(f"a{i}", "Brazil", 24, 8_000_000, "CB", overall=80) for i in range(3)]
+        players += [_p(f"b{i}", "Brazil", 24, 16_000_000, "CB", overall=83) for i in range(3)]
+        def value_pts(pid, **kw):
+            return next(c for c in rank_candidates(self.profile, players, top_n=10, **kw)
+                        if c.sofifa_id == pid).breakdown["value"][0]
+        self.assertGreater(value_pts("a0", team_overall=80.0), value_pts("b0", team_overall=80.0))
+        self.assertGreater(value_pts("b0", team_overall=80.0, level_offset=3),
+                           value_pts("a0", team_overall=80.0, level_offset=3))
+
     def test_score_normalized_to_unit_range(self):
         # perfeito em todos os eixos ativos → score == 1.0 (não a soma dos pesos)
         # fee_discount=1.0 para o candidato a 10M cair exatamente no alvo
