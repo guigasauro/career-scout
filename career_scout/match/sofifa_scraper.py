@@ -253,11 +253,15 @@ def _parse_page(html: str, r_key: str) -> tuple[list[dict], int]:
     if not table or not table.find("tbody"):
         return [], 0
 
+    # a ordem Value/Wage muda entre edições (FC 26+ põe Wage antes): achar pelo cabeçalho
+    heads = [th.get_text(strip=True) for th in table.find("thead").find_all("th")] if table.find("thead") else []
+    value_col = heads.index("Value") if "Value" in heads else 6
+
     rows = []
     raw_count = 0
     for tr in table.find("tbody").find_all("tr"):
         tds = tr.find_all("td", recursive=False)
-        if len(tds) < 7:
+        if len(tds) <= value_col:
             continue
 
         # td[1]: nome, posições (em inglês com hl=en-US), nacionalidade
@@ -292,8 +296,7 @@ def _parse_page(html: str, r_key: str) -> tuple[list[dict], int]:
         club_a = tds[5].find("a", href=re.compile(r"^/team/"))
         club_name = club_a.get_text(strip=True) if club_a else ""
 
-        # td[6]: valor de mercado
-        value_eur = _parse_value(tds[6].get_text(strip=True))
+        value_eur = _parse_value(tds[value_col].get_text(strip=True))
 
         rows.append({
             "sofifa_id":        sofifa_id,

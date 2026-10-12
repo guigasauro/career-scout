@@ -524,6 +524,8 @@ function countryName(name) {
   _regionNames[LANG] ??= new Intl.DisplayNames([LOCALE[LANG]], { type: 'region' });
   return _regionNames[LANG].of(code) || name;
 }
+// ligas raspadas do SoFIFA vêm como "Championship (England)": traduz só o país
+const leagueName = l => l && l.replace(/\(([^()]+)\)$/, (_, c) => `(${countryName(c)})`);
 
 function applyI18n() {
   document.documentElement.lang = LOCALE[LANG];
@@ -532,6 +534,7 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
   document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
   document.querySelectorAll('#sel-country option').forEach(o => { if (o.value) o.textContent = countryName(o.value); });
+  document.querySelectorAll('#sel-league option').forEach(o => { if (o.value) o.textContent = leagueName(o.value); });
   labelThemeButton();
 }
 // ── tema claro/escuro: sem escolha salva, segue o sistema ──
@@ -650,7 +653,7 @@ async function onCountryChange() {
   const leagues = await fetch(`/leagues?edition=${edition}&country=${encodeURIComponent(country)}`).then(r => r.json());
   const sel = document.getElementById('sel-league');
   reset('sel-league', 'select', false);
-  leagues.forEach(l => sel.appendChild(new Option(l, l)));
+  leagues.forEach(l => sel.appendChild(new Option(leagueName(l), l)));
   sel.disabled = false; setStep('step-league', true);
 }
 
@@ -1111,7 +1114,7 @@ function renderPosition({ profile: p, candidates, team_overall }) {
     return `<tr>
       <td class="num muted hide-sm">${i + 1}</td>
       <td class="player trunc">${sofifa ? `<a href="${sofifa}" target="_blank" rel="noopener">${esc(c.short_name)}</a>` : esc(c.short_name)}<span class="sub show-sm">${esc(c.club_name)}</span></td>
-      <td class="trunc hide-sm" title="${esc(c.club_name)} (${esc(c.league_name)})">${esc(c.club_name)}<span class="sub">${esc(c.league_name)}</span></td>
+      <td class="trunc hide-sm" title="${esc(c.club_name)} (${esc(leagueName(c.league_name))})">${esc(c.club_name)}<span class="sub">${esc(leagueName(c.league_name))}</span></td>
       <td class="hide-sm">${esc(countryName(c.nationality))}</td>
       <td class="num">${c.age}</td>
       <td class="num">${fmt(c.value_eur)}</td>

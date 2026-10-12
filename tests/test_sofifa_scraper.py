@@ -55,6 +55,15 @@ class TestParsePageEditionFilter(unittest.TestCase):
         self.assertEqual(rows, [])
         self.assertEqual(raw_count, 1)  # página real, não pode parecer "fim da lista"
 
+    def test_value_column_found_by_header(self):
+        # FC 26+: Wage vem antes de Value — não pode ler o salário como valor
+        head = "<thead><tr>" + "".join(f"<th>{h}</th>" for h in
+               ["", "Name", "Age", "Overall rating", "Potential", "Team & Contract", "Wage", "Value"]) + "</tr></thead>"
+        row = self.ROW.format(sofifa_id=3, href_version="260043", name="E. Haaland").replace(
+            "<td>€10M</td>", "<td>€390K</td><td>€172.5M</td>")
+        rows, _ = _parse_page(f"<table>{head}<tbody><tr>{row}</tr></tbody></table>", "260043")
+        self.assertEqual(rows[0]["value_eur"], 172_500_000)
+
 
 
 class TestLeagueLabel(unittest.TestCase):
