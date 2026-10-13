@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from career_scout.analytics.budget import load_budgets as _load_budgets
 from career_scout.analytics.deficiencies import deficiencies as _deficiencies, load_teams as _load_sb_teams
 from career_scout.analytics.recommend import recommend as _recommend
 from career_scout.extract.transfermarkt import get_arrivals
@@ -457,6 +458,7 @@ def analytics_team(season: str, team: str, target: str = "1-4"):
     return {
         "team": team, "rank": int(me["rank"]), "points": int(me["points"]), "matches": int(me["matches"]),
         "goals_for": int(me["goals_for"]), "goals_conceded": int(me["goals_conceded"]),
+        "budget": _load_budgets(season).get(team),  # None se o orçamento da temporada não foi calculado
         "deficiencies": _deficiencies(teams, team, _target(target)),
     }
 
@@ -464,7 +466,7 @@ def analytics_team(season: str, team: str, target: str = "1-4"):
 @app.get("/analytics/recommend")
 def analytics_recommend(season: str, team: str, target: str = "1-4", max_gap: float = -0.5,
                         max_age: int | None = None, max_value: float | None = None, top: int = 10,
-                        all_leagues: bool = True, strength: float = 0.3):
+                        all_leagues: bool = True, strength: float = 0.3, budget: bool = False):
     _sb_check(season, team)
     return _recommend(season, team, _target(target), max_gap, min(top, 30), max_age, max_value, all_leagues,
-                      min(max(strength, 0.0), 1.0))
+                      min(max(strength, 0.0), 1.0), budget=budget)

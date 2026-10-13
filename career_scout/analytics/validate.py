@@ -13,6 +13,7 @@ import csv
 import re
 from statistics import mean
 
+from career_scout.analytics.budget import season_budgets
 from career_scout.analytics.deficiencies import deficiencies, load_teams
 from career_scout.analytics.market import TEAM_ALIASES, club_index, load_market
 from career_scout.analytics.recommend import (
@@ -48,9 +49,11 @@ def _rank_of(ranked: list[dict], player_id: str) -> int | None:
 
 
 def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WEIGHT, tops=(10, 30),
-             mode="tier", top_k=None, leagues=None) -> tuple[list[dict], dict]:
+             mode="tier", top_k=None, leagues=None, budget=False) -> tuple[list[dict], dict]:
     """`leagues`: só os times dessas ligas são avaliados (separação desenvolvimento × teste);
-    o pool de candidatos continua sendo todas as ligas da temporada."""
+    o pool de candidatos continua sendo todas as ligas da temporada.
+    `budget`: listas e acaso só com jogadores que o clube pode pagar (valor de mercado ≤ teto do
+    orçamento histórico; sem valor no TM conta como pagável). Contratação acima do teto = erro."""
     seasons = sibling_seasons(f"x-{year}")
     players, share, market, by_tm = [], {}, {}, {}
     for s in seasons:
@@ -71,19 +74,22 @@ def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WE
             continue
         teams = load_teams(season)
         signings = summer_signings(season)
+        caps = season_budgets(season) if budget else {}
         for team in sorted({s["team"] for s in signings}):
             needed = plan(deficiencies(teams, team, target, mode), max_gap, top_k)
+            cap = caps.get(team, {}).get("cap")
             rank_cache: dict[tuple, list[dict]] = {}
+            affordable = lambda pid: not cap or not market.get(pid, {}).get("value") or float(market[pid]["value"]) <= cap
 
             def ranked(role, profile):
                 if (role, profile) not in rank_cache:
                     rank_cache[(role, profile)], _ = rank_role(players, share, role, PROFILES[(role, profile)],
                                                                exclude_team=team, top_n=None, market=market,
-                                                               strength_weight=strength_weight)
+                                                               strength_weight=strength_weight, max_value=cap)
                 return rank_cache[(role, profile)]
 
             # acaso: um jogador qualquer do pool (fora do time) cai numa posição pedida / no top-N?
-            pool = [p for p in players if p["team"] != team and float(p["minutes"]) >= MIN_MINUTES]
+            pool = [p for p in players if p["team"] != team and float(p["minutes"]) >= MIN_MINUTES and affordable(p["player_id"])]
             pool_roles = [{r for r, sh in roles_of(p).items() if sh >= MIN_ROLE_SHARE} for p in pool]
             base_role = mean(bool(rs & set(needed)) for rs in pool_roles) if pool else 0.0
             top_ids = {n: {c["player_id"] for role, profs in needed.items() for prof in profs for c in ranked(role, prof)[:n]}
@@ -93,7 +99,7 @@ def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WE
             for s in (x for x in signings if x["team"] == team):
                 p = by_tm.get(s["tm_player_id"])
                 row = {**s, "in_pool": False, "roles": "", "role_match": "", "best_rank": "", "pct_needed": "",
-                       "pct_other": "", "base_role": round(base_role, 3),
+                       "pct_other": "", "base_role": round(base_role, 3), "cap": cap or "", "affordable": "",
                        **{f"hit{n}": "" for n in tops}, **{f"base_top{n}": round(base_top[n], 3) for n in tops}}
                 if p is None or p["team"] == team or float(p["minutes"]) < MIN_MINUTES:
                     rows.append(row)  # veio de fora das ligas carregadas, jogou pouco ou já era do time
@@ -102,7 +108,8 @@ def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WE
                 if not roles:
                     rows.append(row)
                     continue
-                row.update(in_pool=True, roles="/".join(sorted(roles)), role_match=bool(roles & set(needed)))
+                row.update(in_pool=True, roles="/".join(sorted(roles)), role_match=bool(roles & set(needed)),
+                           affordable=affordable(p["player_id"]))
                 # posição relativa (0 = topo, 1 = fim) nos perfis pedidos × nos outros perfis da função
                 need_pct, other_pct, best = [], [], None
                 for (role, prof) in PROFILES:
@@ -136,6 +143,7 @@ def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WE
         "profile_n": len(prof),
         "pct_needed": mean(r["pct_needed"] for r in prof) if prof else 0,
         "pct_other": mean(r["pct_other"] for r in prof) if prof else 0,
+        "affordable": mean(r["affordable"] for r in ev) if ev else 0,
     }
     return rows, summary
 
@@ -149,10 +157,11 @@ def main() -> None:
     ap.add_argument("--mode", choices=("tier", "relative"), default="tier")
     ap.add_argument("--top-k", type=int, help="usar só as K maiores deficiências")
     ap.add_argument("--leagues", help="avaliar só os times destas ligas, ex.: premier-league,serie-a")
+    ap.add_argument("--budget", action="store_true", help="filtrar pelo orçamento histórico do clube")
     args = ap.parse_args()
     lo, hi = map(int, args.target.split("-"))
     leagues = set(args.leagues.split(",")) if args.leagues else None
-    rows, s = evaluate(args.year, (lo, hi), args.max_gap, args.strength, mode=args.mode, top_k=args.top_k, leagues=leagues)
+    rows, s = evaluate(args.year, (lo, hi), args.max_gap, args.strength, mode=args.mode, top_k=args.top_k, leagues=leagues, budget=args.budget)
     path = OUT.format(year=args.year)
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
@@ -164,6 +173,8 @@ def main() -> None:
         print(f"no top {n} de um perfil pedido: {s[f'hit{n}']:.0%}   (acaso: {s[f'hit{n}_base']:.0%})")
     print(f"posição relativa nos perfis pedidos: {s['pct_needed']:.2f} × nos outros perfis da função: {s['pct_other']:.2f}"
           f"   (0 = topo; n={s['profile_n']})")
+    if args.budget:
+        print(f"contratações dentro do teto do orçamento: {s['affordable']:.0%}")
     print(f"detalhe → {path}")
 
 

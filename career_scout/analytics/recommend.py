@@ -10,6 +10,7 @@ import argparse
 import csv
 from pathlib import Path
 
+from career_scout.analytics.budget import load_budgets
 from career_scout.analytics.deficiencies import deficiencies, load_teams
 from career_scout.analytics.market import load_market
 
@@ -197,12 +198,16 @@ def plan(deficiency_rows: list[dict], max_gap: float = -0.5, top_k: int | None =
 
 def recommend(season: str, team: str, target: tuple[int, int] = (1, 4), max_gap: float = -0.5, top_n: int = 10,
               max_age: int | None = None, max_value: float | None = None, all_leagues: bool = True,
-              strength_weight: float = STRENGTH_WEIGHT, mode: str = "tier", top_k: int | None = None) -> list[dict]:
+              strength_weight: float = STRENGTH_WEIGHT, mode: str = "tier", top_k: int | None = None,
+              budget: bool = False) -> list[dict]:
     """Funções a reforçar, da maior deficiência para a menor; cada uma com seus perfis
     (as deficiências que o perfil resolve, os jogadores atuais e os candidatos).
 
     As deficiências são sempre medidas na liga do time; `all_leagues` só amplia onde procurar."""
     teams = load_teams(season)
+    if budget:  # teto = orçamento histórico do clube (+ folga); o menor entre ele e o valor máximo pedido
+        cap = load_budgets(season).get(team, {}).get("cap")
+        max_value = min(v for v in (max_value, cap) if v) if (max_value or cap) else None
     players, share, market = [], {}, {}
     for s in (sibling_seasons(season) if all_leagues else [season]):
         league = split_season(s)[0]

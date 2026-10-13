@@ -451,6 +451,7 @@
       <label for="an-value"><span data-i18n="an_value"></span></label>
       <select id="an-value" onchange="anRun()">
         <option value="" data-i18n="an_any"></option>
+        <option value="budget" data-i18n="an_budget"></option>
         <option value="5000000">€5M</option><option value="10000000">€10M</option><option value="20000000">€20M</option>
         <option value="30000000">€30M</option><option value="50000000">€50M</option>
       </select>
@@ -500,6 +501,7 @@ const I18N = {
     th_league_avg: 'Média da liga', grp_attack: 'Ataque', grp_creation: 'Criação', grp_defense: 'Defesa',
     ind_above: 'Acima da média da liga', ind_below: 'Abaixo da média da liga', ind_good: 'melhor que a média', ind_bad: 'pior que a média',
     an_team_opt: '{rank}º {team} · {pts} pts',
+    an_budget: 'Orçamento do clube', an_budget_info: 'orçamento {b} (teto {cap})',
     an_scope: 'Buscar em', an_scope_all: 'Todas as ligas', an_scope_own: 'Mesma liga',
     an_league_tip: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador e o score é multiplicado pela força da liga (coeficiente UEFA 2015/16).',
     an_league_tip_off: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador, sem ajuste pela força da liga.',
@@ -592,6 +594,7 @@ const I18N = {
     th_league_avg: 'League average', grp_attack: 'Attack', grp_creation: 'Creation', grp_defense: 'Defence',
     ind_above: 'Above the league average', ind_below: 'Below the league average', ind_good: 'better than average', ind_bad: 'worse than average',
     an_team_opt: '#{rank} {team} · {pts} pts',
+    an_budget: "Club's budget", an_budget_info: 'budget {b} (cap {cap})',
     an_scope: 'Search in', an_scope_all: 'All leagues', an_scope_own: 'Same league',
     an_league_tip: "Across all leagues, the percentile is computed within each player's league and the score is multiplied by the league's strength (UEFA coefficient 2015/16).",
     an_league_tip_off: "Across all leagues, the percentile is computed within each player's league, with no league strength adjustment.",
@@ -684,6 +687,7 @@ const I18N = {
     th_league_avg: 'Media de la liga', grp_attack: 'Ataque', grp_creation: 'Creación', grp_defense: 'Defensa',
     ind_above: 'Por encima de la media de la liga', ind_below: 'Por debajo de la media de la liga', ind_good: 'mejor que la media', ind_bad: 'peor que la media',
     an_team_opt: '{rank}º {team} · {pts} pts',
+    an_budget: 'Presupuesto del club', an_budget_info: 'presupuesto {b} (tope {cap})',
     an_scope: 'Buscar en', an_scope_all: 'Todas las ligas', an_scope_own: 'Misma liga',
     an_league_tip: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador y el score se multiplica por la fuerza de la liga (coeficiente UEFA 2015/16).',
     an_league_tip_off: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador, sin ajuste por la fuerza de la liga.',
@@ -1459,7 +1463,9 @@ async function anRun() {
   const q = new URLSearchParams({ season: document.getElementById('an-season').value, team, target: document.getElementById('an-target').value });
   const rq = new URLSearchParams(q);
   if (document.getElementById('an-age').value) rq.set('max_age', document.getElementById('an-age').value);
-  if (document.getElementById('an-value').value) rq.set('max_value', document.getElementById('an-value').value);
+  const vmax = document.getElementById('an-value').value;
+  if (vmax === 'budget') rq.set('budget', true);
+  else if (vmax) rq.set('max_value', vmax);
   const all = document.getElementById('an-scope').value === '1';
   rq.set('all_leagues', all);
   rq.set('strength', all ? document.getElementById('an-strength').value : 0);
@@ -1548,7 +1554,7 @@ function anRender() {
   const rows = ['attack', 'creation', 'defense'].map(g => `<tr class="grp"><th colspan="6">${tr('grp_' + g)}</th></tr>` +
     d.deficiencies.filter(r => r.group === g).map(row).join('')).join('');
   const teamCard = `<section class="card">
-    <div class="card-header">${esc(d.team)} <span class="muted" style="font:400 14px var(--font)">${tr('an_record', { rank: d.rank, pts: d.points, gf: d.goals_for, ga: d.goals_conceded })}</span></div>
+    <div class="card-header">${esc(d.team)} <span class="muted" style="font:400 14px var(--font)">${tr('an_record', { rank: d.rank, pts: d.points, gf: d.goals_for, ga: d.goals_conceded })}${d.budget?.cap ? ' · ' + tr('an_budget_info', { b: fmt(d.budget.budget), cap: fmt(d.budget.cap) }) : ''}</span></div>
     <div class="table-wrap"><table class="an-metrics">
       <thead>${thead('th_metric', '>th_team_val', '~>th_league_avg', `~>${t('th_target_val')} (${tname})`, '~>th_pct', '>th_gap')}</thead>
       <tbody>${rows}</tbody>
