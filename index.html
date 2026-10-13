@@ -926,7 +926,8 @@ async function onLeagueChange() {
     return;
   }
   reset('sel-club', 'select', false);
-  clubs.forEach(c => sel.appendChild(new Option(c.name, JSON.stringify(c))));
+  clubs.sort((a, b) => a.name.localeCompare(b.name, LOCALE[LANG]))
+    .forEach(c => sel.appendChild(new Option(c.name, JSON.stringify(c))));
   sel.disabled = false; setStep('step-club', true);
   setHint(null);
 }
