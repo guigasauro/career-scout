@@ -384,6 +384,7 @@ def scout(req: ScoutRequest):
         if not profile.age_mean:
             continue
         team_overall = team_levels.get(line_of_pos(profile.position_norm)) if req.realism else None
+        targets = {}
         candidates = rank_candidates(profile, players, top_n=None,
                                      exclude_club=sofifa_name,
                                      potential_weight=req.potential_weight,
@@ -392,11 +393,13 @@ def scout(req: ScoutRequest):
                                      level_offset=req.level_offset,
                                      score_threshold=threshold,
                                      sort_by=sort_by,
-                                     value_log=req.value_log)
+                                     value_log=req.value_log,
+                                     targets=targets)
         positions.append({
             "profile": asdict(profile),
             "team_overall": team_overall,
             "target_overall": team_overall + req.level_offset if team_overall else None,
+            "targets": targets,         # alvos e pesos (%) de cada eixo do score
             "total": len(candidates),   # tamanho do rol; a lista vem cortada em top_n
             "candidates": [asdict(c) for c in candidates[:req.top_n]],
         })

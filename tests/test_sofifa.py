@@ -121,6 +121,14 @@ class TestRankCandidates(unittest.TestCase):
             self.assertLessEqual(abs(got - c.score * 100), len(c.breakdown))  # tolerância de arredondamento
             self.assertAlmostEqual(sum(m for _, m in c.breakdown.values()), 100, delta=len(c.breakdown))
 
+    def test_targets_reported(self):
+        targets = {}
+        rank_candidates(self.profile, self.players, fee_discount=0.8, targets=targets)
+        self.assertEqual(targets["value"], 8_000_000)          # fee_mean × desconto
+        self.assertEqual(targets["league"], "French Ligue 1")   # já no nome da edição
+        self.assertIsNone(targets["overall"])                   # sem modo reforço
+        self.assertAlmostEqual(sum(targets["weights"].values()), 100, delta=2)
+
     def test_potential_knob_reorders(self):
         players = [
             _p("low", "France", 24, 10_000_000, "CB"),   # encaixe perfeito, sem potencial

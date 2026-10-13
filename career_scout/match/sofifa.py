@@ -173,6 +173,7 @@ def rank_candidates(
     score_threshold: float = 0.0,
     sort_by: str = "score",
     value_log: bool = False,
+    targets: dict | None = None,   # se passado, recebe os alvos e pesos usados (janela de detalhes)
 ) -> list[Candidate]:
     w = dict(weights or DEFAULT_WEIGHTS)
     w["potential"] = potential_weight   # knob do usuário (0 = ignorar potencial)
@@ -233,6 +234,10 @@ def rank_candidates(
         "overall":     w["overall"],
     }.items() if v}
     active_weight = sum(axis_max.values()) or 1.0
+    if targets is not None:
+        targets.update(value=target_value, age=profile.age_mean, nationality=profile.nationality_mode,
+                       league=target_league, overall=target_overall,
+                       weights={k: round(100 * m / active_weight) for k, m in axis_max.items()})
 
     results: list[Candidate] = []
     for p in pool:

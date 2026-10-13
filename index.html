@@ -206,6 +206,11 @@
   .results-intro { margin-top: 6px; color: var(--muted); max-width: 72ch; }
   .pos-nav { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0; background: var(--ground); }
   .pos-section { scroll-margin-top: 56px; }
+  .pos-nav-ctx { align-self: center; margin-right: 8px; font-weight: 600; font-size: 14px; }
+  .pos-detail-btn { margin-left: auto; padding: 6px 12px; font-size: 13px; }
+  .det-note { margin: 8px 0 0; font-size: 13px; }
+  .det h3 { margin: 0 0 8px; font: 600 18px/1.2 var(--font-cond); }
+  .det { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; min-width: 0; }  /* tabela larga rola dentro, não alarga a janela */
   .pos-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
   .pos-head .badge { font-size: 17px; }
   .pager { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; }
@@ -265,6 +270,7 @@
     .dossier .btn-secondary { justify-self: start; }
     /* tabela de candidatos compacta: nome+clube, idade, valor, OVR, POT, % */
     .hide-sm { display: none; }
+    .pos-nav-ctx { flex-basis: 100%; }
     .show-sm { display: block !important; }
     .pos-section th, .pos-section td { padding: 9px 6px; }
     .pos-section td.player { max-width: 140px; white-space: normal; }
@@ -428,6 +434,8 @@ const I18N = {
     th_nperm: 'n perm.', th_age_mean: 'Idade média', th_fee_mean: 'Valor médio pago', th_nat_mode: 'Nac. típica',
     th_league_mode: 'Liga típica', th_club_mode: 'Clube típico', th_name: 'Nome', th_club: 'Clube', th_league: 'Liga', th_value: 'Valor',
     type_perm: 'compra', type_loan: 'emprést.', type_free: 'livre',
+    details: 'Detalhes', det_title: '{pos}: detalhes da busca', det_axes: 'Critérios do score', det_target: 'Alvo', det_weight: 'Peso', det_higher: 'quanto maior, melhor', det_profile: 'Perfil histórico', det_cands: 'Score de cada candidato (pontos / máximo)',
+    det_value_note: 'Alvo de valor = valor médio pago ({fee}) × 0,8, porque o valor pago costuma ficar acima do valor de mercado.', det_value_lvl: ' Ajustado ao preço de mercado do nível buscado.',
     hdr_level: 'Nível titular', hdr_target: 'Nível buscado',
     lvl_intro_up: 'Nível-alvo Upgrade: cada posição busca jogadores 3 pontos de overall acima dos titulares.',
     lvl_intro_same: 'Nível-alvo Reforço similar: cada posição busca jogadores com o mesmo overall dos titulares.',
@@ -477,6 +485,8 @@ const I18N = {
     th_nperm: 'n perm.', th_age_mean: 'Avg. age', th_fee_mean: 'Avg. fee paid', th_nat_mode: 'Typical nat.',
     th_league_mode: 'Typical league', th_club_mode: 'Typical club', th_name: 'Name', th_club: 'Club', th_league: 'League', th_value: 'Value',
     type_perm: 'perm', type_loan: 'loan', type_free: 'free',
+    details: 'Details', det_title: '{pos}: search details', det_axes: 'Score criteria', det_target: 'Target', det_weight: 'Weight', det_higher: 'higher is better', det_profile: 'Historical profile', det_cands: "Each candidate's score (points / max)",
+    det_value_note: 'Value target = average fee paid ({fee}) × 0.8, since fees usually run above market value.', det_value_lvl: ' Adjusted to the market price of the target level.',
     hdr_level: "Starters' level", hdr_target: 'Target level',
     lvl_intro_up: "Target level Upgrade: each position looks for players 3 overall points above the starters.",
     lvl_intro_same: "Target level Similar level: each position looks for players with the starters' overall.",
@@ -526,6 +536,8 @@ const I18N = {
     th_nperm: 'n def.', th_age_mean: 'Edad media', th_fee_mean: 'Valor medio pagado', th_nat_mode: 'Nac. típica',
     th_league_mode: 'Liga típica', th_club_mode: 'Club típico', th_name: 'Nombre', th_club: 'Club', th_league: 'Liga', th_value: 'Valor',
     type_perm: 'compra', type_loan: 'cesión', type_free: 'libre',
+    details: 'Detalles', det_title: '{pos}: detalles de la búsqueda', det_axes: 'Criterios del score', det_target: 'Objetivo', det_weight: 'Peso', det_higher: 'cuanto más alto, mejor', det_profile: 'Perfil histórico', det_cands: 'Score de cada candidato (puntos / máximo)',
+    det_value_note: 'Objetivo de valor = valor medio pagado ({fee}) × 0,8, porque lo pagado suele superar el valor de mercado.', det_value_lvl: ' Ajustado al precio de mercado del nivel buscado.',
     hdr_level: 'Nivel titular', hdr_target: 'Nivel buscado',
     lvl_intro_up: 'Nivel objetivo Mejora: cada posición busca jugadores 3 puntos de media por encima de los titulares.',
     lvl_intro_same: 'Nivel objetivo Refuerzo similar: cada posición busca jugadores con la misma media de los titulares.',
@@ -1167,6 +1179,35 @@ function openWatch(keepFocus) {
   else openModalHtml(t('watch'), html, true);
 }
 
+// ── janela de detalhes da posição: alvos, pesos e score aberto por eixo ──
+function openPosDetail(pos) {
+  const { profile: p, targets: T, rows } = _posLists[pos];
+  const W = T.weights || {}, axes = Object.keys(W);
+  const tgt = {
+    value: () => fmt(T.value), age: () => T.age?.toFixed(1), overall: () => T.overall != null ? Math.round(T.overall) : '—',
+    nationality: () => esc(countryName(T.nationality)), league: () => esc(leagueName(T.league)), potential: () => tr('det_higher'),
+  };
+  const axesRows = axes.map(k => `<tr><td>${tr('ax_' + k)}</td><td>${tgt[k]?.() ?? '—'}</td><td class="num">${W[k]}%</td></tr>`).join('');
+  const lvl = _lastScout?.level_offset && T.overall != null;
+  const note = 'value' in W ? `<p class="muted det-note">${tr('det_value_note', { fee: fmt(p.fee_mean) })}${lvl ? tr('det_value_lvl') : ''}</p>` : '';
+  const prof = [
+    ['th_signings', p.n], ['th_nperm', p.n_permanent], ['th_age_mean', p.age_mean?.toFixed(1) ?? '—'], ['th_fee_mean', fmt(p.fee_mean)],
+    ['th_nat_mode', esc(countryName(p.nationality_mode) ?? '—')], ['th_league_mode', esc(p.from_league_mode ?? '—')], ['th_club_mode', esc(p.from_club_mode ?? '—')],
+  ].map(([k, v]) => `<div><dt>${tr(k)}</dt><dd>${v}</dd></div>`).join('');
+  const candRows = rows.map(c => `<tr>
+      <td class="num muted">${c.rank}</td><td class="player trunc">${esc(c.short_name)}</td>
+      <td class="num">${tier(c.overall)}</td><td class="num">${Math.round(c.score * 100)}%</td>
+      ${axes.map(k => { const [got, max] = c.breakdown[k] || [0, 0]; return `<td class="num">${got}<span class="muted">/${max}</span></td>`; }).join('')}
+    </tr>`).join('');
+  openModalHtml(t('det_title', { pos: posName(pos) }), `<div class="det">
+    <section><h3>${tr('det_axes')}</h3>
+      <div class="table-wrap"><table><thead>${thead('', 'det_target', '>det_weight')}</thead><tbody>${axesRows}</tbody></table></div>${note}</section>
+    <section><h3>${tr('det_profile')}</h3><dl class="pos-profile">${prof}</dl></section>
+    <section><h3>${tr('det_cands')}</h3>
+      <div class="table-wrap"><table class="sortable"><thead>${thead('>#', 'th_name', '>OVR', '>Score', ...axes.map(k => '>ax_' + k))}</thead><tbody>${candRows}</tbody></table></div></section>
+  </div>`, true);
+}
+
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
   openModalHtml(title, distRows(obj, barColor), false);
@@ -1178,6 +1219,7 @@ function openModalHtml(title, html, wide) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modal-body').scrollTop = 0;  // não herda a rolagem da janela anterior (só vale com a caixa visível)
   _modalOpener = document.activeElement;
   document.getElementById('modal-close').focus();
 }
@@ -1437,7 +1479,7 @@ let _lastScout = null;
 // sufixo do Nível-alvo pelo sinal do offset: up (+3) / same (0) / cheap (−3)
 const lvlKey = (prefix, off) => prefix + (off > 0.5 ? 'up' : off < -0.5 ? 'cheap' : 'same');
 function renderResults(data) {
-  const nav = `<nav class="pos-nav">${data.positions.map(({ profile: p }) =>
+  const nav = `<nav class="pos-nav"><span class="pos-nav-ctx">${esc(data.club)} · ${esc(edLabel(data.fifa_edition))}</span>${data.positions.map(({ profile: p }) =>
     `<a class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''} href="#pos-${esc(p.position_norm)}">${esc(posName(p.position_norm))} <span style="opacity:.6">${p.n}</span></a>`).join('')}</nav>`;
   document.getElementById('results').innerHTML =
     `<h2 class="section-title">${tr('candidates')}</h2>` +
@@ -1511,10 +1553,10 @@ function candRow(c, target) {
       <td class="hide-sm">${sofifa ? `<a class="ext" href="${sofifa}" target="_blank" rel="noopener">SoFIFA ↗</a>` : ''}</td>
     </tr>`;
 }
-function renderPosition({ profile: p, candidates, total, team_overall, target_overall }) {
+function renderPosition({ profile: p, candidates, total, team_overall, target_overall, targets }) {
   const pos = p.position_norm;
   // rank = posição no ranking original; continua visível depois de reordenar por outra coluna
-  _posLists[pos] = { rows: candidates.map((c, i) => ({ ...c, rank: i + 1 })), total: total ?? candidates.length, page: 0, target: target_overall };
+  _posLists[pos] = { rows: candidates.map((c, i) => ({ ...c, rank: i + 1 })), total: total ?? candidates.length, page: 0, target: target_overall, profile: p, targets: targets || {} };
   const prof = [
     [tr('th_signings'), p.n],
     [tr('th_age'), p.age_mean?.toFixed(1) ?? '—'],
@@ -1530,6 +1572,7 @@ function renderPosition({ profile: p, candidates, total, team_overall, target_ov
     <header class="pos-head">
       <span class="badge ${posBadge(p.position_norm, p.is_most_frequent)}"${p.is_most_frequent ? ` title="${tr('most_signed')}"` : ''}>${esc(posName(p.position_norm))}</span>
       <dl class="pos-profile">${prof}</dl>
+      <button class="btn-secondary pos-detail-btn" type="button" onclick="openPosDetail('${esc(pos)}')">${tr('details')}</button>
     </header>
     <div class="table-wrap"><table class="sortable" data-pos="${esc(pos)}">
       <thead>${thead('~>#', 'th_name', '~th_club', '~th_nat', '>th_age', '>th_value', '>OVR', '>POT', '>Score', '~')}</thead>
