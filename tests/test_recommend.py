@@ -78,3 +78,12 @@ class TestPlan(unittest.TestCase):
         self.assertEqual([a["metric"] for a in out["CB"]["marking"]],           # desarmes+int cai no mesmo perfil
                          ["npxg_against", "padj_tackles_int"])
         self.assertNotIn("AM", out)                                             # xA −0,2 não é deficiência
+
+    def test_top_k_and_style_skipped(self):
+        from career_scout.analytics.recommend import plan
+        d = lambda m, g, style=False: {"metric": m, "label": m, "value": 0, "target": 0, "gap": g, "style": style}
+        rows = [d("possession", -3.0, True), d("npxg_against", -2.0), d("xa", -1.0), d("npxg", -0.1), d("shots", 0.5)]
+        self.assertEqual(list(plan(rows, top_k=2)), ["CB", "DM", "AM", "W"])           # posse (estilo) não conta
+        self.assertIn("ST", plan(rows, top_k=5))                                       # npxg −0,1 entra no top 5…
+        self.assertNotIn("shots", [a["metric"] for r in plan(rows, top_k=5).values()  # …mas gap ≥ 0 nunca
+                                   for p in r.values() for a in p])

@@ -26,6 +26,18 @@ class TestDeficiencies(unittest.TestCase):
         rows = deficiencies(self.teams, "D", target=(1, 2))
         self.assertEqual({r["group"] for r in rows}, {"attack", "creation", "defense"})
 
+    def test_relative_mode_weak_team_gets_its_weakest_area(self):
+        # D é o pior em xG sofrido e igual aos outros no resto: no modo relativo a pior área
+        # dele continua sendo a defesa, e as outras ficam acima do próprio nível (gap > 0)
+        rows = deficiencies(self.teams, "D", mode="relative")
+        self.assertEqual(rows[0]["metric"], "npxg_against")
+        self.assertLess(rows[0]["gap"], 0)
+        self.assertGreater(rows[-1]["gap"], 0)
+
+    def test_style_metrics_flagged(self):
+        rows = deficiencies(self.teams, "D")
+        self.assertEqual({r["metric"] for r in rows if r["style"]}, {"possession", "pass_pct"})
+
     def test_strength_has_positive_gap(self):
         teams = self.teams + [_team("E", 5, 40, npxg=60)]
         rows = deficiencies(teams, "E", target=(1, 2))

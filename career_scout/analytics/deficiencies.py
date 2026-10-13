@@ -19,6 +19,7 @@ class Metric:
     better: int          # +1 = maior é melhor; −1 = menor é melhor (números "contra")
     lines: tuple[str, ...]  # linhas que mais influenciam a métrica (deficiência → posição)
     group: str = ""      # attack / creation / defense — só agrupa a tabela na tela
+    style: bool = False  # descreve estilo de jogo, não qualidade (posse, % de passes): não vira pedido de reforço
 
 
 def _per_match(t: dict, k: str) -> float:
@@ -40,10 +41,10 @@ METRICS: list[tuple[Metric, callable]] = [
     (Metric("xa", "xA (chances criadas)", +1, ("MID", "ATT"), "creation"), lambda t: _per_match(t, "xa")),
     (Metric("passes_into_box", "Passes para a área", +1, ("MID", "ATT", "DEF"), "creation"), lambda t: _per_match(t, "passes_into_box")),
     (Metric("progressive_passes", "Passes progressivos", +1, ("MID", "DEF"), "creation"), lambda t: _per_match(t, "progressive_passes")),
-    (Metric("pass_pct", "Passes certos (%)", +1, ("MID", "DEF"), "creation"),
+    (Metric("pass_pct", "Passes certos (%)", +1, ("MID", "DEF"), "creation", style=True),
      lambda t: 100 * float(t["passes_completed"]) / float(t["passes"]) if float(t["passes"]) else 0.0),
     (Metric("dribbles_completed", "Dribles certos", +1, ("ATT",), "attack"), lambda t: _per_match(t, "dribbles_completed")),
-    (Metric("possession", "Posse (fatia dos passes, %)", +1, ("MID",), "creation"), lambda t: 100 * float(t["passes_share"])),
+    (Metric("possession", "Posse (fatia dos passes, %)", +1, ("MID",), "creation", style=True), lambda t: 100 * float(t["passes_share"])),
     (Metric("npxg_against", "xG sofrido sem pênaltis", -1, ("DEF", "MID", "GK"), "defense"), lambda t: _per_match(t, "npxg_against")),
     (Metric("shots_against", "Chutes sofridos", -1, ("DEF", "MID"), "defense"), lambda t: _per_match(t, "shots_against")),
     (Metric("box_entries_against", "Passes do adversário para a área", -1, ("DEF",), "defense"), lambda t: _per_match(t, "passes_into_box_against")),
@@ -60,11 +61,15 @@ def load_teams(season: str) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def deficiencies(teams: list[dict], team: str, target: tuple[int, int] = (1, 4)) -> list[dict]:
+def deficiencies(teams: list[dict], team: str, target: tuple[int, int] = (1, 4), mode: str = "tier") -> list[dict]:
     """Uma linha por métrica, da maior deficiência para a maior força.
 
-    `gap` = (time − média do patamar-alvo) / desvio da liga, com sinal de "melhor":
-    negativo = o time está abaixo do alvo naquilo. `pct` = percentil na liga (100 = melhor).
+    mode="tier": `gap` = (time − média do patamar-alvo) / desvio da liga, com sinal de "melhor";
+    negativo = o time está abaixo do alvo naquilo.
+    mode="relative": `gap` = desvio do time na métrica (contra a média da liga) menos o desvio
+    médio dele nas métricas de qualidade — as áreas mais fracas **em relação ao nível do próprio
+    time**. Time fraco não fica deficiente em tudo, time forte não fica sem deficiência.
+    `pct` = percentil na liga (100 = melhor).
     """
     me = next(t for t in teams if t["team"] == team)
     tier = [t for t in teams if target[0] <= int(t["rank"]) <= target[1]]
@@ -78,10 +83,17 @@ def deficiencies(teams: list[dict], team: str, target: tuple[int, int] = (1, 4))
         beats = sum(1 for v in vals if (mine - v) * m.better > 0)
         rows.append({
             "metric": m.key, "label": m.label, "lines": m.lines, "better": m.better, "group": m.group,
-            "value": mine, "target": tier_mean, "league_mean": mean,
+            "style": m.style, "value": mine, "target": tier_mean, "league_mean": mean,
             "pct": round(100 * beats / (len(vals) - 1)),
             "gap": round((mine - tier_mean) * m.better / std, 2),
+            "z": (mine - mean) * m.better / std,
         })
+    if mode == "relative":
+        level = sum(r["z"] for r in rows if not r["style"]) / sum(1 for r in rows if not r["style"])
+        for r in rows:
+            r["gap"] = round(r["z"] - level, 2)
+    for r in rows:
+        del r["z"]
     return sorted(rows, key=lambda r: r["gap"])
 
 

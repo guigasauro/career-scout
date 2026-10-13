@@ -176,14 +176,19 @@ def rank_role(players: list[dict], share: dict[str, float], role: str, weights: 
     return cands[:top_n], current
 
 
-def plan(deficiency_rows: list[dict], max_gap: float = -0.5) -> dict[str, dict[str, list[dict]]]:
-    """Deficiências com gap ≤ max_gap → {função: {perfil: [deficiências que ele resolve]}}.
+def plan(deficiency_rows: list[dict], max_gap: float = -0.5, top_k: int | None = None) -> dict[str, dict[str, list[dict]]]:
+    """Deficiências → {função: {perfil: [deficiências que ele resolve]}}.
 
-    Funções e perfis na ordem da primeira (maior) deficiência que os pede."""
+    Sem `top_k`: as com gap ≤ max_gap. Com `top_k`: as K maiores (gap < 0). Métricas de estilo
+    (posse, % de passes) nunca viram pedido. Funções e perfis na ordem da maior deficiência."""
     out: dict[str, dict[str, list[dict]]] = {}
+    picked = 0
     for d in deficiency_rows:
-        if d["gap"] > max_gap:
+        if d.get("style"):
+            continue
+        if (top_k is None and d["gap"] > max_gap) or (top_k is not None and (picked == top_k or d["gap"] >= 0)):
             break  # lista vem da maior deficiência para a maior força
+        picked += 1
         for role, profile in ROLES.get(d["metric"], []):
             out.setdefault(role, {}).setdefault(profile, []).append(
                 {k: d[k] for k in ("metric", "label", "value", "target", "gap")})
@@ -192,7 +197,7 @@ def plan(deficiency_rows: list[dict], max_gap: float = -0.5) -> dict[str, dict[s
 
 def recommend(season: str, team: str, target: tuple[int, int] = (1, 4), max_gap: float = -0.5, top_n: int = 10,
               max_age: int | None = None, max_value: float | None = None, all_leagues: bool = True,
-              strength_weight: float = STRENGTH_WEIGHT) -> list[dict]:
+              strength_weight: float = STRENGTH_WEIGHT, mode: str = "tier", top_k: int | None = None) -> list[dict]:
     """Funções a reforçar, da maior deficiência para a menor; cada uma com seus perfis
     (as deficiências que o perfil resolve, os jogadores atuais e os candidatos).
 
@@ -205,7 +210,7 @@ def recommend(season: str, team: str, target: tuple[int, int] = (1, 4), max_gap:
         share.update({t["team"]: float(t["passes_share"]) for t in load_teams(s)})
         market.update(load_market(s))
     out = []
-    for role, profiles in plan(deficiencies(teams, team, target), max_gap).items():
+    for role, profiles in plan(deficiencies(teams, team, target, mode), max_gap, top_k).items():
         entries = []
         for profile, addresses in profiles.items():
             weights = PROFILES[(role, profile)]

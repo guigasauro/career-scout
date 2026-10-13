@@ -47,7 +47,10 @@ def _rank_of(ranked: list[dict], player_id: str) -> int | None:
     return next((i for i, c in enumerate(ranked, 1) if c["player_id"] == player_id), None)
 
 
-def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WEIGHT, tops=(10, 30)) -> tuple[list[dict], dict]:
+def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WEIGHT, tops=(10, 30),
+             mode="tier", top_k=None, leagues=None) -> tuple[list[dict], dict]:
+    """`leagues`: só os times dessas ligas são avaliados (separação desenvolvimento × teste);
+    o pool de candidatos continua sendo todas as ligas da temporada."""
     seasons = sibling_seasons(f"x-{year}")
     players, share, market, by_tm = [], {}, {}, {}
     for s in seasons:
@@ -64,10 +67,12 @@ def evaluate(year: str, target=(1, 4), max_gap=-0.5, strength_weight=STRENGTH_WE
 
     rows = []
     for season in seasons:
+        if leagues and split_season(season)[0] not in leagues:
+            continue
         teams = load_teams(season)
         signings = summer_signings(season)
         for team in sorted({s["team"] for s in signings}):
-            needed = plan(deficiencies(teams, team, target), max_gap)
+            needed = plan(deficiencies(teams, team, target, mode), max_gap, top_k)
             rank_cache: dict[tuple, list[dict]] = {}
 
             def ranked(role, profile):
@@ -141,9 +146,13 @@ def main() -> None:
     ap.add_argument("--target", default="1-4")
     ap.add_argument("--max-gap", type=float, default=-0.5)
     ap.add_argument("--strength", type=float, default=STRENGTH_WEIGHT)
+    ap.add_argument("--mode", choices=("tier", "relative"), default="tier")
+    ap.add_argument("--top-k", type=int, help="usar só as K maiores deficiências")
+    ap.add_argument("--leagues", help="avaliar só os times destas ligas, ex.: premier-league,serie-a")
     args = ap.parse_args()
     lo, hi = map(int, args.target.split("-"))
-    rows, s = evaluate(args.year, (lo, hi), args.max_gap, args.strength)
+    leagues = set(args.leagues.split(",")) if args.leagues else None
+    rows, s = evaluate(args.year, (lo, hi), args.max_gap, args.strength, mode=args.mode, top_k=args.top_k, leagues=leagues)
     path = OUT.format(year=args.year)
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
