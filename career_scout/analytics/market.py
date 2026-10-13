@@ -23,7 +23,11 @@ MAPPING = Path("data/club_mapping.json")
 MIN_NAME_SCORE = 0.6
 
 # nomes do StatsBomb que o mapeamento do modo FIFA não tem: {nome StatsBomb: nome no club_mapping}
-TEAM_ALIASES: dict[str, str] = {"Real Betis": "Real Betis Balompié", "Sporting Gijón": "Real Sporting de Gijón"}
+TEAM_ALIASES: dict[str, str] = {
+    "Real Betis": "Real Betis Balompié", "Sporting Gijón": "Real Sporting de Gijón", "Chievo": "Chievo Verona",
+    "Bordeaux": "FC Girondins de Bordeaux", "Gazélec Ajaccio": "GFC Ajaccio", "Guingamp": "En Avant Guingamp",
+    "Lyon": "Olympique Lyonnais", "Rennes": "Stade Rennais", "Troyes": "ESTAC Troyes",
+}
 
 
 def club_index() -> dict[str, tuple[str, int]]:

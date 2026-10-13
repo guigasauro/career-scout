@@ -71,6 +71,7 @@
   #an-out:not(:empty) ~ .empty { display: none; }
   #an-out { display: grid; gap: 20px; }
   td.wrap { white-space: normal; }
+  .step label .info { margin-left: 6px; }
   .gap-neg { color: var(--danger); font-weight: 600; }
   .gap-pos { color: var(--pitch); font-weight: 600; }
   .an-fixes { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
@@ -481,7 +482,7 @@ const I18N = {
     empty_lead: 'O Career Scout olha as contratações reais do clube nos últimos anos (idade, valor pago, nacionalidade e liga de origem em cada posição) e procura, na edição do jogo que você está jogando, jogadores com o mesmo perfil.',
     mode_fifa: 'Modo Carreira', mode_an: 'Análise de dados', an_season: 'Temporada', an_team: 'Time', an_target: 'Comparar com',
     an_t_1_1: 'Campeão', an_t_1_4: 'Top 4', an_t_5_7: '5º–7º', an_t_8_12: '8º–12º', an_age: 'Idade máxima', an_value: 'Valor máximo', an_any: 'Sem limite',
-    an_empty_title: 'Escolha um time', an_empty_body: 'Compara as estatísticas do time na temporada com as dos times do patamar escolhido, aponta as maiores deficiências e sugere jogadores da liga que as resolvem.',
+    an_empty_title: 'Escolha um time', an_empty_body: 'Compara as estatísticas do time na temporada com as dos times do patamar escolhido, aponta as maiores deficiências e sugere jogadores da mesma liga ou de outras grandes ligas que as resolvem.',
     an_src: 'Dados: StatsBomb Open Data (eventos de cada jogo) e Transfermarkt (idade e valor de mercado na janela seguinte).',
     an_record: '{rank}º lugar, {pts} pontos, {gf} gols marcados e {ga} sofridos',
     th_metric: 'Métrica', th_team_val: 'Time', th_target_val: 'Alvo', th_pct: 'Percentil na liga', th_gap: 'Distância',
@@ -556,7 +557,7 @@ const I18N = {
     empty_lead: "Career Scout looks at the club's real signings over recent seasons (age, fee paid, nationality and origin league for each position) and finds players with the same profile in the edition of the game you're playing.",
     mode_fifa: 'Career Mode', mode_an: 'Data analysis', an_season: 'Season', an_team: 'Team', an_target: 'Compare with',
     an_t_1_1: 'Champion', an_t_1_4: 'Top 4', an_t_5_7: '5th–7th', an_t_8_12: '8th–12th', an_age: 'Max age', an_value: 'Max value', an_any: 'No limit',
-    an_empty_title: 'Pick a team', an_empty_body: "Compares the team's season stats with the teams in the chosen tier, points out the biggest weaknesses and suggests players from the league who address them.",
+    an_empty_title: 'Pick a team', an_empty_body: "Compares the team's season stats with the teams in the chosen tier, points out the biggest weaknesses and suggests players from the same league or other big leagues who address them.",
     an_src: 'Data: StatsBomb Open Data (event data of every match) and Transfermarkt (age and market value in the next window).',
     an_record: '#{rank}, {pts} points, {gf} goals scored, {ga} conceded',
     th_metric: 'Metric', th_team_val: 'Team', th_target_val: 'Target', th_pct: 'League percentile', th_gap: 'Gap',
@@ -631,7 +632,7 @@ const I18N = {
     empty_lead: 'Career Scout analiza los fichajes reales del club en las últimas temporadas (edad, precio pagado, nacionalidad y liga de origen en cada posición) y busca, en la edición del juego que estás jugando, jugadores con el mismo perfil.',
     mode_fifa: 'Modo Carrera', mode_an: 'Análisis de datos', an_season: 'Temporada', an_team: 'Equipo', an_target: 'Comparar con',
     an_t_1_1: 'Campeón', an_t_1_4: 'Top 4', an_t_5_7: '5º–7º', an_t_8_12: '8º–12º', an_age: 'Edad máxima', an_value: 'Valor máximo', an_any: 'Sin límite',
-    an_empty_title: 'Elige un equipo', an_empty_body: 'Compara las estadísticas del equipo en la temporada con las de los equipos del nivel elegido, señala las mayores carencias y sugiere jugadores de la liga que las resuelven.',
+    an_empty_title: 'Elige un equipo', an_empty_body: 'Compara las estadísticas del equipo en la temporada con las de los equipos del nivel elegido, señala las mayores carencias y sugiere jugadores de la misma liga o de otras grandes ligas que las resuelven.',
     an_src: 'Datos: StatsBomb Open Data (eventos de cada partido) y Transfermarkt (edad y valor de mercado en el mercado siguiente).',
     an_record: '{rank}º puesto, {pts} puntos, {gf} goles a favor y {ga} en contra',
     th_metric: 'Métrica', th_team_val: 'Equipo', th_target_val: 'Objetivo', th_pct: 'Percentil en la liga', th_gap: 'Distancia',
