@@ -62,6 +62,12 @@
   .how-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; font-size: 14px; }
   .how-btn:hover { border-color: var(--pitch); color: var(--pitch); }
   .how-q { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 50%; font-size: 12px; }
+  .watch-btn { margin-left: 0; position: relative; }
+  .watch-star { color: var(--gold); font-size: 16px; }
+  .watch-n:not(:empty) { min-width: 20px; padding: 0 5px; border-radius: 10px; background: var(--gold-bg); color: var(--gold); font-size: 12px; font-weight: 600; }
+  .star { background: none; border: 0; padding: 0 6px 0 0; font-size: 16px; line-height: 1; color: var(--faint); cursor: pointer; }
+  .star:hover { color: var(--gold); }
+  .star[aria-pressed=true] { color: var(--gold); }
   .icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; }
   .icon-btn:hover { border-color: var(--pitch); color: var(--pitch); }
   /* mostra o ícone do modo para o qual o clique leva */
@@ -251,6 +257,7 @@
     .brand { white-space: nowrap; }
     .topbar select { padding-left: 8px; padding-right: 4px; }
     .how-btn { width: 40px; padding: 0; justify-content: center; }
+    .watch-n:not(:empty) { position: absolute; top: -7px; right: -7px; }
     .page { padding: 16px; }
     .topbar { padding: 12px 16px; }
     .picker { grid-template-columns: 1fr; }
@@ -274,6 +281,7 @@
     Career Scout
   </a>
   <button id="btn-how" class="how-btn" type="button" onclick="openHow()" data-i18n-aria="how"><span class="how-q" aria-hidden="true">?</span><span class="how-label" data-i18n="how"></span></button>
+  <button id="btn-watch" class="how-btn watch-btn" type="button" onclick="openWatch()" data-i18n-aria="watch"><span class="watch-star" aria-hidden="true">★</span><span class="how-label" data-i18n="watch"></span><span id="watch-n" class="watch-n"></span></button>
   <button id="btn-theme" class="icon-btn" type="button" onclick="toggleTheme()">
     <svg class="i-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     <svg class="i-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -384,6 +392,7 @@ const I18N = {
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
     no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', rate_limited: 'Muitas buscas seguidas. Espere alguns segundos e tente de novo.', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
     empty_lead: 'O Career Scout olha as contratações reais do clube nos últimos anos (idade, valor pago, nacionalidade e liga de origem em cada posição) e procura, na edição do jogo que você está jogando, jogadores com o mesmo perfil.',
+    watch: 'Observados', watch_add: 'Observar {name}', watch_del: 'Parar de observar {name}', watch_empty: 'Nenhum jogador observado. Clique na ☆ ao lado do nome de um candidato para guardá-lo aqui.',
     how: 'Como funciona', how_ed: 'Edição', how_ver: 'Versão', how_src: 'Fonte', how_upd: 'Data do elenco',
     roster: 'Elenco', roster_tip: 'Lançamento = elenco vigente no dia em que o jogo saiu; Último update = elenco mais recente do jogo (com as transferências da temporada).', roster_launch: 'Lançamento', roster_latest: 'Último update',
     empty_title: 'Escolha um clube', empty_body: 'Selecione edição, país, liga e clube acima para ver o padrão de contratações e buscar jogadores parecidos.',
@@ -432,6 +441,7 @@ const I18N = {
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
     no_clubs: 'No clubs mapped', settings: 'Search settings', rate_limited: 'Too many searches in a row. Wait a few seconds and try again.', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
     empty_lead: "Career Scout looks at the club's real signings over recent seasons (age, fee paid, nationality and origin league for each position) and finds players with the same profile in the edition of the game you're playing.",
+    watch: 'Watchlist', watch_add: 'Watch {name}', watch_del: 'Stop watching {name}', watch_empty: 'No players on your watchlist. Click the ☆ next to a candidate\'s name to keep them here.',
     how: 'How it works', how_ed: 'Edition', how_ver: 'Version', how_src: 'Source', how_upd: 'Squad date',
     roster: 'Squads', roster_tip: "Launch = squads in force on the game's release day; Latest update = the game's most recent squads (with the season's transfers).", roster_launch: 'Launch', roster_latest: 'Latest update',
     empty_title: 'Pick a club', empty_body: "Choose an edition, country, league and club above to see the club's signing pattern and find similar players.",
@@ -480,6 +490,7 @@ const I18N = {
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
     no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', rate_limited: 'Demasiadas búsquedas seguidas. Espera unos segundos e inténtalo de nuevo.', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
     empty_lead: 'Career Scout analiza los fichajes reales del club en las últimas temporadas (edad, precio pagado, nacionalidad y liga de origen en cada posición) y busca, en la edición del juego que estás jugando, jugadores con el mismo perfil.',
+    watch: 'Seguidos', watch_add: 'Seguir a {name}', watch_del: 'Dejar de seguir a {name}', watch_empty: 'No sigues a ningún jugador. Haz clic en la ☆ junto al nombre de un candidato para guardarlo aquí.',
     how: 'Cómo funciona', how_ed: 'Edición', how_ver: 'Versión', how_src: 'Fuente', how_upd: 'Fecha de la plantilla',
     roster: 'Plantillas', roster_tip: 'Lanzamiento = plantillas vigentes el día en que salió el juego; Última actualización = las plantillas más recientes del juego (con los fichajes de la temporada).', roster_launch: 'Lanzamiento', roster_latest: 'Última actualización',
     empty_title: 'Elige un club', empty_body: 'Selecciona edición, país, liga y club arriba para ver el patrón de fichajes y buscar jugadores parecidos.',
@@ -1100,6 +1111,62 @@ document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[role=button]')) { e.preventDefault(); e.target.click(); }
 });
 
+// ── lista de observação (salva no navegador) ───────────────────────
+// chave = edição + id: o mesmo jogador muda de overall/valor/clube entre edições
+const wkey = (ed, id) => `${ed}:${id}`;
+let _watch = {};
+try { _watch = JSON.parse(localStorage.getItem('watchlist')) || {}; } catch {}
+let _scoutEdition = null;
+function saveWatch() {
+  try { localStorage.setItem('watchlist', JSON.stringify(_watch)); } catch {}
+  document.getElementById('watch-n').textContent = Object.keys(_watch).length || '';
+}
+function starBtn(c, ed) {
+  const k = wkey(ed, c.sofifa_id), on = k in _watch;
+  return `<button class="star" type="button" data-watch="${esc(k)}" data-name="${esc(c.short_name)}" aria-pressed="${on}" aria-label="${tr(on ? 'watch_del' : 'watch_add', { name: c.short_name })}" onclick="toggleWatch('${esc(k)}')">${on ? '★' : '☆'}</button>`;
+}
+function toggleWatch(k) {
+  if (k in _watch) delete _watch[k];
+  else {
+    // snapshot do candidato: a lista não depende de refazer a busca
+    const id = k.split(':')[1];
+    const c = Object.values(_posLists).flatMap(L => L.rows).find(c => String(c.sofifa_id) === id);
+    if (!c) return;
+    const { sofifa_id, short_name, club_name, league_name, nationality, age, value_eur, overall, potential, player_positions } = c;
+    _watch[k] = { edition: _scoutEdition, sofifa_id, short_name, club_name, league_name, nationality, age, value_eur, overall, potential, player_positions };
+  }
+  saveWatch();
+  const on = k in _watch;
+  document.querySelectorAll(`#results [data-watch="${CSS.escape(k)}"]`).forEach(b => {
+    b.setAttribute('aria-pressed', on);
+    b.setAttribute('aria-label', t(on ? 'watch_del' : 'watch_add', { name: b.dataset.name }));
+    b.textContent = on ? '★' : '☆';
+  });
+  if (!document.getElementById('modal').classList.contains('hidden') && document.getElementById('watch-table')) openWatch(true);
+}
+function openWatch(keepFocus) {
+  const list = Object.entries(_watch).sort(([, a], [, b]) => b.edition - a.edition || b.overall - a.overall);
+  const rows = list.map(([k, c]) => {
+    const sofifa = `https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}`;
+    return `<tr>
+      <td class="player trunc"><button class="star" type="button" aria-pressed="true" aria-label="${tr('watch_del', { name: c.short_name })}" onclick="toggleWatch('${esc(k)}')">★</button><a href="${sofifa}" target="_blank" rel="noopener">${esc(c.short_name)}</a><span class="sub show-sm">${esc(c.club_name)} · ${esc(edLabel(c.edition))}</span></td>
+      <td class="muted hide-sm">${esc(edLabel(c.edition))}</td>
+      <td class="hide-sm">${esc((c.player_positions || []).map(posName).join(', '))}</td>
+      <td class="trunc hide-sm" title="${esc(c.club_name)} (${esc(leagueName(c.league_name))})">${esc(c.club_name)}<span class="sub">${esc(leagueName(c.league_name))}</span></td>
+      <td class="hide-sm">${esc(countryName(c.nationality))}</td>
+      <td class="num hide-sm">${c.age}</td>
+      <td class="num">${fmt(c.value_eur)}</td>
+      <td class="num">${tier(c.overall)}</td>
+      <td class="num">${tier(c.potential)}</td>
+    </tr>`;
+  }).join('');
+  const html = list.length
+    ? `<div class="table-wrap"><table class="sortable" id="watch-table"><thead>${thead('th_name', '~how_ed', '~th_pos', '~th_club', '~th_nat', '~>th_age', '>th_value', '>OVR', '>POT')}</thead><tbody>${rows}</tbody></table></div>`
+    : `<p class="muted" id="watch-table">${tr('watch_empty')}</p>`;
+  if (keepFocus) { document.getElementById('modal-body').innerHTML = html; document.getElementById('modal-close').focus(); }
+  else openModalHtml(t('watch'), html, true);
+}
+
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
   openModalHtml(title, distRows(obj, barColor), false);
@@ -1352,6 +1419,7 @@ async function runScout() {
     });
     if (!res.ok) throw new Error(await apiError(res));
     _lastScout = await res.json();
+    _scoutEdition = edition;
     setStatus('status-scout', '');
     renderResults(_lastScout);
     // no celular os resultados ficam bem abaixo do botão: rola até eles
@@ -1432,7 +1500,7 @@ function candRow(c, target) {
     const sofifa = c.sofifa_id ? `https://sofifa.com/player/${encodeURIComponent(c.sofifa_id)}` : '';
     return `<tr>
       <td class="num muted hide-sm">${c.rank}</td>
-      <td class="player trunc">${sofifa ? `<a href="${sofifa}" target="_blank" rel="noopener">${esc(c.short_name)}</a>` : esc(c.short_name)}<span class="sub show-sm">${esc(c.club_name)}</span></td>
+      <td class="player trunc">${starBtn(c, _scoutEdition)}${sofifa ? `<a href="${sofifa}" target="_blank" rel="noopener">${esc(c.short_name)}</a>` : esc(c.short_name)}<span class="sub show-sm">${esc(c.club_name)}</span></td>
       <td class="trunc hide-sm" title="${esc(c.club_name)} (${esc(leagueName(c.league_name))})">${esc(c.club_name)}<span class="sub">${esc(leagueName(c.league_name))}</span></td>
       <td class="hide-sm">${esc(countryName(c.nationality))}</td>
       <td class="num">${c.age}</td>
@@ -1472,6 +1540,7 @@ function renderPosition({ profile: p, candidates, total, team_overall, target_ov
 }
 
 applyI18n();
+saveWatch();
 init();
 </script>
 </body>
