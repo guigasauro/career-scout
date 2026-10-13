@@ -33,6 +33,7 @@ STATS = [
     "passes", "passes_completed", "progressive_passes", "passes_into_box",
     "dribbles", "dribbles_completed", "pressures", "tackles", "tackles_won",
     "interceptions", "recoveries", "clearances", "blocks", "aerials_won",
+    "npg", "box_receptions", "carries_into_box",
 ]
 
 
@@ -110,6 +111,8 @@ def aggregate_match(events: list[dict], lineups: list[dict]) -> tuple[dict, dict
                 s["npxg"] += sh["statsbomb_xg"]
             if sh["outcome"]["name"] == "Goal":
                 s["goals"] += 1
+                if sh["type"]["name"] != "Penalty":
+                    s["npg"] += 1
         elif kind == "Pass":
             ps = e["pass"]
             # escanteio/lateral/falta contam como passe; tiro de meta e saída de bola não
@@ -128,6 +131,13 @@ def aggregate_match(events: list[dict], lineups: list[dict]) -> tuple[dict, dict
                     s["progressive_passes"] += 1
                 if _in_box(ps["end_location"]) and not _in_box(e["location"]):
                     s["passes_into_box"] += 1
+        elif kind == "Ball Receipt*":
+            # passe recebido já dentro da área adversária: sinal de infiltração
+            if "ball_receipt" not in e and _in_box(e["location"]):
+                s["box_receptions"] += 1
+        elif kind == "Carry":
+            if _in_box(e["carry"]["end_location"]) and not _in_box(e["location"]):
+                s["carries_into_box"] += 1
         elif kind == "Dribble":
             s["dribbles"] += 1
             if e["dribble"]["outcome"]["name"] == "Complete":

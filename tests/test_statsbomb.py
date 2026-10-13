@@ -24,6 +24,10 @@ class TestAggregateMatch(unittest.TestCase):
             _ev("s1", "Shot", 1, **{"shot": {"statsbomb_xg": 0.3, "type": {"name": "Open Play"}, "outcome": {"name": "Goal"}}}),
             _ev("s2", "Shot", 2, **{"shot": {"statsbomb_xg": 0.76, "type": {"name": "Penalty"}, "outcome": {"name": "Saved"}}}),
             _ev("p2", "Pass", 2, **{"pass": {"end_location": [70, 40], "outcome": {"name": "Incomplete"}}}),
+            _ev("r1", "Ball Receipt*", 1, location=(110, 40)),                                   # recepção na área
+            _ev("r2", "Ball Receipt*", 1, location=(110, 40), ball_receipt={"outcome": {"name": "Incomplete"}}),
+            _ev("c1", "Carry", 1, location=(95, 40), carry={"end_location": [105, 40]}),          # conduz pra área
+            _ev("c2", "Carry", 1, location=(105, 40), carry={"end_location": [110, 40]}),         # já estava dentro
             _ev("end", "Half End", None, minute=90),
         ]
 
@@ -37,6 +41,8 @@ class TestAggregateMatch(unittest.TestCase):
         self.assertEqual((b["passes"], b["passes_completed"]), (1, 0))
         self.assertAlmostEqual(b["npxg"], 0.0)                 # pênalti fora do npxG
         self.assertAlmostEqual(b["xg"], 0.76)
+        self.assertEqual((a["npg"], b["npg"]), (1, 0))                  # gol de jogada conta; pênalti não marcou
+        self.assertEqual((a["box_receptions"], a["carries_into_box"]), (1, 1))
 
     def test_team_against(self):
         _, teams = aggregate_match(self.events, self.lineups)

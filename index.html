@@ -78,6 +78,11 @@
   .an-fixes { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
   .an-fixes .muted { margin-right: 2px; }
   .an-per90 { padding: 8px 16px 0; font-size: 13px; color: var(--muted); }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 3px; background: var(--raised); border: 1px solid var(--line); border-radius: 8px; }
+  .seg button { height: 30px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 500; }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed=true] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+  .seg-one { font-size: 14px; font-weight: 500; color: var(--muted); }
   th abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
   .watch-star { color: var(--gold); font-size: 16px; }
   .watch-n:not(:empty) { min-width: 20px; padding: 0 5px; border-radius: 10px; background: var(--gold-bg); color: var(--gold); font-size: 12px; font-weight: 600; }
@@ -290,6 +295,7 @@
     .mode-nav { order: 10; flex: 1 1 200px; }  /* base larga: não cabe na 1ª linha e desce junto com o idioma */
     .topbar select { order: 11; }
     .mode-nav button { flex: 1; padding: 0 6px; font-size: 13px; white-space: nowrap; }
+    #an-out .trunc { max-width: 150px; }  /* nome + clube·liga não empurram o score pra fora */
     .pos-nav-ctx { flex-basis: 100%; }
     .show-sm { display: block !important; }
     .pos-section th, .pos-section td { padding: 9px 6px; }
@@ -504,6 +510,8 @@ const I18N = {
     m_progressive_passes: 'Passes progressivos', m_pass_pct: 'Passes certos', m_dribbles_completed: 'Dribles certos', m_possession: 'Posse',
     m_npxg_against: 'xG sofrido sem pênaltis', m_shots_against: 'Chutes sofridos', m_box_entries_against: 'Passes do adversário para a área',
     m_prog_against: 'Passes progressivos do adversário', m_padj_pressures: 'Pressões (ajust. posse)', m_padj_tackles_int: 'Desarmes + interceptações (ajust. posse)', m_aerials_won: 'Duelos aéreos ganhos',
+    an_profile: 'Perfil', prof_marking: 'Marcação', prof_aerial: 'Jogo aéreo', prof_buildup: 'Construção', prof_defending: 'Defesa', prof_attacking: 'Apoio ao ataque',
+    prof_ball_winning: 'Desarmes', prof_pressing: 'Pressão', prof_creation: 'Criação', prof_finishing: 'Finalização', prof_chance_quality: 'Qualidade da chance', prof_infiltration: 'Infiltração',
     role_CB: 'Zagueiro', role_FB: 'Lateral', role_DM: 'Volante', role_CM: 'Meia central', role_AM: 'Meia ofensivo', role_W: 'Ponta', role_ST: 'Centroavante', role_GK: 'Goleiro',
     s_tackles_won: 'Desarmes certos', s_interceptions: 'Interceptações', s_clearances: 'Cortes', s_blocks: 'Bloqueios', s_aerials_won: 'Aéreos ganhos', s_recoveries: 'Recuperações',
     s_pressures: 'Pressões', s_npxg: 'xG s/ pên.', s_shots: 'Chutes', s_xg_per_shot: 'xG/chute', s_xa: 'xA', s_key_passes: 'Passes-chave',
@@ -516,6 +524,8 @@ const I18N = {
     sf_key_passes: 'Passes que terminaram em chute por 90 min', sf_passes_into_box: 'Passes certos para dentro da área por 90 min',
     sf_progressive_passes: 'Passes certos que avançam 10 jardas ou mais por 90 min', sf_pass_pct: 'Porcentagem de passes certos (não é por 90)',
     sf_dribbles_completed: 'Dribles certos por 90 min', sf_passes: 'Passes tentados por 90 min',
+    s_box_receptions: 'Recepções na área', s_carries_into_box: 'Conduções até a área',
+    sf_box_receptions: 'Passes recebidos dentro da área adversária por 90 min', sf_carries_into_box: 'Conduções de bola que começam fora e terminam dentro da área por 90 min',
     an_per90: 'Estatísticas por 90 minutos jogados. Passe o mouse no nome da coluna para ver a definição.',
     th_minutes: 'Minutos', sf_minutes: 'Minutos jogados na temporada', sf_value: 'Valor de mercado no Transfermarkt na época (verão seguinte à temporada)',
     sf_age: 'Idade na janela de verão seguinte à temporada', sf_score: 'Percentil médio ponderado nas estatísticas da função, entre os jogadores dela na mesma liga, multiplicado pela força da liga',
@@ -592,6 +602,8 @@ const I18N = {
     m_progressive_passes: 'Progressive passes', m_pass_pct: 'Pass accuracy', m_dribbles_completed: 'Successful dribbles', m_possession: 'Possession',
     m_npxg_against: 'Non-penalty xG conceded', m_shots_against: 'Shots conceded', m_box_entries_against: 'Opponent passes into the box',
     m_prog_against: 'Opponent progressive passes', m_padj_pressures: 'Pressures (poss. adj.)', m_padj_tackles_int: 'Tackles + interceptions (poss. adj.)', m_aerials_won: 'Aerial duels won',
+    an_profile: 'Profile', prof_marking: 'Marking', prof_aerial: 'Aerial', prof_buildup: 'Build-up', prof_defending: 'Defending', prof_attacking: 'Attacking support',
+    prof_ball_winning: 'Ball winning', prof_pressing: 'Pressing', prof_creation: 'Creation', prof_finishing: 'Finishing', prof_chance_quality: 'Chance quality', prof_infiltration: 'Box arrivals',
     role_CB: 'Centre-back', role_FB: 'Full-back', role_DM: 'Defensive mid', role_CM: 'Central mid', role_AM: 'Attacking mid', role_W: 'Winger', role_ST: 'Striker', role_GK: 'Goalkeeper',
     s_tackles_won: 'Tackles won', s_interceptions: 'Interceptions', s_clearances: 'Clearances', s_blocks: 'Blocks', s_aerials_won: 'Aerials won', s_recoveries: 'Recoveries',
     s_pressures: 'Pressures', s_npxg: 'npxG', s_shots: 'Shots', s_xg_per_shot: 'xG/shot', s_xa: 'xA', s_key_passes: 'Key passes',
@@ -604,6 +616,8 @@ const I18N = {
     sf_key_passes: 'Passes that led to a shot per 90 min', sf_passes_into_box: 'Completed passes into the box per 90 min',
     sf_progressive_passes: 'Completed passes moving the ball 10+ yards forward per 90 min', sf_pass_pct: 'Pass completion percentage (not per 90)',
     sf_dribbles_completed: 'Successful dribbles per 90 min', sf_passes: 'Passes attempted per 90 min',
+    s_box_receptions: 'Box receptions', s_carries_into_box: 'Carries into box',
+    sf_box_receptions: "Passes received inside the opponent's box per 90 min", sf_carries_into_box: 'Carries starting outside and ending inside the box per 90 min',
     an_per90: 'Stats per 90 minutes played. Hover a column name to see its definition.',
     th_minutes: 'Minutes', sf_minutes: 'Minutes played in the season', sf_value: 'Transfermarkt market value at the time (summer after the season)',
     sf_age: 'Age in the summer window after the season', sf_score: "Weighted average percentile in the role's stats, among the role's players in the same league, multiplied by league strength",
@@ -680,6 +694,8 @@ const I18N = {
     m_progressive_passes: 'Pases progresivos', m_pass_pct: 'Precisión de pase', m_dribbles_completed: 'Regates completados', m_possession: 'Posesión',
     m_npxg_against: 'xG concedido sin penaltis', m_shots_against: 'Tiros concedidos', m_box_entries_against: 'Pases rivales al área',
     m_prog_against: 'Pases progresivos del rival', m_padj_pressures: 'Presiones (ajust. posesión)', m_padj_tackles_int: 'Entradas + intercepciones (ajust. posesión)', m_aerials_won: 'Duelos aéreos ganados',
+    an_profile: 'Perfil', prof_marking: 'Marcaje', prof_aerial: 'Juego aéreo', prof_buildup: 'Construcción', prof_defending: 'Defensa', prof_attacking: 'Apoyo ofensivo',
+    prof_ball_winning: 'Recuperación', prof_pressing: 'Presión', prof_creation: 'Creación', prof_finishing: 'Finalización', prof_chance_quality: 'Calidad de ocasión', prof_infiltration: 'Llegada al área',
     role_CB: 'Central', role_FB: 'Lateral', role_DM: 'Mediocentro defensivo', role_CM: 'Mediocentro', role_AM: 'Mediapunta', role_W: 'Extremo', role_ST: 'Delantero centro', role_GK: 'Portero',
     s_tackles_won: 'Entradas ganadas', s_interceptions: 'Intercepciones', s_clearances: 'Despejes', s_blocks: 'Bloqueos', s_aerials_won: 'Aéreos ganados', s_recoveries: 'Recuperaciones',
     s_pressures: 'Presiones', s_npxg: 'xG sin pen.', s_shots: 'Tiros', s_xg_per_shot: 'xG/tiro', s_xa: 'xA', s_key_passes: 'Pases clave',
@@ -692,6 +708,8 @@ const I18N = {
     sf_key_passes: 'Pases que terminaron en tiro por 90 min', sf_passes_into_box: 'Pases buenos al área por 90 min',
     sf_progressive_passes: 'Pases buenos que avanzan 10 yardas o más por 90 min', sf_pass_pct: 'Porcentaje de pases buenos (no es por 90)',
     sf_dribbles_completed: 'Regates exitosos por 90 min', sf_passes: 'Pases intentados por 90 min',
+    s_box_receptions: 'Recepciones en el área', s_carries_into_box: 'Conducciones al área',
+    sf_box_receptions: 'Pases recibidos dentro del área rival por 90 min', sf_carries_into_box: 'Conducciones que empiezan fuera y terminan dentro del área por 90 min',
     an_per90: 'Estadísticas por 90 minutos jugados. Pasa el ratón sobre el nombre de la columna para ver la definición.',
     th_minutes: 'Minutos', sf_minutes: 'Minutos jugados en la temporada', sf_value: 'Valor de mercado en Transfermarkt en su momento (verano tras la temporada)',
     sf_age: 'Edad en el mercado de verano tras la temporada', sf_score: 'Percentil medio ponderado en las estadísticas de la función, entre sus jugadores en la misma liga, multiplicado por la fuerza de la liga',
@@ -1468,6 +1486,46 @@ function anNum(v, dec = 2) { return new Intl.NumberFormat(LOCALE[LANG], { minimu
 // posse e % de passes vêm em pontos percentuais; o resto é contagem por jogo
 const anVal = (metric, v) => ['possession', 'pass_pct'].includes(metric) ? `${anNum(v, 1)}%` : anNum(v);
 function anGap(g) { return `<span class="${g <= -0.5 ? 'gap-neg' : g >= 0.5 ? 'gap-pos' : 'muted'}">${g > 0 ? '+' : ''}${anNum(g)}</span>`; }
+// um cartão por função; o seletor troca o perfil (ex.: Volante · Desarmes / Construção)
+const _anSel = {};  // função → perfil escolhido (sobrevive à troca de idioma)
+function anPickProfile(role, profile) {
+  _anSel[role] = profile;
+  const r = _anData.recs.find(x => x.role === role);
+  const el = document.getElementById(`an-role-${role}`);
+  el.outerHTML = anRoleCard(r);
+  document.querySelector(`#an-role-${role} [data-profile="${profile}"]`)?.focus();
+}
+function anRoleCard(role) {
+  const r = role.profiles.find(p => p.profile === _anSel[role.role]) || role.profiles[0];
+  const stats = Object.keys(r.weights);
+  const tabs = role.profiles.length > 1 ? `<div class="seg" role="group" aria-label="${tr('an_profile')}">${role.profiles.map(p =>
+    `<button type="button" data-profile="${p.profile}" aria-pressed="${p === r}" onclick="anPickProfile('${role.role}', '${p.profile}')">${tr('prof_' + p.profile)}</button>`).join('')}</div>`
+    : `<span class="seg-one">${tr('prof_' + r.profile)}</span>`;
+  const fixes = r.addresses.map(a => `<span>${tr('m_' + a.metric)} ${anGap(a.gap)}</span>`).join('');
+  const mine = r.current.slice(0, 3).map(c => `${esc(c.player)} <span class="muted">${Math.round(c.score * 100)}%</span>`).join(', ') || '—';
+  const body = r.candidates.map((c, i) => `<tr>
+      <td class="num muted hide-sm">${i + 1}</td>
+      <td class="player trunc">${esc(c.player)}<span class="sub show-sm">${esc(c.team)} · ${esc(anLeague(c.league))}</span></td>
+      <td class="trunc hide-sm">${esc(c.team)}<span class="sub">${esc(anLeague(c.league))}</span></td>
+      <td class="num">${c.age ?? '—'}</td>
+      <td class="num">${fmt(c.value)}</td>
+      <td class="num hide-sm">${c.minutes}</td>
+      <td class="num"><div class="score-bar"><div class="bar"><div class="fill" style="width:${Math.round(c.score * 100)}%"></div></div><span class="val">${Math.round(c.score * 100)}%</span></div></td>
+      ${stats.map(k => `<td class="num hide-sm" title="${tr('s_tip', { v: anNum(c.stats[k].per90), p: c.stats[k].pct })}">${anNum(c.stats[k].per90)}</td>`).join('')}
+    </tr>`).join('');
+  return `<section class="card" id="an-role-${role.role}">
+    <header class="pos-head"><span class="badge badge-pos-${ROLE_LINE[role.role]}">${tr('role_' + role.role)}</span>${tabs}</header>
+    <div class="an-fixes"><span class="muted">${tr('an_fixes')}:</span>${fixes}</div>
+    <div class="an-fixes"><span class="muted">${tr('an_current')}:</span><span>${mine}</span></div>
+    <p class="an-per90 hide-sm">${tr('an_per90')}</p>
+    ${r.candidates.length ? `<div class="table-wrap"><table class="sortable">
+      <thead><tr><th class="num hide-sm">#</th><th>${tr('th_name')}</th><th class="hide-sm">${tr('th_club')}</th>
+        ${[['th_age', 'sf_age', ''], ['th_value', 'sf_value', ''], ['th_minutes', 'sf_minutes', ' hide-sm'], ['Score', 'sf_score', '']]
+          .map(([k, tip, cls]) => anTh(k, tip, cls)).join('')}
+        ${stats.map(k => anTh('s_' + k, 'sf_' + k, ' hide-sm')).join('')}</tr></thead>
+      <tbody>${body}</tbody></table></div>` : `<p class="card-body muted">${tr('an_no_cands')}</p>`}
+  </section>`;
+}
 function anRender() {
   const { team: d, recs, target } = _anData;
   const tname = t('an_t_' + target.replace('-', '_'));
@@ -1497,33 +1555,7 @@ function anRender() {
     </table></div>
     <p class="hint card-body">${tr('an_gap_tip')} ${tr('an_src')}</p>
   </section>`;
-  const recCards = recs.map(r => {
-    const stats = Object.keys(r.weights);
-    const fixes = r.addresses.map(a => `<span>${tr('m_' + a.metric)} ${anGap(a.gap)}</span>`).join('');
-    const mine = r.current.slice(0, 3).map(c => `${esc(c.player)} <span class="muted">${Math.round(c.score * 100)}%</span>`).join(', ') || '—';
-    const body = r.candidates.map((c, i) => `<tr>
-        <td class="num muted hide-sm">${i + 1}</td>
-        <td class="player trunc">${esc(c.player)}<span class="sub show-sm">${esc(c.team)} · ${esc(anLeague(c.league))}</span></td>
-        <td class="trunc hide-sm">${esc(c.team)}<span class="sub">${esc(anLeague(c.league))}</span></td>
-        <td class="num">${c.age ?? '—'}</td>
-        <td class="num">${fmt(c.value)}</td>
-        <td class="num hide-sm">${c.minutes}</td>
-        <td class="num"><div class="score-bar"><div class="bar"><div class="fill" style="width:${Math.round(c.score * 100)}%"></div></div><span class="val">${Math.round(c.score * 100)}%</span></div></td>
-        ${stats.map(k => `<td class="num hide-sm" title="${tr('s_tip', { v: anNum(c.stats[k].per90), p: c.stats[k].pct })}">${anNum(c.stats[k].per90)}</td>`).join('')}
-      </tr>`).join('');
-    return `<section class="card">
-      <header class="pos-head"><span class="badge badge-pos-${ROLE_LINE[r.role]}">${tr('role_' + r.role)}</span>
-        <span class="muted">${tr('an_current')}: ${mine}</span></header>
-      <div class="an-fixes"><span class="muted">${tr('an_fixes')}:</span>${fixes}</div>
-      <p class="an-per90 hide-sm">${tr('an_per90')}</p>
-      ${r.candidates.length ? `<div class="table-wrap"><table class="sortable">
-        <thead><tr><th class="num hide-sm">#</th><th>${tr('th_name')}</th><th class="hide-sm">${tr('th_club')}</th>
-          ${[['th_age', 'sf_age', ''], ['th_value', 'sf_value', ''], ['th_minutes', 'sf_minutes', ' hide-sm'], ['Score', 'sf_score', '']]
-            .map(([k, tip, cls]) => anTh(k, tip, cls)).join('')}
-          ${stats.map(k => anTh('s_' + k, 'sf_' + k, ' hide-sm')).join('')}</tr></thead>
-        <tbody>${body}</tbody></table></div>` : `<p class="card-body muted">${tr('an_no_cands')}</p>`}
-    </section>`;
-  }).join('');
+  const recCards = recs.map(anRoleCard).join('');
   document.getElementById('an-out').innerHTML = teamCard +
     `<h2 class="section-title">${tr('an_recs')}</h2>` +
     (document.getElementById('an-scope').value === '1' ? `<p class="results-intro">${tr(+document.getElementById('an-strength').value ? 'an_league_tip' : 'an_league_tip_off')}</p>` : '') +

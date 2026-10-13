@@ -43,28 +43,47 @@ def sibling_seasons(season: str) -> list[str]:
     year = split_season(season)[1]
     return sorted(p.name[3:-12] for p in OUT_DIR.glob(f"sb_*-{year}_players.csv"))
 
-_DEF_ACTIONS = {"tackles_won": 1, "interceptions": 1, "clearances": 1, "blocks": 1, "aerials_won": 1}
-_DM_ACTIONS = {"tackles_won": 1, "interceptions": 1, "recoveries": 1, "pressures": 1}
+# perfis nomeados de cada função: (função, perfil) → {estatística do jogador por 90: peso}.
+# A mesma função pode ter mais de um perfil (zagueiro de marcação × de construção); a tela mostra
+# uma tabela por função com um seletor de perfil.
+PROFILES: dict[tuple[str, str], dict[str, float]] = {
+    ("CB", "marking"):        {"tackles_won": 1, "interceptions": 1, "clearances": 1, "blocks": 1, "aerials_won": 1},
+    ("CB", "aerial"):         {"aerials_won": 2, "clearances": 1},
+    ("CB", "buildup"):        {"progressive_passes": 2, "pass_pct": 1},
+    ("FB", "defending"):      {"tackles_won": 1, "interceptions": 1, "blocks": 1},
+    ("FB", "attacking"):      {"passes_into_box": 2, "progressive_passes": 1},
+    ("DM", "ball_winning"):   {"tackles_won": 1, "interceptions": 1, "recoveries": 1, "pressures": 1},
+    ("DM", "buildup"):        {"progressive_passes": 2, "pass_pct": 1},
+    ("CM", "buildup"):        {"progressive_passes": 2, "pass_pct": 1},
+    ("CM", "pressing"):       {"pressures": 2, "recoveries": 1},
+    ("AM", "creation"):       {"xa": 2, "key_passes": 1, "passes_into_box": 1},
+    ("AM", "infiltration"):   {"box_receptions": 2, "npxg": 2, "shots": 1, "carries_into_box": 1},
+    ("W", "finishing"):       {"npxg": 2, "shots": 1},
+    ("W", "creation"):        {"xa": 2, "key_passes": 1, "dribbles_completed": 1},
+    ("W", "pressing"):        {"pressures": 1},
+    ("ST", "finishing"):      {"npxg": 2, "shots": 1},
+    ("ST", "chance_quality"): {"xg_per_shot": 2, "npxg": 1},
+    ("ST", "aerial"):         {"aerials_won": 1},
+}
 
-# métrica do time → [(função, {estatística do jogador: peso})]
-ROLES: dict[str, list[tuple[str, dict[str, float]]]] = {
-    "npxg_against":        [("CB", _DEF_ACTIONS), ("DM", _DM_ACTIONS)],
-    "shots_against":       [("CB", _DEF_ACTIONS), ("DM", _DM_ACTIONS)],
-    "box_entries_against": [("CB", _DEF_ACTIONS), ("FB", {"tackles_won": 1, "interceptions": 1, "blocks": 1})],
-    "prog_against":        [("DM", _DM_ACTIONS), ("W", {"pressures": 1})],
-    "padj_pressures":      [("CM", {"pressures": 2, "recoveries": 1}), ("W", {"pressures": 1})],
-    "padj_tackles_int":    [("CB", {"tackles_won": 1, "interceptions": 1}), ("DM", {"tackles_won": 1, "interceptions": 1})],
-    "aerials_won":         [("CB", {"aerials_won": 2, "clearances": 1}), ("ST", {"aerials_won": 1})],
-    "npxg":                [("ST", {"npxg": 2, "shots": 1}), ("W", {"npxg": 2, "shots": 1})],
-    "shots":               [("ST", {"npxg": 2, "shots": 1}), ("W", {"npxg": 2, "shots": 1})],
-    "xg_per_shot":         [("ST", {"xg_per_shot": 2, "npxg": 1})],
-    "xa":                  [("AM", {"xa": 2, "key_passes": 1, "passes_into_box": 1}),
-                            ("W", {"xa": 2, "key_passes": 1, "dribbles_completed": 1})],
-    "passes_into_box":     [("AM", {"xa": 2, "key_passes": 1, "passes_into_box": 1}), ("FB", {"passes_into_box": 2, "progressive_passes": 1})],
-    "progressive_passes":  [("CM", {"progressive_passes": 2, "pass_pct": 1}), ("CB", {"progressive_passes": 2, "pass_pct": 1})],
-    "pass_pct":            [("CM", {"progressive_passes": 2, "pass_pct": 1}), ("CB", {"progressive_passes": 2, "pass_pct": 1})],
-    "dribbles_completed":  [("W", {"xa": 2, "key_passes": 1, "dribbles_completed": 1})],
-    "possession":          [("CM", {"passes": 1, "pass_pct": 1, "progressive_passes": 1})],
+# métrica do time → perfis que mais a resolvem
+ROLES: dict[str, list[tuple[str, str]]] = {
+    "npxg_against":        [("CB", "marking"), ("DM", "ball_winning")],
+    "shots_against":       [("CB", "marking"), ("DM", "ball_winning")],
+    "box_entries_against": [("CB", "marking"), ("FB", "defending")],
+    "prog_against":        [("DM", "ball_winning"), ("W", "pressing")],
+    "padj_pressures":      [("CM", "pressing"), ("W", "pressing")],
+    "padj_tackles_int":    [("CB", "marking"), ("DM", "ball_winning")],
+    "aerials_won":         [("CB", "aerial"), ("ST", "aerial")],
+    "npxg":                [("ST", "finishing"), ("W", "finishing"), ("AM", "infiltration")],
+    "shots":               [("ST", "finishing"), ("W", "finishing"), ("AM", "infiltration")],
+    "xg_per_shot":         [("ST", "chance_quality"), ("AM", "infiltration")],
+    "xa":                  [("AM", "creation"), ("W", "creation")],
+    "passes_into_box":     [("AM", "creation"), ("FB", "attacking")],
+    "progressive_passes":  [("DM", "buildup"), ("CM", "buildup"), ("CB", "buildup")],
+    "pass_pct":            [("DM", "buildup"), ("CM", "buildup"), ("CB", "buildup")],
+    "dribbles_completed":  [("W", "creation")],
+    "possession":          [("CM", "buildup"), ("DM", "buildup")],
 }
 ROLE_LABEL = {"GK": "Goleiro", "CB": "Zagueiro", "FB": "Lateral", "DM": "Volante", "CM": "Meia central",
               "AM": "Meia ofensivo", "W": "Ponta", "ST": "Centroavante"}
@@ -157,11 +176,25 @@ def rank_role(players: list[dict], share: dict[str, float], role: str, weights: 
     return cands[:top_n], current
 
 
+def plan(deficiency_rows: list[dict], max_gap: float = -0.5) -> dict[str, dict[str, list[dict]]]:
+    """Deficiências com gap ≤ max_gap → {função: {perfil: [deficiências que ele resolve]}}.
+
+    Funções e perfis na ordem da primeira (maior) deficiência que os pede."""
+    out: dict[str, dict[str, list[dict]]] = {}
+    for d in deficiency_rows:
+        if d["gap"] > max_gap:
+            break  # lista vem da maior deficiência para a maior força
+        for role, profile in ROLES.get(d["metric"], []):
+            out.setdefault(role, {}).setdefault(profile, []).append(
+                {k: d[k] for k in ("metric", "label", "value", "target", "gap")})
+    return out
+
+
 def recommend(season: str, team: str, target: tuple[int, int] = (1, 4), max_gap: float = -0.5, top_n: int = 10,
               max_age: int | None = None, max_value: float | None = None, all_leagues: bool = True,
               strength_weight: float = STRENGTH_WEIGHT) -> list[dict]:
-    """Funções a reforçar, da maior deficiência para a menor, cada uma com as deficiências
-    que resolve e seus candidatos. Deficiências que pedem a mesma função viram uma entrada só.
+    """Funções a reforçar, da maior deficiência para a menor; cada uma com seus perfis
+    (as deficiências que o perfil resolve, os jogadores atuais e os candidatos).
 
     As deficiências são sempre medidas na liga do time; `all_leagues` só amplia onde procurar."""
     teams = load_teams(season)
@@ -171,19 +204,18 @@ def recommend(season: str, team: str, target: tuple[int, int] = (1, 4), max_gap:
         players += [{**p, "league": league} for p in load_players(s)]
         share.update({t["team"]: float(t["passes_share"]) for t in load_teams(s)})
         market.update(load_market(s))
-    out: dict[tuple, dict] = {}
-    for d in deficiencies(teams, team, target):
-        if d["gap"] > max_gap:
-            break  # lista vem da maior deficiência para a maior força
-        for role, weights in ROLES.get(d["metric"], []):
-            key = (role, tuple(weights.items()))
-            if key not in out:
-                cands, current = rank_role(players, share, role, weights, exclude_team=team, top_n=top_n,
-                                           market=market, max_age=max_age, max_value=max_value,
-                                           strength_weight=strength_weight)
-                out[key] = {"role": role, "weights": weights, "addresses": [], "candidates": cands, "current": current}
-            out[key]["addresses"].append({k: d[k] for k in ("metric", "label", "value", "target", "gap")})
-    return list(out.values())
+    out = []
+    for role, profiles in plan(deficiencies(teams, team, target), max_gap).items():
+        entries = []
+        for profile, addresses in profiles.items():
+            weights = PROFILES[(role, profile)]
+            cands, current = rank_role(players, share, role, weights, exclude_team=team, top_n=top_n,
+                                       market=market, max_age=max_age, max_value=max_value,
+                                       strength_weight=strength_weight)
+            entries.append({"profile": profile, "weights": weights, "addresses": addresses,
+                            "candidates": cands, "current": current})
+        out.append({"role": role, "profiles": entries})
+    return out
 
 
 def main() -> None:
@@ -200,15 +232,16 @@ def main() -> None:
     args = ap.parse_args()
     lo, hi = map(int, args.target.split("-"))
     max_value = args.max_value * 1e6 if args.max_value else None
-    for r in recommend(args.season, args.team, (lo, hi), args.max_gap, args.top, args.max_age, max_value, not args.same_league, args.strength):
-        cols = list(r["weights"])
-        fixes = "; ".join(f"{a['label']} {a['gap']:+.2f}" for a in r["addresses"])
-        mine = ", ".join(f"{c['player']} {c['score']:.0%}" for c in r["current"][:3]) or "—"
-        print(f"\n■ {ROLE_LABEL[r['role']]} ({' + '.join(cols)})\n  resolve: {fixes}\n  atuais: {mine}")
-        for i, c in enumerate(r["candidates"], 1):
-            stats = "  ".join(f"{k}={c['stats'][k]['per90']}" for k in cols)
-            tm = f"{c['age'] or '?':>2}a €{c['value'] / 1e6:5.1f}M" if c["value"] else f"{c['age'] or '?':>2}a      ?"
-            print(f"   {i:2}. {c['player'][:26]:26} {c['team'][:20]:20} {c['league'][:14]:14} {tm} {c['minutes']:5}' {c['score']:5.0%}  {stats}")
+    for role in recommend(args.season, args.team, (lo, hi), args.max_gap, args.top, args.max_age, max_value, not args.same_league, args.strength):
+        for r in role["profiles"]:
+            cols = list(r["weights"])
+            fixes = "; ".join(f"{a['label']} {a['gap']:+.2f}" for a in r["addresses"])
+            mine = ", ".join(f"{c['player']} {c['score']:.0%}" for c in r["current"][:3]) or "—"
+            print(f"\n■ {ROLE_LABEL[role['role']]} · {r['profile']} ({' + '.join(cols)})\n  resolve: {fixes}\n  atuais: {mine}")
+            for i, c in enumerate(r["candidates"], 1):
+                stats = "  ".join(f"{k}={c['stats'][k]['per90']}" for k in cols)
+                tm = f"{c['age'] or '?':>2}a €{c['value'] / 1e6:5.1f}M" if c["value"] else f"{c['age'] or '?':>2}a      ?"
+                print(f"   {i:2}. {c['player'][:26]:26} {c['team'][:20]:20} {c['league'][:14]:14} {tm} {c['minutes']:5}' {c['score']:5.0%}  {stats}")
 
 
 if __name__ == "__main__":

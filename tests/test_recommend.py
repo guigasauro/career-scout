@@ -65,3 +65,16 @@ class TestCrossLeague(unittest.TestCase):
         self.assertEqual(by["FrBest"], round(1.0 * league_factor("ligue-1"), 3))
         self.assertGreater(by["EsBest"], by["FrBest"])   # mesmo topo da liga, liga mais forte vale mais
         self.assertEqual(by["FrLow"], 0.0)                # xA 8 é o pior da Ligue 1
+
+
+class TestPlan(unittest.TestCase):
+    def test_groups_profiles_by_role_worst_first(self):
+        from career_scout.analytics.recommend import plan
+        d = lambda m, g: {"metric": m, "label": m, "value": 0, "target": 0, "gap": g}
+        rows = [d("npxg_against", -2.0), d("pass_pct", -1.5), d("padj_tackles_int", -1.0), d("xa", -0.2)]
+        out = plan(rows, max_gap=-0.5)
+        self.assertEqual(list(out), ["CB", "DM", "CM"])                         # ordem da maior deficiência
+        self.assertEqual(list(out["DM"]), ["ball_winning", "buildup"])         # volante: dois perfis
+        self.assertEqual([a["metric"] for a in out["CB"]["marking"]],           # desarmes+int cai no mesmo perfil
+                         ["npxg_against", "padj_tackles_int"])
+        self.assertNotIn("AM", out)                                             # xA −0,2 não é deficiência
