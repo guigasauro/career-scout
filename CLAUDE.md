@@ -510,7 +510,9 @@ python seed_clubs.py
 ### 18.3 Ordem do protótipo
 1. ✅ Carregador StatsBomb + agregação por jogador/time (Premier League 2015/16). Testes em `tests/test_statsbomb.py`.
 2. ✅ Relatório de deficiências (`analytics/deficiencies.py`): 16 métricas por jogo, percentil na liga e `gap` até a média do patamar-alvo (default top 4, `--target`), em desvios-padrão da liga; negativo = deficiência. Cada métrica aponta as linhas (DEF/MID/ATT) que mais pesam nela. CLI: `python -m career_scout.analytics.deficiencies premier-league-2015-16 Chelsea`.
-3. Recomendação por deficiência (10 candidatos), dentro da própria liga; depois as 5 ligas com ajuste de força.
+3. ✅ Recomendação por deficiência (`analytics/recommend.py`), dentro da própria liga. Deficiências com `gap ≤ −0.5` (`--max-gap`) → funções que as resolvem (`ROLES`: zagueiro, lateral, volante, meia central, meia ofensivo, ponta, centroavante, cada uma com estatísticas por 90 e pesos) → candidatos pelo percentil ponderado no pool da função (≥900 min e ≥30% dos minutos na função). Deficiências que pedem a mesma função viram uma entrada só. Mostra também os jogadores atuais do clube na função, com o mesmo score. Ações defensivas ajustadas pela posse do time do jogador. CLI: `python -m career_scout.analytics.recommend premier-league-2015-16 Chelsea`.
+   - Conferência manual: Chelsea (xG sofrido −1,14) → Kanté em 4º entre os volantes. Liverpool (xG por chute −1,25; dribles −0,46) → Mané só em 21º entre os pontas: a função "ponta" pede criação e drible, e o forte dele era finalizar. **Não ajustar pesos olhando casos conhecidos** — calibrar no passo 5, com muitas contratações.
+   - Próximo: as 5 ligas com ajuste de força da liga.
 4. Valor de mercado/idade do TM nos candidatos.
 5. Validação com contratações reais do verão de 2016.
 6. Interface (aba nova no frontend atual).
@@ -521,4 +523,5 @@ python seed_clubs.py
 - `npxg` exclui pênaltis. Gols contra não entram em `goals`/`goals_against` (só chutes).
 - Posse aproximada por `passes_share` (fatia dos passes do jogo).
 - Jogador transferido no meio da temporada fica com o último clube.
+- `positions` guarda os minutos por posição (`"Center Attacking Midfield:1033;Right Wing:1005"`); `position` é a principal.
 - Classificação (`points`, `goals_for`, `goals_conceded`, `rank`) vem do placar oficial dos jogos. Conferida contra a tabela real de 2015/16 (Leicester 81, Arsenal 71, Tottenham 70…; Kane 25 gols, Özil 19 assistências).

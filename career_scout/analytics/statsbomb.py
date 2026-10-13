@@ -204,6 +204,9 @@ def season_tables(comp_id: int, season_id: int) -> tuple[list[dict], list[dict]]
             print(f"  {i}/{len(matches)} jogos", flush=True)
     for acc in players.values():
         acc["position"] = max(acc["_pos"], key=acc["_pos"].get)
+        # minutos por posição ("Center Attacking Midfield:1800;Left Wing:900"): o jogador entra
+        # em mais de uma função na recomendação (ex.: meia que também joga de ponta)
+        acc["positions"] = ";".join(f"{k}:{round(v)}" for k, v in sorted(acc["_pos"].items(), key=lambda kv: -kv[1]))
         del acc["_pos"]
     for acc in teams.values():
         acc["passes_share"] /= acc["matches"]  # média por jogo = posse aproximada

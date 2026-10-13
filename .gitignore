@@ -14,3 +14,4 @@ data/processed/
 .claude/
 plans/
 .pytest_cache/
+email_sofascore.md
