@@ -427,6 +427,10 @@ Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o est�
 | `GET`  | `/clubs?league=X&edition=N` | Clubes com mapeamento TM válido na liga, naquela edição (liga vem do CSV da edição) |
 | `POST` | `/overview` | Estágios 1+2: retorna chegadas + perfis + estatísticas agregadas |
 | `POST` | `/scout` | Estágios 1+2+3: retorna candidatos ranqueados por posição |
+| `GET`  | `/analytics/seasons` | Temporadas do StatsBomb com CSV em `data/processed/` (§18) |
+| `GET`  | `/analytics/teams?season=` | Times da temporada com posição e pontos |
+| `GET`  | `/analytics/team?season=&team=&target=1-4` | Classificação e as 16 métricas com percentil e `gap` (`deficiencies`) |
+| `GET`  | `/analytics/recommend?season=&team=&target=&max_gap=&max_age=&max_value=&top=` | Funções a reforçar com candidatos (`recommend`); `season`/`team` validados contra o que existe em disco |
 
 ### Body de `/overview` e `/scout` (`ScoutRequest`)
 ```json
@@ -480,6 +484,8 @@ python seed_clubs.py
 ### Estado atual
 5 grandes ligas + Championship, La Liga 2, Serie B, 2. Bundesliga, Ligue 2, Portugal, Holanda, Argentina, MLS, Liga MX, Turquia e Arábia Saudita (Brasileirão de fora: não é licenciado no jogo). Todos os clubes dessas ligas em todas as edições (15–27, nas duas versões de elenco) mapeados. Mapeados à mão: `AC Arles Avignon` → `athletic-club-arlesien/11300` (o TM usa o nome original do clube) e `Al Riyadh` → `al-riyadh-sc/31008` (a busca do TM não acha). Nomes com patrocinador (ex.: "Yukatel Kayserispor") ou siglas pontuadas não são achados pela busca — foram mapeados à mão com buscas limpas e revisados.
 
+**Auditoria (2026-10-13):** o título da página de cada id do TM foi comparado com o nome no mapeamento. 17 clubes do mapeamento antigo (5 grandes ligas e Serie B) apontavam para **outro clube**: Everton (Hertha BSC II), Deportivo (Montpellier), Montpellier (id inexistente), Parma, Mainz, Spezia, SPAL, Benevento, Brescia, Sassuolo, Arminia (Preußen Münster), Lecce, Sampdoria, Palermo, Pescara, além do Bordeaux já corrigido antes — corrigidos; o modo FIFA mostrava o histórico de contratações do clube errado para eles. **Pendentes** (TM bloqueou com 403 no fim da auditoria): Nancy (id 255 = Legia Varsóvia), Chicago Fire (aponta para o time B, 95331) e Castellammare di Stabia (94738, clube amador). Renomeações legítimas (Arles-Avignon → Athlétic Club Arlésien, Llagostera → UE Costa Brava) aparecem com nome diferente e estão certas.
+
 ---
 
 ## 18. Pivô: scouting por estatísticas avançadas (portfólio)
@@ -489,7 +495,7 @@ python seed_clubs.py
 ### 18.1 Fontes de dados (decisão)
 | Fonte | Status | Motivo |
 |---|---|---|
-| **StatsBomb Open Data** | ✅ **base do protótipo** | Dados de evento completos (xG por chute, passes, pressões, duelos), uso livre não comercial com crédito. Temporada **2015/16 completa das 5 grandes ligas** (`SEASONS` em `analytics/statsbomb.py`). Repositório: github.com/statsbomb/open-data |
+| **StatsBomb Open Data** | ✅ **base do protótipo** | Dados de evento completos (xG por chute, passes, pressões, duelos), uso livre não comercial com crédito. Temporada **2015/16 completa de Premier League, La Liga e Serie A**, Ligue 1 com 377/380 jogos (`SEASONS` em `analytics/statsbomb.py`). **A Bundesliga 2015/16 tem só os 34 jogos do Leverkusen** (idem 2023/24) — fora da análise: sem a liga inteira não há tabela nem percentil. Repositório: github.com/statsbomb/open-data |
 | Transfermarkt | ✅ reaproveitado | Valor de mercado, idade, contrato e transferências (já raspado em §6) |
 | FBref | ❌ | Perdeu xG e métricas avançadas em 20/01/2026 (Opta cortou o acesso e exigiu apagar o histórico). Só sobra estatística básica |
 | Understat | ❌ | `robots.txt` com `Disallow: /` para todos (conferido em 2026-10-13) |
@@ -513,9 +519,10 @@ python seed_clubs.py
 3. ✅ Recomendação por deficiência (`analytics/recommend.py`), dentro da própria liga. Deficiências com `gap ≤ −0.5` (`--max-gap`) → funções que as resolvem (`ROLES`: zagueiro, lateral, volante, meia central, meia ofensivo, ponta, centroavante, cada uma com estatísticas por 90 e pesos) → candidatos pelo percentil ponderado no pool da função (≥900 min e ≥30% dos minutos na função). Deficiências que pedem a mesma função viram uma entrada só. Mostra também os jogadores atuais do clube na função, com o mesmo score. Ações defensivas ajustadas pela posse do time do jogador. CLI: `python -m career_scout.analytics.recommend premier-league-2015-16 Chelsea`.
    - Conferência manual: Chelsea (xG sofrido −1,14) → Kanté em 4º entre os volantes. Liverpool (xG por chute −1,25; dribles −0,46) → Mané só em 21º entre os pontas: a função "ponta" pede criação e drible, e o forte dele era finalizar. **Não ajustar pesos olhando casos conhecidos** — calibrar no passo 5, com muitas contratações.
    - Próximo: as 5 ligas com ajuste de força da liga.
-4. Valor de mercado/idade do TM nos candidatos.
+4. ✅ Idade e valor do TM (`analytics/market.py`): lê o **elenco de cada clube na temporada** (`/kader/.../saison_id/{ano}/plus/1`, uma página por clube) e casa os nomes dentro do clube (`name_score`: sobrenome + inicial valem mais; sem sobrenome em comum só grafia quase idêntica). Premier League 2015/16: 548/550 casados. Idade = na janela de verão seguinte; valor = o da época. O TM não mostra contrato em temporadas passadas. Filtros `max_age`/`max_value` em `recommend` (quem não tem o dado passa). CLI: `python -m career_scout.analytics.market premier-league-2015-16` → `sb_{temporada}_market.csv`.
+   - Achado no caminho: o **Everton** estava com o id 45 (Hertha BSC II) no `club_mapping.json` desde o primeiro mapeamento — corrigido para 29 (afetava o modo FIFA).
 5. Validação com contratações reais do verão de 2016.
-6. Interface (aba nova no frontend atual).
+6. ✅ Interface: modo **"Análise de dados"** no header (`setMode`, `#analise` na URL), ao lado do Modo Carreira. Seletores de temporada, time, patamar (Campeão / Top 4 / 5º–7º / 8º–12º), idade e valor máximos; tabela das 16 métricas com percentil e distância; um cartão por função com as deficiências que resolve, os jogadores atuais e os candidatos (idade, valor, minutos, score e as estatísticas por 90, com o percentil no tooltip). pt/en/es.
 
 ### 18.4 Notas do carregador
 - Cache cru em `data/raw/statsbomb/*.json.gz` (gzip: um jogo cru tem ~4MB; 380 jogos).
@@ -523,5 +530,7 @@ python seed_clubs.py
 - `npxg` exclui pênaltis. Gols contra não entram em `goals`/`goals_against` (só chutes).
 - Posse aproximada por `passes_share` (fatia dos passes do jogo).
 - Jogador transferido no meio da temporada fica com o último clube.
+- Nome do time: vale o da lista de jogos, casado pelo `team_id` — nas escalações da Ligue 1 o nome muda de jogo para jogo ("Olympique de Marseille" × "Marseille", "Stade Malherbe Caen" × "Caen").
+- Conferência das tabelas contra as reais: Premier League, La Liga e Serie A batem; Ligue 1 bate exceto pelos 3 jogos ausentes (PSG 93 em vez de 96, Gazélec 34 em vez de 37).
 - `positions` guarda os minutos por posição (`"Center Attacking Midfield:1033;Right Wing:1005"`); `position` é a principal.
 - Classificação (`points`, `goals_for`, `goals_conceded`, `rank`) vem do placar oficial dos jogos. Conferida contra a tabela real de 2015/16 (Leicester 81, Arsenal 71, Tottenham 70…; Kane 25 gols, Özil 19 assistências).

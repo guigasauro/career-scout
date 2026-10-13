@@ -4,7 +4,7 @@ from career_scout.analytics.recommend import rank_role, role_of, roles_of
 
 
 def _p(name, team, minutes, positions, **stats):
-    base = dict(player=name, team=team, minutes=str(minutes), position=positions.split(":")[0], positions=positions,
+    base = dict(player_id=name, player=name, team=team, minutes=str(minutes), position=positions.split(":")[0], positions=positions,
                 passes="100", passes_completed="80", shots="0", npxg="0")
     base.update({k: str(v) for k, v in stats.items()})
     return base
@@ -46,3 +46,22 @@ class TestRankRole(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCrossLeague(unittest.TestCase):
+    def test_percentile_within_league_times_strength(self):
+        from career_scout.analytics.recommend import league_factor
+        share = {"A": 0.5, "B": 0.5, "C": 0.5, "D": 0.5}
+        players = [
+            {**_p("EsBest", "A", 1800, "Left Wing:1800", xa=5), "league": "la-liga"},
+            {**_p("EsLow", "B", 1800, "Left Wing:1800", xa=1), "league": "la-liga"},
+            # números absolutos maiores na Ligue 1, mas o percentil é contra os pares da liga dele
+            {**_p("FrBest", "C", 1800, "Left Wing:1800", xa=9), "league": "ligue-1"},
+            {**_p("FrLow", "D", 1800, "Left Wing:1800", xa=8), "league": "ligue-1"},
+        ]
+        cands, _ = rank_role(players, share, "W", {"xa": 1})
+        by = {c["player"]: c["score"] for c in cands}
+        self.assertEqual(by["EsBest"], round(1.0 * league_factor("la-liga"), 3))
+        self.assertEqual(by["FrBest"], round(1.0 * league_factor("ligue-1"), 3))
+        self.assertGreater(by["EsBest"], by["FrBest"])   # mesmo topo da liga, liga mais forte vale mais
+        self.assertEqual(by["FrLow"], 0.0)                # xA 8 é o pior da Ligue 1

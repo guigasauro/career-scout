@@ -63,6 +63,18 @@
   .how-btn:hover { border-color: var(--pitch); color: var(--pitch); }
   .how-q { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 50%; font-size: 12px; }
   .watch-btn { margin-left: 0; position: relative; }
+  .page[hidden] { display: none; }  /* .page define display e venceria o atributo hidden */
+  .mode-nav { display: flex; gap: 4px; padding: 3px; background: var(--raised); border: 1px solid var(--line); border-radius: 8px; }
+  .mode-nav button { height: 34px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 500; }
+  .mode-nav button[aria-pressed=true] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+  .picker.an-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #an-out:not(:empty) ~ .empty { display: none; }
+  #an-out { display: grid; gap: 20px; }
+  td.wrap { white-space: normal; }
+  .gap-neg { color: var(--danger); font-weight: 600; }
+  .gap-pos { color: var(--pitch); font-weight: 600; }
+  .an-fixes { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .an-fixes .muted { margin-right: 2px; }
   .watch-star { color: var(--gold); font-size: 16px; }
   .watch-n:not(:empty) { min-width: 20px; padding: 0 5px; border-radius: 10px; background: var(--gold-bg); color: var(--gold); font-size: 12px; font-weight: 600; }
   .star { background: none; border: 0; padding: 0 6px 0 0; font-size: 16px; line-height: 1; color: var(--faint); cursor: pointer; }
@@ -252,7 +264,7 @@
   .see-all:hover { text-decoration: underline; }
 
   @media (max-width: 900px) {
-    .picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .picker, .picker.an-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .layout { grid-template-columns: 1fr; }
     .settings { position: static; }
   }
@@ -265,11 +277,15 @@
     .watch-n:not(:empty) { position: absolute; top: -7px; right: -7px; }
     .page { padding: 16px; }
     .topbar { padding: 12px 16px; }
-    .picker { grid-template-columns: 1fr; }
+    .picker, .picker.an-picker { grid-template-columns: 1fr; }
     .dossier { grid-template-columns: 1fr; padding: 20px; }
     .dossier .btn-secondary { justify-self: start; }
     /* tabela de candidatos compacta: nome+clube, idade, valor, OVR, POT, % */
     .hide-sm { display: none; }
+    .topbar { flex-wrap: wrap; }
+    .mode-nav { order: 10; flex: 1 1 200px; }  /* base larga: não cabe na 1ª linha e desce junto com o idioma */
+    .topbar select { order: 11; }
+    .mode-nav button { flex: 1; padding: 0 6px; font-size: 13px; white-space: nowrap; }
     .pos-nav-ctx { flex-basis: 100%; }
     .show-sm { display: block !important; }
     .pos-section th, .pos-section td { padding: 9px 6px; }
@@ -286,6 +302,10 @@
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" rx="3" stroke="currentColor" stroke-width="2"/><line x1="13" y1="2" x2="13" y2="24" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="13" r="4.5" stroke="currentColor" stroke-width="2"/></svg>
     Career Scout
   </a>
+  <nav class="mode-nav" aria-label="Modo">
+    <button type="button" data-mode="fifa" aria-pressed="true" onclick="setMode('fifa')" data-i18n="mode_fifa"></button>
+    <button type="button" data-mode="an" aria-pressed="false" onclick="setMode('an')" data-i18n="mode_an"></button>
+  </nav>
   <button id="btn-how" class="how-btn" type="button" onclick="openHow()" data-i18n-aria="how"><span class="how-q" aria-hidden="true">?</span><span class="how-label" data-i18n="how"></span></button>
   <button id="btn-watch" class="how-btn watch-btn" type="button" onclick="openWatch()" data-i18n-aria="watch"><span class="watch-star" aria-hidden="true">★</span><span class="how-label" data-i18n="watch"></span><span id="watch-n" class="watch-n"></span></button>
   <button id="btn-theme" class="icon-btn" type="button" onclick="toggleTheme()">
@@ -299,7 +319,7 @@
   </select>
 </header>
 
-<div class="page">
+<div class="page" id="page-fifa">
   <!-- Escolha do clube: 4 passos em sequência -->
   <section class="picker" aria-label="Clube">
     <div class="step active" id="step-edition">
@@ -374,6 +394,67 @@
   </div>
 </div>
 
+<!-- Modo Análise (pivô §18): deficiências do time e reforços sugeridos -->
+<div class="page" id="page-an" hidden>
+  <section class="picker an-picker" aria-label="Time">
+    <div class="step active">
+      <label for="an-season"><span data-i18n="an_season"></span></label>
+      <select id="an-season" onchange="anLoadTeams()"><option value="" data-i18n="loading"></option></select>
+    </div>
+    <div class="step active">
+      <label for="an-team"><span data-i18n="an_team"></span></label>
+      <select id="an-team" disabled onchange="anRun()"><option value="" data-i18n="select"></option></select>
+    </div>
+    <div class="step active">
+      <label for="an-target"><span data-i18n="an_target"></span></label>
+      <select id="an-target" onchange="anRun()">
+        <option value="1-1" data-i18n="an_t_1_1"></option>
+        <option value="1-4" selected data-i18n="an_t_1_4"></option>
+        <option value="5-7" data-i18n="an_t_5_7"></option>
+        <option value="8-12" data-i18n="an_t_8_12"></option>
+      </select>
+    </div>
+    <div class="step active">
+      <label for="an-scope"><span data-i18n="an_scope"></span></label>
+      <select id="an-scope" onchange="anRun()">
+        <option value="1" data-i18n="an_scope_all"></option>
+        <option value="0" data-i18n="an_scope_own"></option>
+      </select>
+    </div>
+    <div class="step active">
+      <label for="an-strength"><span><span data-i18n="an_strength"></span><span class="info" tabindex="0" role="img" data-i18n-title="an_strength_tip" data-i18n-aria="an_strength_tip">i</span></span></label>
+      <select id="an-strength" onchange="anRun()">
+        <option value="0" data-i18n="off"></option>
+        <option value="0.15" data-i18n="an_str_low"></option>
+        <option value="0.3" selected data-i18n="mid"></option>
+        <option value="0.5" data-i18n="an_str_high"></option>
+      </select>
+    </div>
+    <div class="step active">
+      <label for="an-age"><span data-i18n="an_age"></span></label>
+      <select id="an-age" onchange="anRun()">
+        <option value="" data-i18n="an_any"></option>
+        <option>21</option><option>23</option><option>25</option><option>27</option><option>29</option>
+      </select>
+    </div>
+    <div class="step active">
+      <label for="an-value"><span data-i18n="an_value"></span></label>
+      <select id="an-value" onchange="anRun()">
+        <option value="" data-i18n="an_any"></option>
+        <option value="5000000">€5M</option><option value="10000000">€10M</option><option value="20000000">€20M</option>
+        <option value="30000000">€30M</option><option value="50000000">€50M</option>
+      </select>
+    </div>
+  </section>
+  <div id="an-status" class="status-bar" role="status"></div>
+  <div id="an-out"></div>
+  <div class="empty" id="an-empty">
+    <h2 data-i18n="an_empty_title"></h2>
+    <p class="empty-lead" data-i18n="an_empty_body"></p>
+    <p data-i18n="an_src"></p>
+  </div>
+</div>
+
 <div id="tip" class="tip" role="status" hidden></div>
 
 <!-- Modal reutilizável -->
@@ -398,6 +479,30 @@ const I18N = {
     pick_edition: '— selecione a edição —', pick_country: '— selecione o país —', pick_league: '— selecione a liga —',
     no_clubs: 'Nenhum clube cadastrado', settings: 'Ajustes da busca', rate_limited: 'Muitas buscas seguidas. Espere alguns segundos e tente de novo.', theme_dark: 'Mudar para modo escuro', theme_light: 'Mudar para modo claro', most_signed: 'Posição mais contratada', candidates: 'Candidatos', th_signings: 'Contratações',
     empty_lead: 'O Career Scout olha as contratações reais do clube nos últimos anos (idade, valor pago, nacionalidade e liga de origem em cada posição) e procura, na edição do jogo que você está jogando, jogadores com o mesmo perfil.',
+    mode_fifa: 'Modo Carreira', mode_an: 'Análise de dados', an_season: 'Temporada', an_team: 'Time', an_target: 'Comparar com',
+    an_t_1_1: 'Campeão', an_t_1_4: 'Top 4', an_t_5_7: '5º–7º', an_t_8_12: '8º–12º', an_age: 'Idade máxima', an_value: 'Valor máximo', an_any: 'Sem limite',
+    an_empty_title: 'Escolha um time', an_empty_body: 'Compara as estatísticas do time na temporada com as dos times do patamar escolhido, aponta as maiores deficiências e sugere jogadores da liga que as resolvem.',
+    an_src: 'Dados: StatsBomb Open Data (eventos de cada jogo) e Transfermarkt (idade e valor de mercado na janela seguinte).',
+    an_record: '{rank}º lugar, {pts} pontos, {gf} gols marcados e {ga} sofridos',
+    th_metric: 'Métrica', th_team_val: 'Time', th_target_val: 'Alvo', th_pct: 'Percentil na liga', th_gap: 'Distância',
+    an_gap_tip: 'Distância até a média do patamar, em desvios-padrão da liga. Negativo = abaixo do alvo; −0,5 ou menos conta como deficiência.',
+    an_recs: 'Reforços sugeridos', an_fixes: 'Resolve', an_current: 'No elenco', an_none: 'Nenhuma deficiência clara em relação a esse patamar.',
+    an_team_opt: '{rank}º {team} · {pts} pts',
+    an_scope: 'Buscar em', an_scope_all: 'Todas as ligas', an_scope_own: 'Mesma liga',
+    an_league_tip: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador e o score é multiplicado pela força da liga (coeficiente UEFA 2015/16).',
+    an_league_tip_off: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador, sem ajuste pela força da liga.',
+    an_strength: 'Força da liga', an_str_low: 'Leve', an_str_high: 'Forte',
+    an_strength_tip: 'Quanto a força da liga (coeficiente UEFA 2015/16) pesa no score. No Médio: Espanha 1,00, Inglaterra 0,92, Itália 0,90, França 0,85. Off = todas as ligas valem igual.', th_min: 'Min.',
+    an_no_cands: 'Nenhum candidato com esses filtros.',
+    m_npxg: 'xG sem pênaltis', m_shots: 'Chutes', m_xg_per_shot: 'xG por chute', m_xa: 'xA (chances criadas)', m_passes_into_box: 'Passes para a área',
+    m_progressive_passes: 'Passes progressivos', m_pass_pct: 'Passes certos', m_dribbles_completed: 'Dribles certos', m_possession: 'Posse',
+    m_npxg_against: 'xG sofrido sem pênaltis', m_shots_against: 'Chutes sofridos', m_box_entries_against: 'Passes do adversário para a área',
+    m_prog_against: 'Passes progressivos do adversário', m_padj_pressures: 'Pressões (ajust. posse)', m_padj_tackles_int: 'Desarmes + interceptações (ajust. posse)', m_aerials_won: 'Duelos aéreos ganhos',
+    role_CB: 'Zagueiro', role_FB: 'Lateral', role_DM: 'Volante', role_CM: 'Meia central', role_AM: 'Meia ofensivo', role_W: 'Ponta', role_ST: 'Centroavante', role_GK: 'Goleiro',
+    s_tackles_won: 'Desarmes', s_interceptions: 'Intercept.', s_clearances: 'Cortes', s_blocks: 'Bloqueios', s_aerials_won: 'Aéreos', s_recoveries: 'Recup.',
+    s_pressures: 'Pressões', s_npxg: 'npxG', s_shots: 'Chutes', s_xg_per_shot: 'xG/chute', s_xa: 'xA', s_key_passes: 'Passes-chave',
+    s_passes_into_box: 'P. área', s_progressive_passes: 'P. progr.', s_pass_pct: '% passes', s_dribbles_completed: 'Dribles', s_passes: 'Passes',
+    s_tip: '{v} por 90 min — percentil {p} na função',
     watch: 'Observados', watch_add: 'Observar {name}', watch_del: 'Parar de observar {name}', watch_empty: 'Nenhum jogador observado. Clique na ☆ ao lado do nome de um candidato para guardá-lo aqui.',
     how: 'Como funciona', how_ed: 'Edição', how_ver: 'Versão', how_src: 'Fonte', how_upd: 'Data do elenco',
     roster: 'Elenco', roster_tip: 'Lançamento = elenco vigente no dia em que o jogo saiu; Último update = elenco mais recente do jogo (com as transferências da temporada).', roster_launch: 'Lançamento', roster_latest: 'Último update',
@@ -449,6 +554,30 @@ const I18N = {
     pick_edition: '— select an edition —', pick_country: '— select a country —', pick_league: '— select a league —',
     no_clubs: 'No clubs mapped', settings: 'Search settings', rate_limited: 'Too many searches in a row. Wait a few seconds and try again.', theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode', most_signed: 'Most signed position', candidates: 'Candidates', th_signings: 'Signings',
     empty_lead: "Career Scout looks at the club's real signings over recent seasons (age, fee paid, nationality and origin league for each position) and finds players with the same profile in the edition of the game you're playing.",
+    mode_fifa: 'Career Mode', mode_an: 'Data analysis', an_season: 'Season', an_team: 'Team', an_target: 'Compare with',
+    an_t_1_1: 'Champion', an_t_1_4: 'Top 4', an_t_5_7: '5th–7th', an_t_8_12: '8th–12th', an_age: 'Max age', an_value: 'Max value', an_any: 'No limit',
+    an_empty_title: 'Pick a team', an_empty_body: "Compares the team's season stats with the teams in the chosen tier, points out the biggest weaknesses and suggests players from the league who address them.",
+    an_src: 'Data: StatsBomb Open Data (event data of every match) and Transfermarkt (age and market value in the next window).',
+    an_record: '#{rank}, {pts} points, {gf} goals scored, {ga} conceded',
+    th_metric: 'Metric', th_team_val: 'Team', th_target_val: 'Target', th_pct: 'League percentile', th_gap: 'Gap',
+    an_gap_tip: "Distance to the tier's average, in league standard deviations. Negative = below target; −0.5 or less counts as a weakness.",
+    an_recs: 'Suggested signings', an_fixes: 'Addresses', an_current: 'In the squad', an_none: 'No clear weakness against this tier.',
+    an_team_opt: '#{rank} {team} · {pts} pts',
+    an_scope: 'Search in', an_scope_all: 'All leagues', an_scope_own: 'Same league',
+    an_league_tip: "Across all leagues, the percentile is computed within each player's league and the score is multiplied by the league's strength (UEFA coefficient 2015/16).",
+    an_league_tip_off: "Across all leagues, the percentile is computed within each player's league, with no league strength adjustment.",
+    an_strength: 'League strength', an_str_low: 'Light', an_str_high: 'Strong',
+    an_strength_tip: 'How much league strength (UEFA coefficient 2015/16) weighs on the score. On Medium: Spain 1.00, England 0.92, Italy 0.90, France 0.85. Off = all leagues count the same.', th_min: 'Min.',
+    an_no_cands: 'No candidates with these filters.',
+    m_npxg: 'Non-penalty xG', m_shots: 'Shots', m_xg_per_shot: 'xG per shot', m_xa: 'xA (chances created)', m_passes_into_box: 'Passes into the box',
+    m_progressive_passes: 'Progressive passes', m_pass_pct: 'Pass accuracy', m_dribbles_completed: 'Successful dribbles', m_possession: 'Possession',
+    m_npxg_against: 'Non-penalty xG conceded', m_shots_against: 'Shots conceded', m_box_entries_against: 'Opponent passes into the box',
+    m_prog_against: 'Opponent progressive passes', m_padj_pressures: 'Pressures (poss. adj.)', m_padj_tackles_int: 'Tackles + interceptions (poss. adj.)', m_aerials_won: 'Aerial duels won',
+    role_CB: 'Centre-back', role_FB: 'Full-back', role_DM: 'Defensive mid', role_CM: 'Central mid', role_AM: 'Attacking mid', role_W: 'Winger', role_ST: 'Striker', role_GK: 'Goalkeeper',
+    s_tackles_won: 'Tackles', s_interceptions: 'Int.', s_clearances: 'Clearances', s_blocks: 'Blocks', s_aerials_won: 'Aerials', s_recoveries: 'Recov.',
+    s_pressures: 'Pressures', s_npxg: 'npxG', s_shots: 'Shots', s_xg_per_shot: 'xG/shot', s_xa: 'xA', s_key_passes: 'Key passes',
+    s_passes_into_box: 'Box passes', s_progressive_passes: 'Prog. passes', s_pass_pct: 'Pass %', s_dribbles_completed: 'Dribbles', s_passes: 'Passes',
+    s_tip: '{v} per 90 min — {p} percentile in the role',
     watch: 'Watchlist', watch_add: 'Watch {name}', watch_del: 'Stop watching {name}', watch_empty: 'No players on your watchlist. Click the ☆ next to a candidate\'s name to keep them here.',
     how: 'How it works', how_ed: 'Edition', how_ver: 'Version', how_src: 'Source', how_upd: 'Squad date',
     roster: 'Squads', roster_tip: "Launch = squads in force on the game's release day; Latest update = the game's most recent squads (with the season's transfers).", roster_launch: 'Launch', roster_latest: 'Latest update',
@@ -500,6 +629,30 @@ const I18N = {
     pick_edition: '— selecciona la edición —', pick_country: '— selecciona el país —', pick_league: '— selecciona la liga —',
     no_clubs: 'Ningún club registrado', settings: 'Ajustes de búsqueda', rate_limited: 'Demasiadas búsquedas seguidas. Espera unos segundos e inténtalo de nuevo.', theme_dark: 'Cambiar a modo oscuro', theme_light: 'Cambiar a modo claro', most_signed: 'Posición más fichada', candidates: 'Candidatos', th_signings: 'Fichajes',
     empty_lead: 'Career Scout analiza los fichajes reales del club en las últimas temporadas (edad, precio pagado, nacionalidad y liga de origen en cada posición) y busca, en la edición del juego que estás jugando, jugadores con el mismo perfil.',
+    mode_fifa: 'Modo Carrera', mode_an: 'Análisis de datos', an_season: 'Temporada', an_team: 'Equipo', an_target: 'Comparar con',
+    an_t_1_1: 'Campeón', an_t_1_4: 'Top 4', an_t_5_7: '5º–7º', an_t_8_12: '8º–12º', an_age: 'Edad máxima', an_value: 'Valor máximo', an_any: 'Sin límite',
+    an_empty_title: 'Elige un equipo', an_empty_body: 'Compara las estadísticas del equipo en la temporada con las de los equipos del nivel elegido, señala las mayores carencias y sugiere jugadores de la liga que las resuelven.',
+    an_src: 'Datos: StatsBomb Open Data (eventos de cada partido) y Transfermarkt (edad y valor de mercado en el mercado siguiente).',
+    an_record: '{rank}º puesto, {pts} puntos, {gf} goles a favor y {ga} en contra',
+    th_metric: 'Métrica', th_team_val: 'Equipo', th_target_val: 'Objetivo', th_pct: 'Percentil en la liga', th_gap: 'Distancia',
+    an_gap_tip: 'Distancia a la media del nivel, en desviaciones estándar de la liga. Negativo = por debajo del objetivo; −0,5 o menos cuenta como carencia.',
+    an_recs: 'Fichajes sugeridos', an_fixes: 'Resuelve', an_current: 'En la plantilla', an_none: 'Ninguna carencia clara frente a este nivel.',
+    an_team_opt: '{rank}º {team} · {pts} pts',
+    an_scope: 'Buscar en', an_scope_all: 'Todas las ligas', an_scope_own: 'Misma liga',
+    an_league_tip: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador y el score se multiplica por la fuerza de la liga (coeficiente UEFA 2015/16).',
+    an_league_tip_off: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador, sin ajuste por la fuerza de la liga.',
+    an_strength: 'Fuerza de la liga', an_str_low: 'Leve', an_str_high: 'Fuerte',
+    an_strength_tip: 'Cuánto pesa la fuerza de la liga (coeficiente UEFA 2015/16) en el score. En Medio: España 1,00, Inglaterra 0,92, Italia 0,90, Francia 0,85. Off = todas las ligas valen igual.', th_min: 'Min.',
+    an_no_cands: 'Ningún candidato con estos filtros.',
+    m_npxg: 'xG sin penaltis', m_shots: 'Tiros', m_xg_per_shot: 'xG por tiro', m_xa: 'xA (ocasiones creadas)', m_passes_into_box: 'Pases al área',
+    m_progressive_passes: 'Pases progresivos', m_pass_pct: 'Precisión de pase', m_dribbles_completed: 'Regates completados', m_possession: 'Posesión',
+    m_npxg_against: 'xG concedido sin penaltis', m_shots_against: 'Tiros concedidos', m_box_entries_against: 'Pases rivales al área',
+    m_prog_against: 'Pases progresivos del rival', m_padj_pressures: 'Presiones (ajust. posesión)', m_padj_tackles_int: 'Entradas + intercepciones (ajust. posesión)', m_aerials_won: 'Duelos aéreos ganados',
+    role_CB: 'Central', role_FB: 'Lateral', role_DM: 'Mediocentro defensivo', role_CM: 'Mediocentro', role_AM: 'Mediapunta', role_W: 'Extremo', role_ST: 'Delantero centro', role_GK: 'Portero',
+    s_tackles_won: 'Entradas', s_interceptions: 'Interc.', s_clearances: 'Despejes', s_blocks: 'Bloqueos', s_aerials_won: 'Aéreos', s_recoveries: 'Recup.',
+    s_pressures: 'Presiones', s_npxg: 'npxG', s_shots: 'Tiros', s_xg_per_shot: 'xG/tiro', s_xa: 'xA', s_key_passes: 'Pases clave',
+    s_passes_into_box: 'P. área', s_progressive_passes: 'P. progr.', s_pass_pct: '% pases', s_dribbles_completed: 'Regates', s_passes: 'Pases',
+    s_tip: '{v} por 90 min — percentil {p} en la función',
     watch: 'Seguidos', watch_add: 'Seguir a {name}', watch_del: 'Dejar de seguir a {name}', watch_empty: 'No sigues a ningún jugador. Haz clic en la ☆ junto al nombre de un candidato para guardarlo aquí.',
     how: 'Cómo funciona', how_ed: 'Edición', how_ver: 'Versión', how_src: 'Fuente', how_upd: 'Fecha de la plantilla',
     roster: 'Plantillas', roster_tip: 'Lanzamiento = plantillas vigentes el día en que salió el juego; Última actualización = las plantillas más recientes del juego (con los fichajes de la temporada).', roster_launch: 'Lanzamiento', roster_latest: 'Última actualización',
@@ -651,6 +804,7 @@ function setLang(lang) {
   const ov = window._overviewData;
   if (ov && document.getElementById('overview').innerHTML) document.getElementById('overview').innerHTML = renderSimplePanel(ov, ov._history);
   if (_lastScout && document.getElementById('results').innerHTML) renderResults(_lastScout);
+  if (_anData) anRender();
   if (!document.getElementById('modal').classList.contains('hidden')) hideModal();
 }
 
@@ -706,7 +860,7 @@ const HOW = {
     </ul>
     <h3>6. Limites</h3>
     <ul>
-      <li>Só os clubes das 5 grandes ligas (Inglaterra, Espanha, Itália, Alemanha e França) podem ser escolhidos. Os candidatos vêm de todas as ligas do jogo.</li>
+      <li>Dá para escolher clubes das 5 grandes ligas e de mais 12: as segundas divisões de Inglaterra, Espanha, Itália, Alemanha e França, além de Portugal, Holanda, Argentina, MLS, Liga MX, Turquia e Arábia Saudita. Os candidatos vêm de todas as ligas do jogo.</li>
       <li>Os dados do jogo são de um update específico e podem não bater com o seu save.</li>
       <li>Contratações com valor não divulgado ficam fora da média de valor.</li>
     </ul>`,
@@ -758,7 +912,7 @@ const HOW = {
     </ul>
     <h3>6. Limits</h3>
     <ul>
-      <li>Only clubs from the big 5 leagues (England, Spain, Italy, Germany and France) can be picked. Candidates come from every league in the game.</li>
+      <li>You can pick clubs from the big 5 leagues and 12 more: the second divisions of England, Spain, Italy, Germany and France, plus Portugal, the Netherlands, Argentina, MLS, Liga MX, Turkey and Saudi Arabia. Candidates come from every league in the game.</li>
       <li>Game data comes from a specific update and may not match your save.</li>
       <li>Signings with an undisclosed fee are left out of the value average.</li>
     </ul>`,
@@ -810,7 +964,7 @@ const HOW = {
     </ul>
     <h3>6. Límites</h3>
     <ul>
-      <li>Solo se pueden elegir clubes de las 5 grandes ligas (Inglaterra, España, Italia, Alemania y Francia). Los candidatos salen de todas las ligas del juego.</li>
+      <li>Se pueden elegir clubes de las 5 grandes ligas y de 12 más: las segundas divisiones de Inglaterra, España, Italia, Alemania y Francia, además de Portugal, Países Bajos, Argentina, MLS, Liga MX, Turquía y Arabia Saudí. Los candidatos salen de todas las ligas del juego.</li>
       <li>Los datos del juego son de una actualización concreta y pueden no coincidir con tu partida.</li>
       <li>Los fichajes con precio no revelado quedan fuera de la media de valor.</li>
     </ul>`,
@@ -1208,6 +1362,114 @@ function openPosDetail(pos) {
   </div>`, true);
 }
 
+// ── Modo Análise (pivô §18): StatsBomb Open Data + Transfermarkt ──────────
+let _anInit = false, _anData = null, _anReq = 0;
+function setMode(m) {
+  const an = m === 'an';
+  document.getElementById('page-fifa').hidden = an;
+  document.getElementById('page-an').hidden = !an;
+  document.querySelectorAll('.mode-nav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  history.replaceState(null, '', location.pathname + location.search + (an ? '#analise' : ''));
+  if (an && !_anInit) { _anInit = true; anInit(); }
+}
+// "premier-league-2015-16" → "Premier League 2015/16"
+// "la-liga" → "La Liga", "ligue-1" → "Ligue 1"
+const anLeague = k => (k || '').split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+const seasonName = k => k.replace(/-(\d{4})-(\d{2})$/, ' $1/$2').split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+async function anInit() {
+  const seasons = await fetch('/analytics/seasons').then(r => r.json());
+  const sel = document.getElementById('an-season');
+  sel.innerHTML = '';
+  seasons.forEach(s => sel.appendChild(new Option(seasonName(s), s)));
+  if (seasons.length) anLoadTeams();
+}
+async function anLoadTeams() {
+  const season = document.getElementById('an-season').value;
+  const teams = await fetch(`/analytics/teams?season=${encodeURIComponent(season)}`).then(r => r.json());
+  const sel = document.getElementById('an-team');
+  sel.innerHTML = `<option value="">${tr('select')}</option>`;
+  teams.forEach(x => sel.appendChild(new Option(t('an_team_opt', { rank: x.rank, team: x.team, pts: x.points }), x.team)));
+  sel.disabled = false;
+  document.getElementById('an-out').innerHTML = ''; _anData = null;
+}
+async function anRun() {
+  const team = document.getElementById('an-team').value;
+  if (!team) return;
+  const q = new URLSearchParams({ season: document.getElementById('an-season').value, team, target: document.getElementById('an-target').value });
+  const rq = new URLSearchParams(q);
+  if (document.getElementById('an-age').value) rq.set('max_age', document.getElementById('an-age').value);
+  if (document.getElementById('an-value').value) rq.set('max_value', document.getElementById('an-value').value);
+  const all = document.getElementById('an-scope').value === '1';
+  rq.set('all_leagues', all);
+  rq.set('strength', all ? document.getElementById('an-strength').value : 0);
+  document.getElementById('an-strength').disabled = !all;  // numa liga só o fator é igual pra todos
+  const req = ++_anReq;  // trocas rápidas de filtro: só a última resposta vale
+  setStatus('an-status', 'loading', `<span class="spinner"></span>${t('loading')}`);
+  try {
+    const [rt, rr] = await Promise.all([fetch(`/analytics/team?${q}`), fetch(`/analytics/recommend?${rq}`)]);
+    if (!rt.ok) throw new Error(await apiError(rt));
+    if (!rr.ok) throw new Error(await apiError(rr));
+    const data = { team: await rt.json(), recs: await rr.json(), target: q.get('target') };
+    if (req !== _anReq) return;
+    _anData = data;
+    setStatus('an-status', '');
+    anRender();
+  } catch (e) {
+    if (req === _anReq) setStatus('an-status', 'error', `${t('error')}: ${esc(e.message)}`);
+  }
+}
+const ROLE_LINE = { GK: 'gk', CB: 'def', FB: 'def', DM: 'mid', CM: 'mid', AM: 'mid', W: 'att', ST: 'att' };
+function anNum(v, dec = 2) { return new Intl.NumberFormat(LOCALE[LANG], { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v); }
+// posse e % de passes vêm em pontos percentuais; o resto é contagem por jogo
+const anVal = (metric, v) => ['possession', 'pass_pct'].includes(metric) ? `${anNum(v, 1)}%` : anNum(v);
+function anGap(g) { return `<span class="${g <= -0.5 ? 'gap-neg' : g >= 0.5 ? 'gap-pos' : 'muted'}">${g > 0 ? '+' : ''}${anNum(g)}</span>`; }
+function anRender() {
+  const { team: d, recs, target } = _anData;
+  const tname = t('an_t_' + target.replace('-', '_'));
+  const rows = d.deficiencies.map(r => `<tr>
+      <td class="wrap">${tr('m_' + r.metric)}</td>
+      <td class="num">${anVal(r.metric, r.value)}</td>
+      <td class="num muted hide-sm">${anVal(r.metric, r.target)}</td>
+      <td class="num hide-sm"><div class="score-bar"><div class="bar"><div class="fill" style="width:${r.pct}%"></div></div><span class="val">${r.pct}</span></div></td>
+      <td class="num">${anGap(r.gap)}</td>
+    </tr>`).join('');
+  const teamCard = `<section class="card">
+    <div class="card-header">${esc(d.team)} <span class="muted" style="font:400 14px var(--font)">${tr('an_record', { rank: d.rank, pts: d.points, gf: d.goals_for, ga: d.goals_conceded })}</span></div>
+    <div class="table-wrap"><table class="sortable">
+      <thead>${thead('th_metric', '>th_team_val', `~>${t('th_target_val')} (${tname})`, '~>th_pct', '>th_gap')}</thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <p class="hint card-body">${tr('an_gap_tip')} ${tr('an_src')}</p>
+  </section>`;
+  const recCards = recs.map(r => {
+    const stats = Object.keys(r.weights);
+    const fixes = r.addresses.map(a => `<span>${tr('m_' + a.metric)} ${anGap(a.gap)}</span>`).join('');
+    const mine = r.current.slice(0, 3).map(c => `${esc(c.player)} <span class="muted">${Math.round(c.score * 100)}%</span>`).join(', ') || '—';
+    const body = r.candidates.map((c, i) => `<tr>
+        <td class="num muted hide-sm">${i + 1}</td>
+        <td class="player trunc">${esc(c.player)}<span class="sub show-sm">${esc(c.team)} · ${esc(anLeague(c.league))}</span></td>
+        <td class="trunc hide-sm">${esc(c.team)}<span class="sub">${esc(anLeague(c.league))}</span></td>
+        <td class="num">${c.age ?? '—'}</td>
+        <td class="num">${fmt(c.value)}</td>
+        <td class="num hide-sm">${c.minutes}</td>
+        <td class="num"><div class="score-bar"><div class="bar"><div class="fill" style="width:${Math.round(c.score * 100)}%"></div></div><span class="val">${Math.round(c.score * 100)}%</span></div></td>
+        ${stats.map(k => `<td class="num hide-sm" title="${tr('s_tip', { v: anNum(c.stats[k].per90), p: c.stats[k].pct })}">${anNum(c.stats[k].per90)}</td>`).join('')}
+      </tr>`).join('');
+    return `<section class="card">
+      <header class="pos-head"><span class="badge badge-pos-${ROLE_LINE[r.role]}">${tr('role_' + r.role)}</span>
+        <span class="muted">${tr('an_current')}: ${mine}</span></header>
+      <div class="an-fixes"><span class="muted">${tr('an_fixes')}:</span>${fixes}</div>
+      ${r.candidates.length ? `<div class="table-wrap"><table class="sortable">
+        <thead>${thead('~>#', 'th_name', '~th_club', '>th_age', '>th_value', '~>th_min', '>Score', ...stats.map(k => '~>s_' + k))}</thead>
+        <tbody>${body}</tbody></table></div>` : `<p class="card-body muted">${tr('an_no_cands')}</p>`}
+    </section>`;
+  }).join('');
+  document.getElementById('an-out').innerHTML = teamCard +
+    `<h2 class="section-title">${tr('an_recs')}</h2>` +
+    (document.getElementById('an-scope').value === '1' ? `<p class="results-intro">${tr(+document.getElementById('an-strength').value ? 'an_league_tip' : 'an_league_tip_off')}</p>` : '') +
+    (recs.length ? recCards : `<p class="muted">${tr('an_none')}</p>`);
+}
+
 // ── modal ────────────────────────────────────────────────────────
 function openModal(title, obj, barColor) {
   openModalHtml(title, distRows(obj, barColor), false);
@@ -1585,6 +1847,8 @@ function renderPosition({ profile: p, candidates, total, team_overall, target_ov
 applyI18n();
 saveWatch();
 init();
+if (location.hash === '#analise') setMode('an');
+addEventListener('hashchange', () => setMode(location.hash === '#analise' ? 'an' : 'fifa'));
 </script>
 </body>
 </html>

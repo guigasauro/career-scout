@@ -1,7 +1,8 @@
 """Pivô analytics — dados de evento do StatsBomb Open Data → estatísticas por jogador e por time.
 
 Fonte: github.com/statsbomb/open-data (uso livre não comercial, com crédito ao StatsBomb).
-Cobertura útil: temporada 2015/16 completa das 5 grandes ligas.
+Cobertura útil: temporada 2015/16 completa de Premier League, La Liga e Serie A; Ligue 1 com
+377 de 380 jogos. A Bundesliga 2015/16 do repositório tem só os 34 jogos do Leverkusen — fora.
 Parsing (`aggregate_match`) separado de fetching (`fetch_json`), como no scraper do TM.
 """
 import argparse
@@ -23,7 +24,6 @@ SEASONS = {
     "premier-league-2015-16": (2, 27),
     "la-liga-2015-16": (11, 27),
     "serie-a-2015-16": (12, 27),
-    "bundesliga-2015-16": (9, 27),
     "ligue-1-2015-16": (7, 27),
 }
 
@@ -177,7 +177,11 @@ def season_tables(comp_id: int, season_id: int) -> tuple[list[dict], list[dict]]
     matches = fetch_json(f"matches/{comp_id}/{season_id}.json")
     for i, m in enumerate(matches, 1):
         mid = m["match_id"]
-        p_match, t_match = aggregate_match(fetch_json(f"events/{mid}.json"), fetch_json(f"lineups/{mid}.json"))
+        # o nome do time nas escalações muda de jogo para jogo ("Olympique de Marseille" × "Marseille"):
+        # vale o nome da lista de jogos, casado pelo id
+        name_by_id = {m[f"{side}_team"][f"{side}_team_id"]: m[f"{side}_team"][f"{side}_team_name"] for side in ("home", "away")}
+        lineups = [{**t, "team_name": name_by_id.get(t["team_id"], t["team_name"])} for t in fetch_json(f"lineups/{mid}.json")]
+        p_match, t_match = aggregate_match(fetch_json(f"events/{mid}.json"), lineups)
         for pid, s in p_match.items():
             acc = players.setdefault(pid, {**s, **dict.fromkeys(STATS + ["minutes"], 0.0), "matches": 0, "_pos": defaultdict(float)})
             acc["team"] = s["team"]  # transferido no meio da temporada: fica o último clube

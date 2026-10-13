@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from career_scout.analytics.deficiencies import deficiencies as _deficiencies, load_teams as _load_sb_teams
+from career_scout.analytics.recommend import recommend as _recommend
 from career_scout.extract.transfermarkt import get_arrivals
 from career_scout.match.sofifa import (
     available_rosters, club_leagues, league_levels, league_names, roster_csv, line_of_pos, load_sofifa, rank_candidates, team_line_overall,
@@ -412,3 +414,57 @@ def scout(req: ScoutRequest):
         "team_levels": team_levels,
         "positions": positions,
     }
+
+
+# ── Analytics (pivô §18): deficiências do time e candidatos por função, StatsBomb Open Data ──
+def _sb_seasons() -> list[str]:
+    return sorted(p.name[3:-10] for p in (BASE / "processed").glob("sb_*_teams.csv"))
+
+
+def _sb_check(season: str, team: str | None = None) -> list[dict]:
+    # season vira nome de arquivo: só aceita as que existem em disco
+    if season not in _sb_seasons():
+        raise HTTPException(404, f"Temporada {season} não encontrada")
+    teams = _load_sb_teams(season)
+    if team is not None and team not in {t["team"] for t in teams}:
+        raise HTTPException(404, f"Time {team} não encontrado em {season}")
+    return teams
+
+
+def _target(target: str) -> tuple[int, int]:
+    try:
+        lo, hi = map(int, target.split("-"))
+    except ValueError:
+        raise HTTPException(422, "target deve ser no formato 1-4")
+    return lo, hi
+
+
+@app.get("/analytics/seasons")
+def analytics_seasons():
+    return _sb_seasons()
+
+
+@app.get("/analytics/teams")
+def analytics_teams(season: str):
+    teams = _sb_check(season)
+    return sorted(({"team": t["team"], "rank": int(t["rank"]), "points": int(t["points"])} for t in teams), key=lambda t: t["rank"])
+
+
+@app.get("/analytics/team")
+def analytics_team(season: str, team: str, target: str = "1-4"):
+    teams = _sb_check(season, team)
+    me = next(t for t in teams if t["team"] == team)
+    return {
+        "team": team, "rank": int(me["rank"]), "points": int(me["points"]), "matches": int(me["matches"]),
+        "goals_for": int(me["goals_for"]), "goals_conceded": int(me["goals_conceded"]),
+        "deficiencies": _deficiencies(teams, team, _target(target)),
+    }
+
+
+@app.get("/analytics/recommend")
+def analytics_recommend(season: str, team: str, target: str = "1-4", max_gap: float = -0.5,
+                        max_age: int | None = None, max_value: float | None = None, top: int = 10,
+                        all_leagues: bool = True, strength: float = 0.3):
+    _sb_check(season, team)
+    return _recommend(season, team, _target(target), max_gap, min(top, 30), max_age, max_value, all_leagues,
+                      min(max(strength, 0.0), 1.0))
