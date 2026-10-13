@@ -139,7 +139,7 @@
   },
   "Everton": {
     "tm_slug": "fc-everton",
-    "tm_id": 45,
+    "tm_id": 29,
     "league": "English Premier League",
     "ok": true
   },
@@ -217,7 +217,7 @@
   },
   "Parma": {
     "tm_slug": "parma-calcio-1913",
-    "tm_id": 99,
+    "tm_id": 130,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -349,7 +349,7 @@
   },
   "U.S. Sassuolo Calcio": {
     "tm_slug": "us-sassuolo-calcio",
-    "tm_id": 6591,
+    "tm_id": 6574,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -391,7 +391,7 @@
   },
   "Montpellier Hérault SC": {
     "tm_slug": "hsc-montpellier",
-    "tm_id": 382,
+    "tm_id": 969,
     "league": "French Ligue 1",
     "ok": true
   },
@@ -415,7 +415,7 @@
   },
   "U.C. Sampdoria": {
     "tm_slug": "sampdoria-genua",
-    "tm_id": 232,
+    "tm_id": 1038,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -427,7 +427,7 @@
   },
   "1. FSV Mainz 05": {
     "tm_slug": "1-fsv-mainz-05",
-    "tm_id": 190,
+    "tm_id": 39,
     "league": "German 1. Bundesliga",
     "ok": true
   },
@@ -481,7 +481,7 @@
   },
   "Deportivo de La Coruña": {
     "tm_slug": "rc-deportivo",
-    "tm_id": 969,
+    "tm_id": 897,
     "league": "Spain Primera Division",
     "ok": true
   },
@@ -541,7 +541,7 @@
   },
   "Palermo": {
     "tm_slug": "us-palermo",
-    "tm_id": 480,
+    "tm_id": 458,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -685,7 +685,7 @@
   },
   "Pescara": {
     "tm_slug": "delfino-pescara-1936",
-    "tm_id": 3551,
+    "tm_id": 2921,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -727,7 +727,7 @@
   },
   "SPAL": {
     "tm_slug": "spal",
-    "tm_id": 3671,
+    "tm_id": 2722,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -763,7 +763,7 @@
   },
   "Benevento": {
     "tm_slug": "benevento-calcio",
-    "tm_id": 6674,
+    "tm_id": 4171,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -817,7 +817,7 @@
   },
   "Brescia": {
     "tm_slug": "brescia-calcio",
-    "tm_id": 1393,
+    "tm_id": 19,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -847,7 +847,7 @@
   },
   "Lecce": {
     "tm_slug": "us-lecce",
-    "tm_id": 1284,
+    "tm_id": 1005,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -865,13 +865,13 @@
   },
   "Spezia": {
     "tm_slug": "spezia-calcio",
-    "tm_id": 3521,
+    "tm_id": 3522,
     "league": "Italian Serie A",
     "ok": true
   },
   "DSC Arminia Bielefeld": {
     "tm_slug": "arminia-bielefeld",
-    "tm_id": 91,
+    "tm_id": 10,
     "league": "German 1. Bundesliga",
     "ok": true
   },
@@ -937,7 +937,7 @@
   },
   "Montpellier HSC": {
     "tm_slug": "hsc-montpellier",
-    "tm_id": 382,
+    "tm_id": 969,
     "league": "French Ligue 1",
     "ok": true
   },
@@ -949,7 +949,7 @@
   },
   "RC Deportivo A Coruña": {
     "tm_slug": "rc-deportivo",
-    "tm_id": 969,
+    "tm_id": 897,
     "league": "Spain Primera Division",
     "ok": true
   },
@@ -973,13 +973,13 @@
   },
   "Sampdoria": {
     "tm_slug": "sampdoria-genua",
-    "tm_id": 232,
+    "tm_id": 1038,
     "league": "Italian Serie A",
     "ok": true
   },
   "Sassuolo": {
     "tm_slug": "us-sassuolo-calcio",
-    "tm_id": 6591,
+    "tm_id": 6574,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -1057,7 +1057,7 @@
   },
   "Everton FC": {
     "tm_slug": "fc-everton",
-    "tm_id": 45,
+    "tm_id": 29,
     "league": "English Premier League",
     "ok": true
   },
@@ -1087,7 +1087,7 @@
   },
   "Parma Calcio": {
     "tm_slug": "parma-calcio-1913",
-    "tm_id": 99,
+    "tm_id": 130,
     "league": "Italian Serie A",
     "ok": true
   },
@@ -3499,7 +3499,7 @@
   },
   "Palermo FC": {
     "tm_slug": "us-palermo",
-    "tm_id": 480,
+    "tm_id": 458,
     "league": "Serie B (Italy)",
     "ok": true
   },
@@ -3595,7 +3595,7 @@
   },
   "Brescia Calcio": {
     "tm_slug": "brescia-calcio",
-    "tm_id": 1393,
+    "tm_id": 19,
     "league": "Serie B (Italy)",
     "ok": true
   },
@@ -3733,7 +3733,7 @@
   },
   "RC Deportivo de La Coruña": {
     "tm_slug": "rc-deportivo",
-    "tm_id": 969,
+    "tm_id": 897,
     "league": "La Liga 2 (Spain)",
     "ok": true
   },
