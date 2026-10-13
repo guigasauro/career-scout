@@ -77,7 +77,7 @@ def _make_session(data_dir: Path) -> requests.Session:
 
 def _looks_like_challenge(html: str) -> bool:
     """Detecta a página de verificação Cloudflare (cookie ausente/expirado)."""
-    return "cf-chl-widget" in html or "Performing security verification" in html
+    return "cf-chl-widget" in html or "Performing security verification" in html or "<title>Just a moment...</title>" in html
 
 
 def _fetch(session: requests.Session, url: str, cache: Path, delay: float = 1.5) -> str:
@@ -87,15 +87,15 @@ def _fetch(session: requests.Session, url: str, cache: Path, delay: float = 1.5)
     for attempt in range(3):
         try:
             resp = session.get(url, timeout=20)
+            # desafio do Cloudflare vem com 403: avisa pra renovar o cookie em vez de um HTTPError genérico
+            if _looks_like_challenge(resp.text):
+                raise RuntimeError(COOKIE_INSTRUCTIONS)
             resp.raise_for_status()
             break
         except requests.RequestException:
             if attempt == 2:
                 raise
             time.sleep(delay * (attempt + 1))  # backoff simples: timeout de rede é transitório
-    if _looks_like_challenge(resp.text):
-        # não cacheia a página de desafio — senão envenena o cache pra sempre
-        raise RuntimeError(COOKIE_INSTRUCTIONS)
     cache.write_text(resp.text, encoding="utf-8")
     return resp.text
 

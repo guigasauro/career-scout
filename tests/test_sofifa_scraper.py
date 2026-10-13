@@ -20,6 +20,10 @@ class TestLooksLikeChallenge(unittest.TestCase):
         html = '<div id="cf-chl-widget-abc">Performing security verification</div>'
         self.assertTrue(_looks_like_challenge(html))
 
+    def test_detects_403_just_a_moment_page(self):
+        # página que vem junto com o 403 quando o cf_clearance expira
+        self.assertTrue(_looks_like_challenge('<html><head><title>Just a moment...</title></head></html>'))
+
     def test_normal_page_passes(self):
         html = "<table><tbody><tr><td>Player</td></tr></tbody></table>"
         self.assertFalse(_looks_like_challenge(html))
