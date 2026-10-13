@@ -714,8 +714,8 @@
     "ok": true
   },
   "AS Nancy Lorraine": {
-    "tm_slug": "as-nancy",
-    "tm_id": 255,
+    "tm_slug": "as-nancy-lorraine",
+    "tm_id": 1159,
     "league": "French Ligue 1",
     "ok": true
   },
@@ -2142,8 +2142,8 @@
     "ok": true
   },
   "Chicago Fire Football Club": {
-    "tm_slug": "chicago-fire-fc-2",
-    "tm_id": 95331,
+    "tm_slug": "chicago-fire-fc",
+    "tm_id": 432,
     "league": "USA Major League Soccer",
     "ok": true
   },
@@ -2904,8 +2904,8 @@
     "ok": true
   },
   "Castellammare di Stabia": {
-    "tm_slug": "as-stabia-friends",
-    "tm_id": 94738,
+    "tm_slug": "ss-juve-stabia",
+    "tm_id": 5587,
     "league": "Italian Serie B",
     "ok": true
   },
