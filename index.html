@@ -77,6 +77,8 @@
   .gap-pos { color: var(--pitch); font-weight: 600; }
   .an-fixes { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
   .an-fixes .muted { margin-right: 2px; }
+  .an-per90 { padding: 8px 16px 0; font-size: 13px; color: var(--muted); }
+  th abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
   .watch-star { color: var(--gold); font-size: 16px; }
   .watch-n:not(:empty) { min-width: 20px; padding: 0 5px; border-radius: 10px; background: var(--gold-bg); color: var(--gold); font-size: 12px; font-weight: 600; }
   .star { background: none; border: 0; padding: 0 6px 0 0; font-size: 16px; line-height: 1; color: var(--faint); cursor: pointer; }
@@ -496,17 +498,28 @@ const I18N = {
     an_league_tip: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador e o score é multiplicado pela força da liga (coeficiente UEFA 2015/16).',
     an_league_tip_off: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador, sem ajuste pela força da liga.',
     an_strength: 'Força da liga', an_str_low: 'Leve', an_str_high: 'Forte',
-    an_strength_tip: 'Quanto a força da liga (coeficiente UEFA 2015/16) pesa no score. No Médio: Espanha 1,00, Inglaterra 0,92, Itália 0,90, França 0,85. Off = todas as ligas valem igual.', th_min: 'Min.',
+    an_strength_tip: 'Quanto a força da liga (coeficiente UEFA 2015/16) pesa no score. No Médio: Espanha 1,00, Inglaterra 0,92, Itália 0,90, França 0,85. Off = todas as ligas valem igual.',
     an_no_cands: 'Nenhum candidato com esses filtros.',
     m_npxg: 'xG sem pênaltis', m_shots: 'Chutes', m_xg_per_shot: 'xG por chute', m_xa: 'xA (chances criadas)', m_passes_into_box: 'Passes para a área',
     m_progressive_passes: 'Passes progressivos', m_pass_pct: 'Passes certos', m_dribbles_completed: 'Dribles certos', m_possession: 'Posse',
     m_npxg_against: 'xG sofrido sem pênaltis', m_shots_against: 'Chutes sofridos', m_box_entries_against: 'Passes do adversário para a área',
     m_prog_against: 'Passes progressivos do adversário', m_padj_pressures: 'Pressões (ajust. posse)', m_padj_tackles_int: 'Desarmes + interceptações (ajust. posse)', m_aerials_won: 'Duelos aéreos ganhos',
     role_CB: 'Zagueiro', role_FB: 'Lateral', role_DM: 'Volante', role_CM: 'Meia central', role_AM: 'Meia ofensivo', role_W: 'Ponta', role_ST: 'Centroavante', role_GK: 'Goleiro',
-    s_tackles_won: 'Desarmes', s_interceptions: 'Intercept.', s_clearances: 'Cortes', s_blocks: 'Bloqueios', s_aerials_won: 'Aéreos', s_recoveries: 'Recup.',
-    s_pressures: 'Pressões', s_npxg: 'npxG', s_shots: 'Chutes', s_xg_per_shot: 'xG/chute', s_xa: 'xA', s_key_passes: 'Passes-chave',
-    s_passes_into_box: 'P. área', s_progressive_passes: 'P. progr.', s_pass_pct: '% passes', s_dribbles_completed: 'Dribles', s_passes: 'Passes',
-    s_tip: '{v} por 90 min — percentil {p} na função',
+    s_tackles_won: 'Desarmes certos', s_interceptions: 'Interceptações', s_clearances: 'Cortes', s_blocks: 'Bloqueios', s_aerials_won: 'Aéreos ganhos', s_recoveries: 'Recuperações',
+    s_pressures: 'Pressões', s_npxg: 'xG s/ pên.', s_shots: 'Chutes', s_xg_per_shot: 'xG/chute', s_xa: 'xA', s_key_passes: 'Passes-chave',
+    s_passes_into_box: 'Passes p/ área', s_progressive_passes: 'Passes progr.', s_pass_pct: '% passes certos', s_dribbles_completed: 'Dribles certos', s_passes: 'Passes',
+    sf_tackles_won: 'Desarmes certos por 90 min (ajustado pela posse)', sf_interceptions: 'Interceptações por 90 min (ajustado pela posse)',
+    sf_clearances: 'Cortes (bola afastada da área) por 90 min (ajustado pela posse)', sf_blocks: 'Chutes e passes bloqueados por 90 min (ajustado pela posse)',
+    sf_aerials_won: 'Duelos aéreos ganhos por 90 min', sf_recoveries: 'Recuperações de bola por 90 min (ajustado pela posse)',
+    sf_pressures: 'Pressões no adversário com a bola por 90 min (ajustado pela posse)', sf_npxg: 'Gols esperados (xG) sem pênaltis por 90 min',
+    sf_shots: 'Chutes por 90 min', sf_xg_per_shot: 'xG médio por chute: qualidade das chances (não é por 90)', sf_xa: 'Assistências esperadas (xA) por 90 min',
+    sf_key_passes: 'Passes que terminaram em chute por 90 min', sf_passes_into_box: 'Passes certos para dentro da área por 90 min',
+    sf_progressive_passes: 'Passes certos que avançam 10 jardas ou mais por 90 min', sf_pass_pct: 'Porcentagem de passes certos (não é por 90)',
+    sf_dribbles_completed: 'Dribles certos por 90 min', sf_passes: 'Passes tentados por 90 min',
+    an_per90: 'Estatísticas por 90 minutos jogados. Passe o mouse no nome da coluna para ver a definição.',
+    th_minutes: 'Minutos', sf_minutes: 'Minutos jogados na temporada', sf_value: 'Valor de mercado no Transfermarkt na época (verão seguinte à temporada)',
+    sf_age: 'Idade na janela de verão seguinte à temporada', sf_score: 'Percentil médio ponderado nas estatísticas da função, entre os jogadores dela na mesma liga, multiplicado pela força da liga',
+    s_tip: '{v} — percentil {p} na função, dentro da liga do jogador',
     watch: 'Observados', watch_add: 'Observar {name}', watch_del: 'Parar de observar {name}', watch_empty: 'Nenhum jogador observado. Clique na ☆ ao lado do nome de um candidato para guardá-lo aqui.',
     how: 'Como funciona', how_ed: 'Edição', how_ver: 'Versão', how_src: 'Fonte', how_upd: 'Data do elenco',
     roster: 'Elenco', roster_tip: 'Lançamento = elenco vigente no dia em que o jogo saiu; Último update = elenco mais recente do jogo (com as transferências da temporada).', roster_launch: 'Lançamento', roster_latest: 'Último update',
@@ -573,17 +586,28 @@ const I18N = {
     an_league_tip: "Across all leagues, the percentile is computed within each player's league and the score is multiplied by the league's strength (UEFA coefficient 2015/16).",
     an_league_tip_off: "Across all leagues, the percentile is computed within each player's league, with no league strength adjustment.",
     an_strength: 'League strength', an_str_low: 'Light', an_str_high: 'Strong',
-    an_strength_tip: 'How much league strength (UEFA coefficient 2015/16) weighs on the score. On Medium: Spain 1.00, England 0.92, Italy 0.90, France 0.85. Off = all leagues count the same.', th_min: 'Min.',
+    an_strength_tip: 'How much league strength (UEFA coefficient 2015/16) weighs on the score. On Medium: Spain 1.00, England 0.92, Italy 0.90, France 0.85. Off = all leagues count the same.',
     an_no_cands: 'No candidates with these filters.',
     m_npxg: 'Non-penalty xG', m_shots: 'Shots', m_xg_per_shot: 'xG per shot', m_xa: 'xA (chances created)', m_passes_into_box: 'Passes into the box',
     m_progressive_passes: 'Progressive passes', m_pass_pct: 'Pass accuracy', m_dribbles_completed: 'Successful dribbles', m_possession: 'Possession',
     m_npxg_against: 'Non-penalty xG conceded', m_shots_against: 'Shots conceded', m_box_entries_against: 'Opponent passes into the box',
     m_prog_against: 'Opponent progressive passes', m_padj_pressures: 'Pressures (poss. adj.)', m_padj_tackles_int: 'Tackles + interceptions (poss. adj.)', m_aerials_won: 'Aerial duels won',
     role_CB: 'Centre-back', role_FB: 'Full-back', role_DM: 'Defensive mid', role_CM: 'Central mid', role_AM: 'Attacking mid', role_W: 'Winger', role_ST: 'Striker', role_GK: 'Goalkeeper',
-    s_tackles_won: 'Tackles', s_interceptions: 'Int.', s_clearances: 'Clearances', s_blocks: 'Blocks', s_aerials_won: 'Aerials', s_recoveries: 'Recov.',
+    s_tackles_won: 'Tackles won', s_interceptions: 'Interceptions', s_clearances: 'Clearances', s_blocks: 'Blocks', s_aerials_won: 'Aerials won', s_recoveries: 'Recoveries',
     s_pressures: 'Pressures', s_npxg: 'npxG', s_shots: 'Shots', s_xg_per_shot: 'xG/shot', s_xa: 'xA', s_key_passes: 'Key passes',
-    s_passes_into_box: 'Box passes', s_progressive_passes: 'Prog. passes', s_pass_pct: 'Pass %', s_dribbles_completed: 'Dribbles', s_passes: 'Passes',
-    s_tip: '{v} per 90 min — {p} percentile in the role',
+    s_passes_into_box: 'Box passes', s_progressive_passes: 'Prog. passes', s_pass_pct: 'Pass accuracy', s_dribbles_completed: 'Dribbles won', s_passes: 'Passes',
+    sf_tackles_won: 'Tackles won per 90 min (possession-adjusted)', sf_interceptions: 'Interceptions per 90 min (possession-adjusted)',
+    sf_clearances: 'Clearances per 90 min (possession-adjusted)', sf_blocks: 'Blocked shots and passes per 90 min (possession-adjusted)',
+    sf_aerials_won: 'Aerial duels won per 90 min', sf_recoveries: 'Ball recoveries per 90 min (possession-adjusted)',
+    sf_pressures: 'Pressures on the ball carrier per 90 min (possession-adjusted)', sf_npxg: 'Non-penalty expected goals (xG) per 90 min',
+    sf_shots: 'Shots per 90 min', sf_xg_per_shot: 'Average xG per shot: chance quality (not per 90)', sf_xa: 'Expected assists (xA) per 90 min',
+    sf_key_passes: 'Passes that led to a shot per 90 min', sf_passes_into_box: 'Completed passes into the box per 90 min',
+    sf_progressive_passes: 'Completed passes moving the ball 10+ yards forward per 90 min', sf_pass_pct: 'Pass completion percentage (not per 90)',
+    sf_dribbles_completed: 'Successful dribbles per 90 min', sf_passes: 'Passes attempted per 90 min',
+    an_per90: 'Stats per 90 minutes played. Hover a column name to see its definition.',
+    th_minutes: 'Minutes', sf_minutes: 'Minutes played in the season', sf_value: 'Transfermarkt market value at the time (summer after the season)',
+    sf_age: 'Age in the summer window after the season', sf_score: "Weighted average percentile in the role's stats, among the role's players in the same league, multiplied by league strength",
+    s_tip: "{v} — {p} percentile in the role, within the player's league",
     watch: 'Watchlist', watch_add: 'Watch {name}', watch_del: 'Stop watching {name}', watch_empty: 'No players on your watchlist. Click the ☆ next to a candidate\'s name to keep them here.',
     how: 'How it works', how_ed: 'Edition', how_ver: 'Version', how_src: 'Source', how_upd: 'Squad date',
     roster: 'Squads', roster_tip: "Launch = squads in force on the game's release day; Latest update = the game's most recent squads (with the season's transfers).", roster_launch: 'Launch', roster_latest: 'Latest update',
@@ -650,17 +674,28 @@ const I18N = {
     an_league_tip: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador y el score se multiplica por la fuerza de la liga (coeficiente UEFA 2015/16).',
     an_league_tip_off: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador, sin ajuste por la fuerza de la liga.',
     an_strength: 'Fuerza de la liga', an_str_low: 'Leve', an_str_high: 'Fuerte',
-    an_strength_tip: 'Cuánto pesa la fuerza de la liga (coeficiente UEFA 2015/16) en el score. En Medio: España 1,00, Inglaterra 0,92, Italia 0,90, Francia 0,85. Off = todas las ligas valen igual.', th_min: 'Min.',
+    an_strength_tip: 'Cuánto pesa la fuerza de la liga (coeficiente UEFA 2015/16) en el score. En Medio: España 1,00, Inglaterra 0,92, Italia 0,90, Francia 0,85. Off = todas las ligas valen igual.',
     an_no_cands: 'Ningún candidato con estos filtros.',
     m_npxg: 'xG sin penaltis', m_shots: 'Tiros', m_xg_per_shot: 'xG por tiro', m_xa: 'xA (ocasiones creadas)', m_passes_into_box: 'Pases al área',
     m_progressive_passes: 'Pases progresivos', m_pass_pct: 'Precisión de pase', m_dribbles_completed: 'Regates completados', m_possession: 'Posesión',
     m_npxg_against: 'xG concedido sin penaltis', m_shots_against: 'Tiros concedidos', m_box_entries_against: 'Pases rivales al área',
     m_prog_against: 'Pases progresivos del rival', m_padj_pressures: 'Presiones (ajust. posesión)', m_padj_tackles_int: 'Entradas + intercepciones (ajust. posesión)', m_aerials_won: 'Duelos aéreos ganados',
     role_CB: 'Central', role_FB: 'Lateral', role_DM: 'Mediocentro defensivo', role_CM: 'Mediocentro', role_AM: 'Mediapunta', role_W: 'Extremo', role_ST: 'Delantero centro', role_GK: 'Portero',
-    s_tackles_won: 'Entradas', s_interceptions: 'Interc.', s_clearances: 'Despejes', s_blocks: 'Bloqueos', s_aerials_won: 'Aéreos', s_recoveries: 'Recup.',
-    s_pressures: 'Presiones', s_npxg: 'npxG', s_shots: 'Tiros', s_xg_per_shot: 'xG/tiro', s_xa: 'xA', s_key_passes: 'Pases clave',
-    s_passes_into_box: 'P. área', s_progressive_passes: 'P. progr.', s_pass_pct: '% pases', s_dribbles_completed: 'Regates', s_passes: 'Pases',
-    s_tip: '{v} por 90 min — percentil {p} en la función',
+    s_tackles_won: 'Entradas ganadas', s_interceptions: 'Intercepciones', s_clearances: 'Despejes', s_blocks: 'Bloqueos', s_aerials_won: 'Aéreos ganados', s_recoveries: 'Recuperaciones',
+    s_pressures: 'Presiones', s_npxg: 'xG sin pen.', s_shots: 'Tiros', s_xg_per_shot: 'xG/tiro', s_xa: 'xA', s_key_passes: 'Pases clave',
+    s_passes_into_box: 'Pases al área', s_progressive_passes: 'Pases progr.', s_pass_pct: '% pases buenos', s_dribbles_completed: 'Regates buenos', s_passes: 'Pases',
+    sf_tackles_won: 'Entradas ganadas por 90 min (ajustado por posesión)', sf_interceptions: 'Intercepciones por 90 min (ajustado por posesión)',
+    sf_clearances: 'Despejes por 90 min (ajustado por posesión)', sf_blocks: 'Tiros y pases bloqueados por 90 min (ajustado por posesión)',
+    sf_aerials_won: 'Duelos aéreos ganados por 90 min', sf_recoveries: 'Recuperaciones de balón por 90 min (ajustado por posesión)',
+    sf_pressures: 'Presiones al rival con balón por 90 min (ajustado por posesión)', sf_npxg: 'Goles esperados (xG) sin penaltis por 90 min',
+    sf_shots: 'Tiros por 90 min', sf_xg_per_shot: 'xG medio por tiro: calidad de las ocasiones (no es por 90)', sf_xa: 'Asistencias esperadas (xA) por 90 min',
+    sf_key_passes: 'Pases que terminaron en tiro por 90 min', sf_passes_into_box: 'Pases buenos al área por 90 min',
+    sf_progressive_passes: 'Pases buenos que avanzan 10 yardas o más por 90 min', sf_pass_pct: 'Porcentaje de pases buenos (no es por 90)',
+    sf_dribbles_completed: 'Regates exitosos por 90 min', sf_passes: 'Pases intentados por 90 min',
+    an_per90: 'Estadísticas por 90 minutos jugados. Pasa el ratón sobre el nombre de la columna para ver la definición.',
+    th_minutes: 'Minutos', sf_minutes: 'Minutos jugados en la temporada', sf_value: 'Valor de mercado en Transfermarkt en su momento (verano tras la temporada)',
+    sf_age: 'Edad en el mercado de verano tras la temporada', sf_score: 'Percentil medio ponderado en las estadísticas de la función, entre sus jugadores en la misma liga, multiplicado por la fuerza de la liga',
+    s_tip: '{v} — percentil {p} en la función, dentro de la liga del jugador',
     watch: 'Seguidos', watch_add: 'Seguir a {name}', watch_del: 'Dejar de seguir a {name}', watch_empty: 'No sigues a ningún jugador. Haz clic en la ☆ junto al nombre de un candidato para guardarlo aquí.',
     how: 'Cómo funciona', how_ed: 'Edición', how_ver: 'Versión', how_src: 'Fuente', how_upd: 'Fecha de la plantilla',
     roster: 'Plantillas', roster_tip: 'Lanzamiento = plantillas vigentes el día en que salió el juego; Última actualización = las plantillas más recientes del juego (con los fichajes de la temporada).', roster_launch: 'Lanzamiento', roster_latest: 'Última actualización',
@@ -1426,6 +1461,8 @@ async function anRun() {
     if (req === _anReq) setStatus('an-status', 'error', `${t('error')}: ${esc(e.message)}`);
   }
 }
+// cabeçalho numérico com nome curto e a definição completa no tooltip (sublinhado pontilhado)
+const anTh = (key, tip, cls) => `<th class="num${cls}"><abbr title="${tr(tip)}">${tr(key)}</abbr></th>`;
 const ROLE_LINE = { GK: 'gk', CB: 'def', FB: 'def', DM: 'mid', CM: 'mid', AM: 'mid', W: 'att', ST: 'att' };
 function anNum(v, dec = 2) { return new Intl.NumberFormat(LOCALE[LANG], { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v); }
 // posse e % de passes vêm em pontos percentuais; o resto é contagem por jogo
@@ -1478,8 +1515,12 @@ function anRender() {
       <header class="pos-head"><span class="badge badge-pos-${ROLE_LINE[r.role]}">${tr('role_' + r.role)}</span>
         <span class="muted">${tr('an_current')}: ${mine}</span></header>
       <div class="an-fixes"><span class="muted">${tr('an_fixes')}:</span>${fixes}</div>
+      <p class="an-per90 hide-sm">${tr('an_per90')}</p>
       ${r.candidates.length ? `<div class="table-wrap"><table class="sortable">
-        <thead>${thead('~>#', 'th_name', '~th_club', '>th_age', '>th_value', '~>th_min', '>Score', ...stats.map(k => '~>s_' + k))}</thead>
+        <thead><tr><th class="num hide-sm">#</th><th>${tr('th_name')}</th><th class="hide-sm">${tr('th_club')}</th>
+          ${[['th_age', 'sf_age', ''], ['th_value', 'sf_value', ''], ['th_minutes', 'sf_minutes', ' hide-sm'], ['Score', 'sf_score', '']]
+            .map(([k, tip, cls]) => anTh(k, tip, cls)).join('')}
+          ${stats.map(k => anTh('s_' + k, 'sf_' + k, ' hide-sm')).join('')}</tr></thead>
         <tbody>${body}</tbody></table></div>` : `<p class="card-body muted">${tr('an_no_cands')}</p>`}
     </section>`;
   }).join('');
