@@ -136,7 +136,37 @@ do orçamento → motivou o experimento 2.
 **Depois deste experimento, La Liga e Ligue 1 deixam de ser um conjunto de teste limpo.**
 
 ### 5.2 Experimento 2 — filtro de orçamento (exploratório)
-_Ver seção a seguir; preenchida após a rodada._
+Mesmo método da linha de base (Top 4, distância ≤ −0,5), com listas e acaso restritos aos jogadores que
+o clube pode pagar (seção 3.4). Contratação acima do teto conta como erro.
+
+Orçamentos obtidos (percentil 90 das compras pagas em 2013/14–2015/16): Barcelona €82M, Real Madrid €75M,
+Manchester City €64M, PSG €63M … Rayo Vallecano €0,5M, Carpi €0,2M; 2 clubes da Ligue 1 sem nenhuma
+compra paga ficaram sem teto.
+
+| Times | | Top 10 × acaso | Top 30 × acaso | Ganho top 30 (IC95%) | Perfil pedidos × outros |
+|---|---|---|---|---|---|
+| Todos (215) | sem orçamento | 6% × 8% | 20% × 22% | −1,6 (−7,0 a +3,9) | 0,45 × 0,50 |
+| Todos (215) | com orçamento | 12% × 14% | 27% × 33% | −5,9 (−12,3 a +0,6) | **0,41 × 0,50** |
+| Dev (117) | com orçamento | 13% × 11% | 26% × 27% | −0,3 (−8,5 a +8,6) | 0,44 × 0,50 |
+| Teste usado (98) | com orçamento | 10% × 17% | 28% × 40% | −12,6 (−22,3 a −3,1) | 0,38 × 0,49 |
+
+- **O teto como indicador**: 81% das contratações avaliáveis ficaram dentro dele (91% nos times de
+  Premier League/Serie A, 70% em La Liga/Ligue 1). Compras, empréstimos e livres erram parecido
+  (84%, 78%, 78% dentro do teto) — o problema não é o empréstimo trazer jogador "caro" de graça.
+- **Top 10/30**: o filtro sobe os acertos (20% → 27% no top 30), mas sobe o acaso junto (22% → 33%),
+  porque o grupo de pagáveis é menor. Ganho sobre o acaso continua zero ou negativo; em La Liga/Ligue 1
+  fica abaixo do acaso, em parte porque 30% das contratações estouram o teto.
+- **Perfil (sinal fraco)**: entre os jogadores pagáveis, os contratados ficam mais bem colocados nos
+  perfis pedidos pela deficiência do que nos outros perfis da mesma função: diferença 0,084, IC95%
+  [0,007; 0,160], teste dos sinais p = 0,041 (n = 70, todos os times). Só nos times de La Liga/Ligue 1:
+  0,107, IC95% [−0,010; 0,218], p = 0,20 (n = 30).
+
+**Leitura**: o orçamento não faz o método acertar quem será contratado. Mas há um indício de que,
+**dentro do que o clube pode pagar**, as contratações tendem a combinar com as deficiências que o
+método aponta — ou seja, a ligação deficiência → perfil pode ter algum fundamento, enquanto a escolha
+do jogador específico depende de fatores fora dos dados. Como o experimento é exploratório e foram
+feitas várias comparações nestes mesmos dados, o p = 0,041 **não confirma** nada: é uma hipótese para
+testar numa temporada nova.
 
 ## 6. Limitações e ameaças à validade
 
@@ -161,6 +191,7 @@ python -m career_scout.analytics.recommend premier-league-2015-16 Chelsea
 python -m career_scout.analytics.validate 2015-16                    # linha de base
 python -m career_scout.analytics.validate 2015-16 --leagues premier-league,serie-a --top-k 3   # exp. 1 (dev, B)
 python -m career_scout.analytics.validate 2015-16 --leagues la-liga,ligue-1 --top-k 3          # exp. 1 (teste, B)
+python -c "from career_scout.analytics.budget import season_budgets as b; [b(f'{l}-2015-16') for l in ('premier-league','la-liga','serie-a','ligue-1')]"
 python -m career_scout.analytics.validate 2015-16 --budget          # exp. 2
 ```
 
