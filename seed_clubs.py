@@ -12,6 +12,7 @@ import json
 import re
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 import requests
@@ -41,8 +42,65 @@ def collect_clubs(filter_leagues: set[str] | None = None) -> dict[str, str]:
     return clubs
 
 
-def search_tm(club_name: str) -> tuple[str, int] | tuple[None, None]:
-    """Busca no TM; retorna (slug, id) do primeiro resultado de clube ou (None, None)."""
+# times de base/B/reservas que a busca do TM costuma devolver antes do principal
+YOUTH = re.compile(r"(^|-)(u\d\d|under-\d\d|jugend|youth|primavera|reserves?|b|ii|iii|formation|academy|tm)(-|$)")
+
+# bandeira esperada (como o TM escreve) por liga; liga fora daqui = sem filtro de país
+LEAGUE_NATIONS = {
+    "English League Championship": {"England", "Wales"}, "Championship (England)": {"England", "Wales"},
+    "Spanish Segunda División": {"Spain", "Andorra"}, "La Liga 2 (Spain)": {"Spain", "Andorra"},  # FC Andorra
+    "Italian Serie B": {"Italy"}, "Serie B (Italy)": {"Italy"},
+    "German 2. Bundesliga": {"Germany"}, "2. Bundesliga (Germany)": {"Germany"},
+    "French Ligue 2": {"France"}, "Ligue 2 (France)": {"France"},
+    "Portuguese Liga ZON SAGRES": {"Portugal"}, "Primeira Liga (Portugal)": {"Portugal"},
+    "Holland Eredivisie": {"Netherlands"},
+    "Argentina Primera División": {"Argentina"}, "Liga Profesional de Fútbol (Argentina)": {"Argentina"},
+    "USA Major League Soccer": {"United States", "Canada"}, "Major League Soccer (United States)": {"United States", "Canada"},
+    "Mexican Liga MX": {"Mexico"}, "Liga BBVA MX (Mexico)": {"Mexico"},
+    "Turkish Süper Lig": {"Türkiye", "Turkey"}, "Süper Lig (Türkiye)": {"Türkiye", "Turkey"},
+    "Saudi Abdul L. Jameel League": {"Saudi Arabia"}, "Pro League (Saudi Arabia)": {"Saudi Arabia"},
+}
+
+_STOP = {"fc", "afc", "cf", "ac", "as", "sc", "ss", "ssc", "us", "ud", "rc", "rcd", "cd", "sd", "ca", "bc", "calcio",
+         "club", "de", "fk", "sv", "vfb", "vfl", "tsg", "og", "hsc", "osc", "ogc", "sco", "sm", "ea", "esp", "sk", "cp"}
+
+
+def norm_name(s: str) -> str:
+    """Nome sem acento/sufixos ('Arsenal FC' == 'Arsenal'): variantes Kaggle × SoFIFA do mesmo clube."""
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+    return " ".join(w for w in re.findall(r"[a-z0-9]+", s) if w not in _STOP)
+
+
+def parse_tm_clubs(html: str) -> list[tuple[str, int, str]]:
+    """(slug, id, país) da caixa "Clubs" da busca — links de clube das outras caixas (jogadores) não contam."""
+    soup = BeautifulSoup(html, "lxml")
+    for box in soup.select("div.box"):
+        head = box.find(["h2", "div"], class_=re.compile("content-box-headline|table-header"))
+        if not head or "Clubs" not in head.get_text():
+            continue
+        rows = []
+        for tr in box.select("table.items > tbody > tr"):
+            a = tr.find("a", href=re.compile(r"/startseite/verein/\d+"))
+            flag = tr.find("img", class_="flaggenrahmen")
+            if a:
+                m = re.search(r"/([a-z0-9-]+)/startseite/verein/(\d+)", a["href"])
+                rows.append((m.group(1), int(m.group(2)), flag.get("title", "") if flag else ""))
+        return rows
+    return []
+
+
+def pick_club(rows: list[tuple[str, int, str]], nations: set[str] | None, name: str = "") -> tuple[str, int] | tuple[None, None]:
+    own = set(norm_name(name).split())  # "Willem II", "FC Barcelona B": o marcador faz parte do nome, não é base
+    for slug, tid, country in rows:
+        youth = YOUTH.search(slug)
+        if (youth and youth.group(2) not in own) or (nations and country not in nations):
+            continue
+        return slug, tid
+    return None, None
+
+
+def search_tm(club_name: str, nations: set[str] | None = None) -> tuple[str, int] | tuple[None, None]:
+    """Busca no TM; retorna (slug, id) do 1º clube principal do país esperado, ou (None, None)."""
     url = (
         "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche"
         f"?query={requests.utils.quote(club_name)}"
@@ -54,11 +112,7 @@ def search_tm(club_name: str) -> tuple[str, int] | tuple[None, None]:
         print(f"erro de rede: {e}")
         return None, None
 
-    for a in BeautifulSoup(resp.text, "lxml").find_all("a", href=True):
-        m = re.search(r'/([a-z0-9-]+)/startseite/verein/(\d+)', a["href"])
-        if m:
-            return m.group(1), int(m.group(2))
-    return None, None
+    return pick_club(parse_tm_clubs(resp.text), nations, club_name)
 
 
 def main() -> None:
@@ -75,12 +129,21 @@ def main() -> None:
         print("Nada a fazer.")
         return
 
+    # variante de nome de um clube já mapeado (ex.: "Sporting CP" × "Sporting Clube de Portugal") vira alias, sem busca
+    by_norm = {norm_name(k): k for k, v in mapping.items() if v.get("ok")}
     for i, (name, league) in enumerate(todo.items(), 1):
         print(f"[{i}/{len(todo)}] {name} ({league})... ", end="", flush=True)
-        slug, tid = search_tm(name)
+        twin = by_norm.get(norm_name(name))
+        if twin:
+            mapping[name] = {**mapping[twin], "league": league}
+            print(f"→ alias de {twin}")
+            MAPPING_PATH.write_text(json.dumps(mapping, ensure_ascii=False, indent=2))
+            continue
+        slug, tid = search_tm(name, LEAGUE_NATIONS.get(league))
         if slug:
             print(f"→ {slug} / {tid}")
             mapping[name] = {"tm_slug": slug, "tm_id": tid, "league": league, "ok": True}
+            by_norm[norm_name(name)] = name
         else:
             print("→ não encontrado")
             mapping[name] = {"tm_slug": None, "tm_id": None, "league": league, "ok": False}

@@ -420,7 +420,7 @@ Quando `position_norm` fina (ex.: `ST`, `LW`) tem amostra < `min_sample`, o est�
 | `GET`  | `/data-info` | Origem e versão dos jogadores por edição (Kaggle = elenco de lançamento; SoFIFA = data do update, de `data/raw/sofifa_versions.json`). Usado no "Como funciona" do header |
 | `GET`  | `/countries?edition=N` | Países disponíveis para a edição (via `LEAGUE_COUNTRY`) |
 | `GET`  | `/leagues?edition=N&country=X` | Ligas da edição, filtradas por país |
-| `GET`  | `/clubs?league=X` | Clubes com mapeamento TM válido na liga |
+| `GET`  | `/clubs?league=X&edition=N` | Clubes com mapeamento TM válido na liga, naquela edição (liga vem do CSV da edição) |
 | `POST` | `/overview` | Estágios 1+2: retorna chegadas + perfis + estatísticas agregadas |
 | `POST` | `/scout` | Estágios 1+2+3: retorna candidatos ranqueados por posição |
 
@@ -470,5 +470,8 @@ python seed_clubs.py
 - Para achar slug/id correto: abrir a página do clube no TM e ler a URL — `/{tm_slug}/startseite/verein/{tm_id}`.
 - PSG no seed veio como `fc-paris-saint-germain/583`; override em `_OVERRIDES` usa `paris-saint-germain/583` (slug correto).
 
+### Busca mais segura (2026-10)
+`search_tm` lê só a caixa **"Clubs"** da busca (links de clube da caixa de jogadores davam clube errado — ex.: Carpi → Burgos), pula times de base/B (`YOUTH`, exceto quando o próprio nome tem o marcador: "FC Barcelona B", "Willem II") e exige o país da liga (`LEAGUE_NATIONS`; Championship aceita Gales, MLS aceita Canadá, Segunda aceita Andorra). Nome que é variante de um clube já mapeado (`norm_name`: "Arsenal FC" = "Arsenal") vira alias sem busca. Testes em `tests/test_seed_clubs.py`.
+
 ### Estado atual
-150/152 clubes das 5 grandes ligas mapeados. Os 2 restantes (`Évian Thonon Gaillard FC`, `AS Nancy Lorraine`) eram clubes extintos/rebaixados irrelevantes para Career Mode — não mapeados.
+5 grandes ligas + Championship, La Liga 2, Serie B, 2. Bundesliga, Ligue 2, Portugal, Holanda, Argentina, MLS, Liga MX, Turquia e Arábia Saudita (Brasileirão de fora: não é licenciado no jogo). Todos os clubes dessas ligas em todas as edições (15–27, nas duas versões de elenco) mapeados. Mapeados à mão: `AC Arles Avignon` → `athletic-club-arlesien/11300` (o TM usa o nome original do clube) e `Al Riyadh` → `al-riyadh-sc/31008` (a busca do TM não acha). Nomes com patrocinador (ex.: "Yukatel Kayserispor") ou siglas pontuadas não são achados pela busca — foram mapeados à mão com buscas limpas e revisados.

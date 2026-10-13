@@ -180,8 +180,8 @@
     "ok": true
   },
   "FC Girondins de Bordeaux": {
-    "tm_slug": "girondins-bordeaux",
-    "tm_id": 336,
+    "tm_slug": "fc-girondins-bordeaux",
+    "tm_id": 40,
     "league": "French Ligue 1",
     "ok": true
   },
@@ -1269,6 +1269,2706 @@
     "tm_slug": "fc-southampton",
     "tm_id": 180,
     "league": "English Premier League",
+    "ok": true
+  },
+  "Galatasaray SK": {
+    "tm_slug": "galatasaray-istanbul",
+    "tm_id": 141,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "SL Benfica": {
+    "tm_slug": "benfica-lissabon",
+    "tm_id": 294,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Fenerbahçe SK": {
+    "tm_slug": "fenerbahce-istanbul",
+    "tm_id": 36,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "FC Porto": {
+    "tm_slug": "fc-porto",
+    "tm_id": 720,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Sporting CP": {
+    "tm_slug": "sporting-lissabon",
+    "tm_id": 336,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Beşiktaş JK": {
+    "tm_slug": "besiktas-istanbul",
+    "tm_id": 114,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Seattle Sounders FC": {
+    "tm_slug": "seattle-sounders-fc",
+    "tm_id": 9636,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Gallos Blancos de Querétaro": {
+    "tm_slug": "queretaro-fc",
+    "tm_id": 4961,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Toronto FC": {
+    "tm_slug": "toronto-fc",
+    "tm_id": 11141,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Trabzonspor": {
+    "tm_slug": "trabzonspor",
+    "tm_id": 449,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "LA Galaxy": {
+    "tm_slug": "los-angeles-galaxy",
+    "tm_id": 1061,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Ajax": {
+    "tm_slug": "ajax-amsterdam",
+    "tm_id": 610,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "New York Red Bulls": {
+    "tm_slug": "new-york-red-bulls",
+    "tm_id": 623,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Racing Club": {
+    "tm_slug": "racing-club",
+    "tm_id": 1444,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "PSV": {
+    "tm_slug": "psv-eindhoven",
+    "tm_id": 383,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Al Hilal": {
+    "tm_slug": "al-hilal-riad",
+    "tm_id": 1114,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Newell's Old Boys": {
+    "tm_slug": "club-atletico-newells-old-boys",
+    "tm_id": 1286,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "New England Revolution": {
+    "tm_slug": "new-england-revolution",
+    "tm_id": 626,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Feyenoord": {
+    "tm_slug": "feyenoord-rotterdam",
+    "tm_id": 234,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Portland Timbers": {
+    "tm_slug": "portland-timbers",
+    "tm_id": 4291,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Demir Grup Sivasspor": {
+    "tm_slug": "sivasspor",
+    "tm_id": 2381,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Al Shabab": {
+    "tm_slug": "al-shabab-riad",
+    "tm_id": 9840,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Al Ittihad": {
+    "tm_slug": "al-ittihad-dschidda",
+    "tm_id": 8023,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Vélez Sarsfield": {
+    "tm_slug": "club-atletico-velez-sarsfield",
+    "tm_id": 1029,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "SC Braga": {
+    "tm_slug": "sc-braga",
+    "tm_id": 1075,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Bursaspor": {
+    "tm_slug": "bursaspor",
+    "tm_id": 20,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Real Salt Lake": {
+    "tm_slug": "real-salt-lake-city",
+    "tm_id": 6643,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Boca Juniors": {
+    "tm_slug": "club-atletico-boca-juniors",
+    "tm_id": 189,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Club América": {
+    "tm_slug": "cf-america",
+    "tm_id": 3631,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Columbus Crew": {
+    "tm_slug": "columbus-crew-sc",
+    "tm_id": 813,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Club de Foot Montréal": {
+    "tm_slug": "club-de-foot-montreal",
+    "tm_id": 4078,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Çaykur Rizespor": {
+    "tm_slug": "caykur-rizespor",
+    "tm_id": 126,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Vancouver Whitecaps FC": {
+    "tm_slug": "vancouver-whitecaps-fc",
+    "tm_id": 6321,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Al Nassr": {
+    "tm_slug": "al-nasr-riad",
+    "tm_id": 18544,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "River Plate": {
+    "tm_slug": "club-atletico-river-plate",
+    "tm_id": 209,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "San Lorenzo de Almagro": {
+    "tm_slug": "club-atletico-san-lorenzo-de-almagro",
+    "tm_id": 1775,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Gaziantepspor": {
+    "tm_slug": "gaziantepspor",
+    "tm_id": 524,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Cruz Azul": {
+    "tm_slug": "cd-cruz-azul",
+    "tm_id": 3711,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Club Tijuana": {
+    "tm_slug": "club-tijuana",
+    "tm_id": 13353,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Eskişehirspor": {
+    "tm_slug": "eskisehirspor",
+    "tm_id": 825,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Kasimpaşa SK": {
+    "tm_slug": "kasimpasa",
+    "tm_id": 10484,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Tigres U.A.N.L.": {
+    "tm_slug": "tigres-uanl",
+    "tm_id": 7055,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Vitesse": {
+    "tm_slug": "vitesse-arnheim",
+    "tm_id": 499,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "PEC Zwolle": {
+    "tm_slug": "pec-zwolle",
+    "tm_id": 1269,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Estoril Praia": {
+    "tm_slug": "gd-estoril-praia",
+    "tm_id": 1465,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "FC Twente": {
+    "tm_slug": "fc-twente-enschede",
+    "tm_id": 317,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "FC Utrecht": {
+    "tm_slug": "fc-utrecht",
+    "tm_id": 200,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "CF Monterrey": {
+    "tm_slug": "cf-monterrey",
+    "tm_id": 2407,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Club Atlético Lanús": {
+    "tm_slug": "club-atletico-lanus",
+    "tm_id": 333,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Wigan Athletic": {
+    "tm_slug": "wigan-athletic",
+    "tm_id": 1071,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Club Atlas": {
+    "tm_slug": "atlas-guadalajara",
+    "tm_id": 8590,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Al Ahli": {
+    "tm_slug": "al-ahli-dschidda",
+    "tm_id": 18487,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Catania": {
+    "tm_slug": "catania-calcio",
+    "tm_id": 1627,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Sheffield Wednesday": {
+    "tm_slug": "sheffield-wednesday",
+    "tm_id": 1035,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Club Atlético Tigre": {
+    "tm_slug": "club-atletico-tigre",
+    "tm_id": 11831,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Blackburn Rovers": {
+    "tm_slug": "blackburn-rovers",
+    "tm_id": 164,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "San Jose Earthquakes": {
+    "tm_slug": "san-jose-earthquakes",
+    "tm_id": 218,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "CD Nacional": {
+    "tm_slug": "cd-nacional",
+    "tm_id": 982,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Vitória de Guimarães": {
+    "tm_slug": "vitoria-guimaraes-sc",
+    "tm_id": 2420,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "AZ Alkmaar": {
+    "tm_slug": "az-alkmaar",
+    "tm_id": 1090,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "FC Groningen": {
+    "tm_slug": "fc-groningen",
+    "tm_id": 202,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Rio Ave FC": {
+    "tm_slug": "rio-ave-fc",
+    "tm_id": 2425,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Al Fateh": {
+    "tm_slug": "al-fateh",
+    "tm_id": 27221,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Club León": {
+    "tm_slug": "club-leon-fc",
+    "tm_id": 4941,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "AC Arles Avignon": {
+    "tm_slug": "athletic-club-arlesien",
+    "tm_id": 11300,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Akhisar Belediyespor": {
+    "tm_slug": "akhisarspor",
+    "tm_id": 19771,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "İttifak Holding Konyaspor": {
+    "tm_slug": "konyaspor",
+    "tm_id": 2293,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Kayseri Erciyesspor": {
+    "tm_slug": "kayseri-erciyesspor",
+    "tm_id": 6894,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Real Zaragoza": {
+    "tm_slug": "real-saragossa",
+    "tm_id": 142,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Estudiantes de La Plata": {
+    "tm_slug": "club-estudiantes-de-la-plata",
+    "tm_id": 288,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Belgrano de Córdoba": {
+    "tm_slug": "ca-belgrano",
+    "tm_id": 2417,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "İstanbul Başakşehir FK": {
+    "tm_slug": "istanbul-basaksehir-fk",
+    "tm_id": 6890,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Deportivo Toluca": {
+    "tm_slug": "deportivo-toluca",
+    "tm_id": 1804,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Pachuca": {
+    "tm_slug": "cf-pachuca",
+    "tm_id": 4035,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Philadelphia Union": {
+    "tm_slug": "philadelphia-union",
+    "tm_id": 25467,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Kardemir Karabükspor": {
+    "tm_slug": "kardemir-karabukspor",
+    "tm_id": 1506,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Sporting Kansas City": {
+    "tm_slug": "sporting-kansas-city",
+    "tm_id": 4284,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Houston Dynamo": {
+    "tm_slug": "houston-dynamo-fc",
+    "tm_id": 9168,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Chivas USA": {
+    "tm_slug": "cd-chivas-usa",
+    "tm_id": 6642,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "FC Sochaux-Montbéliard": {
+    "tm_slug": "fc-sochaux-montbeliard",
+    "tm_id": 750,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Valenciennes FC": {
+    "tm_slug": "fc-valenciennes",
+    "tm_id": 1423,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Monarcas Morelia": {
+    "tm_slug": "club-atletico-morelia",
+    "tm_id": 5623,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "CD Tenerife": {
+    "tm_slug": "cd-teneriffa",
+    "tm_id": 648,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Bolton Wanderers": {
+    "tm_slug": "bolton-wanderers",
+    "tm_id": 355,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Derby County": {
+    "tm_slug": "derby-county",
+    "tm_id": 22,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "FC Arouca": {
+    "tm_slug": "fc-arouca",
+    "tm_id": 8024,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Jaguares de Chiapas": {
+    "tm_slug": "chiapas-fc",
+    "tm_id": 4774,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Reading": {
+    "tm_slug": "fc-reading",
+    "tm_id": 1032,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Mersin İdman Yurdu": {
+    "tm_slug": "icel-idmanyurdu-sk",
+    "tm_id": 69486,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Associação Académica de Coimbra": {
+    "tm_slug": "academica-coimbra",
+    "tm_id": 2990,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "1. FC Kaiserslautern": {
+    "tm_slug": "1-fc-kaiserslautern",
+    "tm_id": 2,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "FC Dallas": {
+    "tm_slug": "fc-dallas",
+    "tm_id": 8816,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Santos Laguna": {
+    "tm_slug": "santos-laguna",
+    "tm_id": 1403,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "FC Paços de Ferreira": {
+    "tm_slug": "fc-pacos-de-ferreira",
+    "tm_id": 2995,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "TSV 1860 München": {
+    "tm_slug": "tsv-1860-munchen",
+    "tm_id": 72,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Clube Sport Marítimo": {
+    "tm_slug": "cs-maritimo",
+    "tm_id": 1301,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Bari": {
+    "tm_slug": "ssc-bari",
+    "tm_id": 332,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Livorno": {
+    "tm_slug": "as-livorno",
+    "tm_id": 1210,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Arsenal de Sarandí": {
+    "tm_slug": "arsenal-futbol-club",
+    "tm_id": 4673,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Gil Vicente FC": {
+    "tm_slug": "gil-vicente-fc",
+    "tm_id": 2424,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Club Atlético Independiente": {
+    "tm_slug": "club-atletico-independiente",
+    "tm_id": 1234,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Belenenses SAD": {
+    "tm_slug": "belenenses-sad",
+    "tm_id": 2457,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Puebla FC": {
+    "tm_slug": "puebla-fc",
+    "tm_id": 5662,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Colorado Rapids": {
+    "tm_slug": "colorado-rapids",
+    "tm_id": 1247,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Club Universidad Nacional": {
+    "tm_slug": "unam-pumas",
+    "tm_id": 7633,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Perugia": {
+    "tm_slug": "ac-perugia-calcio",
+    "tm_id": 839,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Virtus Entella Chiavari": {
+    "tm_slug": "virtus-entella",
+    "tm_id": 20519,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Club Deportivo Guadalajara": {
+    "tm_slug": "deportivo-guadalajara",
+    "tm_id": 6711,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Birmingham City": {
+    "tm_slug": "birmingham-city",
+    "tm_id": 337,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Stade Lavallois Mayenne FC": {
+    "tm_slug": "stade-laval",
+    "tm_id": 1080,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Charlton Athletic": {
+    "tm_slug": "charlton-athletic",
+    "tm_id": 358,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "SC Heerenveen": {
+    "tm_slug": "sc-heerenveen",
+    "tm_id": 306,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Eintracht Braunschweig": {
+    "tm_slug": "eintracht-braunschweig",
+    "tm_id": 23,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Gençlerbirliği SK": {
+    "tm_slug": "genclerbirligi-ankara",
+    "tm_id": 820,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Atlético de Rafaela": {
+    "tm_slug": "atletico-de-rafaela",
+    "tm_id": 10233,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Trapani": {
+    "tm_slug": "trapani-calcio",
+    "tm_id": 4331,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "SD Ponferradina": {
+    "tm_slug": "sd-ponferradina",
+    "tm_id": 4032,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "NAC Breda": {
+    "tm_slug": "nac-breda",
+    "tm_id": 132,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "FSV Frankfurt": {
+    "tm_slug": "fsv-frankfurt",
+    "tm_id": 293,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Rosario Central": {
+    "tm_slug": "club-atletico-rosario-central",
+    "tm_id": 1418,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "RC Recreativo de Huelva": {
+    "tm_slug": "recreativo-huelva",
+    "tm_id": 2867,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "CD Lugo": {
+    "tm_slug": "cd-lugo",
+    "tm_id": 11000,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Ternana": {
+    "tm_slug": "ternana-calcio",
+    "tm_id": 1103,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Millwall": {
+    "tm_slug": "fc-millwall",
+    "tm_id": 1028,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "CD Numancia": {
+    "tm_slug": "cd-numancia",
+    "tm_id": 2296,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Boavista FC": {
+    "tm_slug": "boavista-porto-fc",
+    "tm_id": 2503,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Moreirense FC": {
+    "tm_slug": "moreirense-fc",
+    "tm_id": 979,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Tiburones Rojos de Veracruz": {
+    "tm_slug": "tiburones-rojos-de-veracruz",
+    "tm_id": 5138,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Balıkesirspor": {
+    "tm_slug": "balikesirspor",
+    "tm_id": 20698,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Club Atlético Banfield": {
+    "tm_slug": "club-atletico-banfield",
+    "tm_id": 830,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Willem II": {
+    "tm_slug": "willem-ii-tilburg",
+    "tm_id": 403,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Modena": {
+    "tm_slug": "modena-fc-2018",
+    "tm_id": 1385,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "D.C. United": {
+    "tm_slug": "d-c-united",
+    "tm_id": 2440,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "ADO Den Haag": {
+    "tm_slug": "ado-den-haag",
+    "tm_id": 1268,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Godoy Cruz": {
+    "tm_slug": "club-deportivo-godoy-cruz-antonio-tomba",
+    "tm_id": 12574,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Gimnasia y Esgrima La Plata": {
+    "tm_slug": "club-de-gimnasia-y-esgrima-la-plata",
+    "tm_id": 1106,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "FC Barcelona B": {
+    "tm_slug": "fc-barcelona-b",
+    "tm_id": 2464,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "US Créteil-Lusitanos": {
+    "tm_slug": "us-creteil-lusitanos",
+    "tm_id": 2067,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Heracles Almelo": {
+    "tm_slug": "heracles-almelo",
+    "tm_id": 1304,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "FC Penafiel": {
+    "tm_slug": "fc-penafiel",
+    "tm_id": 3327,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Vitória de Setúbal": {
+    "tm_slug": "vitoria-setubal-fc",
+    "tm_id": 1085,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "La Berrichonne de Châteauroux": {
+    "tm_slug": "lb-chateauroux",
+    "tm_id": 1175,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Leones Negros de la UdeG": {
+    "tm_slug": "cd-leones-negros-de-la-udeg",
+    "tm_id": 23505,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "CE Sabadell FC": {
+    "tm_slug": "ce-sabadell",
+    "tm_id": 11422,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Al Faisaly": {
+    "tm_slug": "al-faisaly-harmah",
+    "tm_id": 28848,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Chicago Fire Football Club": {
+    "tm_slug": "chicago-fire-fc-2",
+    "tm_id": 95331,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Al Raed": {
+    "tm_slug": "al-raed",
+    "tm_id": 22381,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Tours FC": {
+    "tm_slug": "fc-tours",
+    "tm_id": 3161,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Blackpool": {
+    "tm_slug": "fc-blackpool",
+    "tm_id": 1181,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Rotherham United": {
+    "tm_slug": "rotherham-united",
+    "tm_id": 1194,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Club Olimpo": {
+    "tm_slug": "club-olimpo",
+    "tm_id": 7468,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "AD Alcorcón": {
+    "tm_slug": "ad-alcorcon",
+    "tm_id": 11596,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Quilmes Atlético Club": {
+    "tm_slug": "quilmes-atletico-club",
+    "tm_id": 1826,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Al Orobah": {
+    "tm_slug": "al-orubah",
+    "tm_id": 39536,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "SV Sandhausen": {
+    "tm_slug": "sv-sandhausen",
+    "tm_id": 254,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Latina": {
+    "tm_slug": "latina-calcio-1932",
+    "tm_id": 22045,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Karlsruher SC": {
+    "tm_slug": "karlsruher-sc",
+    "tm_id": 48,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Varese": {
+    "tm_slug": "asd-citta-di-varese",
+    "tm_id": 83362,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Cittadella": {
+    "tm_slug": "as-cittadella",
+    "tm_id": 4084,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Al Taawoun": {
+    "tm_slug": "al-taawoun-fc",
+    "tm_id": 28844,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "FC Dordrecht": {
+    "tm_slug": "fc-dordrecht",
+    "tm_id": 1455,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "UE Llagostera": {
+    "tm_slug": "ue-llagostera",
+    "tm_id": 26132,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Avellino": {
+    "tm_slug": "us-avellino-1912",
+    "tm_id": 2331,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Go Ahead Eagles": {
+    "tm_slug": "go-ahead-eagles-deventer",
+    "tm_id": 1435,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "SC Cambuur": {
+    "tm_slug": "sc-cambuur-leeuwarden",
+    "tm_id": 133,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "VfR Aalen": {
+    "tm_slug": "vfr-aalen",
+    "tm_id": 83,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Excelsior": {
+    "tm_slug": "sbv-excelsior-rotterdam",
+    "tm_id": 798,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "SS Virtus Lanciano": {
+    "tm_slug": "ss-virtus-lanciano",
+    "tm_id": 4718,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "FC Pro Vercelli 1892": {
+    "tm_slug": "fc-pro-vercelli-1892",
+    "tm_id": 26789,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "CD Mirandés": {
+    "tm_slug": "cd-mirandes",
+    "tm_id": 13222,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Defensa y Justicia": {
+    "tm_slug": "defensa-y-justicia",
+    "tm_id": 2402,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Chamois Niortais Football Club": {
+    "tm_slug": "chamois-niortais-fc",
+    "tm_id": 1161,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "FC Erzgebirge Aue": {
+    "tm_slug": "fc-erzgebirge-aue",
+    "tm_id": 94,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "US Orléans Loiret Football": {
+    "tm_slug": "us-orleans",
+    "tm_id": 10868,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Albacete BP": {
+    "tm_slug": "albacete-balompie",
+    "tm_id": 1532,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Vicenza": {
+    "tm_slug": "lr-vicenza-virtus",
+    "tm_id": 2655,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Al Shoulla": {
+    "tm_slug": "al-shoalah-fc",
+    "tm_id": 37372,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Najran SC": {
+    "tm_slug": "najran-sc",
+    "tm_id": 26586,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Hajer": {
+    "tm_slug": "hajer-club",
+    "tm_id": 32343,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Al Khaleej": {
+    "tm_slug": "al-khaleej",
+    "tm_id": 6070,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "New York City FC": {
+    "tm_slug": "new-york-city-fc",
+    "tm_id": 40058,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Orlando City Soccer Club": {
+    "tm_slug": "orlando-city-sc",
+    "tm_id": 45604,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Antalyaspor": {
+    "tm_slug": "antalyaspor",
+    "tm_id": 589,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "CD Tondela": {
+    "tm_slug": "cd-tondela",
+    "tm_id": 7179,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "União da Madeira": {
+    "tm_slug": "cf-uniao-madeira",
+    "tm_id": 976,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Osmanlıspor": {
+    "tm_slug": "ankaraspor",
+    "tm_id": 2944,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Yukatel Kayserispor": {
+    "tm_slug": "kayserispor",
+    "tm_id": 3205,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Milton Keynes Dons": {
+    "tm_slug": "milton-keynes-dons",
+    "tm_id": 991,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Gimnàstic de Tarragona": {
+    "tm_slug": "gimnastic-de-tarragona",
+    "tm_id": 5648,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Club Atlético Sarmiento": {
+    "tm_slug": "club-atletico-sarmiento-junin-",
+    "tm_id": 12454,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Club Atlético Huracán": {
+    "tm_slug": "club-atletico-huracan",
+    "tm_id": 2063,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Bristol City": {
+    "tm_slug": "bristol-city",
+    "tm_id": 698,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Novara Calcio": {
+    "tm_slug": "novara-calcio",
+    "tm_id": 6692,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Athletic Club de Bilbao B": {
+    "tm_slug": "athletic-bilbao-b",
+    "tm_id": 6688,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Preston North End": {
+    "tm_slug": "preston-north-end",
+    "tm_id": 466,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Club Atlético Colón": {
+    "tm_slug": "club-atletico-colon",
+    "tm_id": 1070,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "N.E.C. Nijmegen": {
+    "tm_slug": "nec-nijmegen",
+    "tm_id": 467,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Roda JC Kerkrade": {
+    "tm_slug": "roda-jc-kerkrade",
+    "tm_id": 192,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Unión de Santa Fe": {
+    "tm_slug": "club-atletico-union",
+    "tm_id": 7097,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Dorados de Sinaloa": {
+    "tm_slug": "dorados-de-sinaloa",
+    "tm_id": 10091,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Red Star FC": {
+    "tm_slug": "red-star-fc",
+    "tm_id": 1154,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Nueva Chicago": {
+    "tm_slug": "nueva-chicago",
+    "tm_id": 10534,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "MSV Duisburg": {
+    "tm_slug": "msv-duisburg",
+    "tm_id": 52,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Club Atlético Aldosivi": {
+    "tm_slug": "club-atletico-aldosivi",
+    "tm_id": 12301,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Argentinos Juniors": {
+    "tm_slug": "argentinos-juniors",
+    "tm_id": 1030,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "San Martín de San Juan": {
+    "tm_slug": "club-atletico-san-martin-sj-",
+    "tm_id": 10511,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "De Graafschap": {
+    "tm_slug": "de-graafschap-doetinchem",
+    "tm_id": 642,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Ascoli": {
+    "tm_slug": "ascoli-calcio",
+    "tm_id": 408,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Crucero del Norte": {
+    "tm_slug": "club-mutual-crucero-del-norte",
+    "tm_id": 26157,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Club Atlético Temperley": {
+    "tm_slug": "club-atletico-temperley",
+    "tm_id": 14542,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Football Bourg En Bresse Peronnas 01": {
+    "tm_slug": "bourg-en-bresse-peronnas-01",
+    "tm_id": 2972,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Al Qadisiyah": {
+    "tm_slug": "al-qadisiyah-fc",
+    "tm_id": 26069,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Al Wehda": {
+    "tm_slug": "al-wahda-mekka",
+    "tm_id": 17209,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Aytemiz Alanyaspor": {
+    "tm_slug": "alanyaspor",
+    "tm_id": 11282,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Club Necaxa": {
+    "tm_slug": "club-necaxa",
+    "tm_id": 1146,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "CD Feirense": {
+    "tm_slug": "cd-feirense",
+    "tm_id": 3349,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "GD Chaves": {
+    "tm_slug": "gd-chaves",
+    "tm_id": 3325,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "CF Reus Deportiu": {
+    "tm_slug": "fc-reus-deportiu-aufgel-",
+    "tm_id": 13225,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Club Atlético Talleres": {
+    "tm_slug": "club-atletico-talleres",
+    "tm_id": 3938,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Adanaspor": {
+    "tm_slug": "adanaspor",
+    "tm_id": 6,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Patronato": {
+    "tm_slug": "club-atletico-patronato",
+    "tm_id": 19806,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "UCAM Murcia CF": {
+    "tm_slug": "ucam-murcia",
+    "tm_id": 34148,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Burton Albion": {
+    "tm_slug": "burton-albion",
+    "tm_id": 2963,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Atlético Tucumán": {
+    "tm_slug": "club-atletico-tucuman",
+    "tm_id": 14554,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "FC Würzburger Kickers": {
+    "tm_slug": "wurzburger-kickers",
+    "tm_id": 1557,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Ettifaq FC": {
+    "tm_slug": "al-ettifaq",
+    "tm_id": 7732,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Sevilla Atlético": {
+    "tm_slug": "fc-sevilla-b-atletico-",
+    "tm_id": 8519,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "SG Dynamo Dresden": {
+    "tm_slug": "sg-dynamo-dresden",
+    "tm_id": 129,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Barnsley": {
+    "tm_slug": "fc-barnsley",
+    "tm_id": 349,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Sparta Rotterdam": {
+    "tm_slug": "sparta-rotterdam",
+    "tm_id": 468,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Al Batin": {
+    "tm_slug": "al-batin",
+    "tm_id": 28597,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Atlanta United": {
+    "tm_slug": "atlanta-united-fc",
+    "tm_id": 51663,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Göztepe SK": {
+    "tm_slug": "goztepe",
+    "tm_id": 1467,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Desportivo das Aves": {
+    "tm_slug": "desportivo-aves",
+    "tm_id": 3336,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "US Cremonese": {
+    "tm_slug": "us-cremonese",
+    "tm_id": 2239,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Portimonense SC": {
+    "tm_slug": "portimonense-sc",
+    "tm_id": 7378,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Lobos BUAP": {
+    "tm_slug": "lobos-buap",
+    "tm_id": 13357,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Minnesota United FC": {
+    "tm_slug": "minnesota-united-fc",
+    "tm_id": 56089,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Yeni Malatyaspor": {
+    "tm_slug": "yeni-malatyaspor",
+    "tm_id": 19789,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Al Fayha": {
+    "tm_slug": "al-fayha-fc",
+    "tm_id": 50531,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Chacarita Juniors": {
+    "tm_slug": "ca-chacarita-juniors",
+    "tm_id": 2154,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "US Quevilly Rouen Métropole": {
+    "tm_slug": "quevilly-rouen-metropole",
+    "tm_id": 7124,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Cultural Leonesa": {
+    "tm_slug": "cultural-leonesa",
+    "tm_id": 4542,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "VVV-Venlo": {
+    "tm_slug": "vvv-venlo",
+    "tm_id": 1426,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "SSV Jahn Regensburg": {
+    "tm_slug": "ssv-jahn-regensburg",
+    "tm_id": 109,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Lorca FC": {
+    "tm_slug": "lorca-fc",
+    "tm_id": 34559,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Foggia": {
+    "tm_slug": "calcio-foggia-1920",
+    "tm_id": 704,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Ohod Club": {
+    "tm_slug": "ohod-al-medina",
+    "tm_id": 26587,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Los Angeles FC": {
+    "tm_slug": "los-angeles-fc",
+    "tm_id": 51828,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "MKE Ankaragücü": {
+    "tm_slug": "mke-ankaragucu",
+    "tm_id": 868,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Santa Clara": {
+    "tm_slug": "cd-santa-clara",
+    "tm_id": 2423,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "CF Rayo Majadahonda": {
+    "tm_slug": "cf-rayo-majadahonda",
+    "tm_id": 13702,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "BB Erzurumspor": {
+    "tm_slug": "buyuksehir-belediye-erzurumspor",
+    "tm_id": 39722,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "1. FC Magdeburg": {
+    "tm_slug": "1-fc-magdeburg",
+    "tm_id": 187,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Cosenza": {
+    "tm_slug": "cosenza-calcio",
+    "tm_id": 4031,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Fortuna Sittard": {
+    "tm_slug": "fortuna-sittard",
+    "tm_id": 385,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Padova": {
+    "tm_slug": "calcio-padova",
+    "tm_id": 3037,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Extremadura UD": {
+    "tm_slug": "extremadura-ud",
+    "tm_id": 29095,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Grenoble Foot 38": {
+    "tm_slug": "grenoble-foot-38",
+    "tm_id": 1290,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "AS Béziers": {
+    "tm_slug": "as-beziers",
+    "tm_id": 10867,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Al Hazem": {
+    "tm_slug": "al-hazm",
+    "tm_id": 9131,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "San Martin de Tucumán": {
+    "tm_slug": "ca-san-martin-tucuman-",
+    "tm_id": 12709,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "FC Emmen": {
+    "tm_slug": "fc-emmen",
+    "tm_id": 1283,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Club Atlético de San Luis": {
+    "tm_slug": "atletico-de-san-luis",
+    "tm_id": 40188,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Denizlispor": {
+    "tm_slug": "denizlispor",
+    "tm_id": 833,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Gazişehir Gaziantep F.K.": {
+    "tm_slug": "gaziantep-fk",
+    "tm_id": 2832,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Futebol Clube de Famalicão": {
+    "tm_slug": "fc-famalicao",
+    "tm_id": 3329,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "FC Cincinnati": {
+    "tm_slug": "fc-cincinnati",
+    "tm_id": 51772,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Club Atlético Central Córdoba": {
+    "tm_slug": "club-atletico-central-cordoba-sde-",
+    "tm_id": 31284,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "Pordenone": {
+    "tm_slug": "pordenone-calcio",
+    "tm_id": 21331,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Fútbol Club Juárez": {
+    "tm_slug": "fc-juarez",
+    "tm_id": 49283,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "Damac FC": {
+    "tm_slug": "damac-fc",
+    "tm_id": 50532,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "Castellammare di Stabia": {
+    "tm_slug": "as-stabia-friends",
+    "tm_id": 94738,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "CF Fuenlabrada": {
+    "tm_slug": "fc-fuenlabrada",
+    "tm_id": 16486,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "VfL Osnabrück": {
+    "tm_slug": "vfl-osnabruck",
+    "tm_id": 81,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "SV Wehen Wiesbaden": {
+    "tm_slug": "sv-wehen-wiesbaden",
+    "tm_id": 108,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Abha Club": {
+    "tm_slug": "abha-club",
+    "tm_id": 40039,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "FC Chambly Oise": {
+    "tm_slug": "fc-chambly",
+    "tm_id": 35012,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Al Adalah": {
+    "tm_slug": "al-adalah-fc",
+    "tm_id": 55544,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "RKC Waalwijk": {
+    "tm_slug": "rkc-waalwijk",
+    "tm_id": 235,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Rodez Aveyron Football": {
+    "tm_slug": "rodez-af",
+    "tm_id": 11273,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "Inter Miami CF": {
+    "tm_slug": "inter-miami-cf",
+    "tm_id": 69261,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Fatih Karagümrük S.K.": {
+    "tm_slug": "fatih-karagumruk",
+    "tm_id": 6646,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Atakaş Hatayspor": {
+    "tm_slug": "hatayspor",
+    "tm_id": 7775,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Mazatlán Futbol Club": {
+    "tm_slug": "mazatlan-fc",
+    "tm_id": 82696,
+    "league": "Mexican Liga MX",
+    "ok": true
+  },
+  "AC Monza": {
+    "tm_slug": "ac-monza",
+    "tm_id": 2919,
+    "league": "Italian Serie B",
+    "ok": true
+  },
+  "Nashville SC": {
+    "tm_slug": "nashville-sc",
+    "tm_id": 63966,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "FC Cartagena": {
+    "tm_slug": "fc-cartagena",
+    "tm_id": 7077,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "SC Farense": {
+    "tm_slug": "sc-farense",
+    "tm_id": 4294,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "UD Logroñés": {
+    "tm_slug": "ud-logrones",
+    "tm_id": 24420,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Wycombe Wanderers": {
+    "tm_slug": "wycombe-wanderers",
+    "tm_id": 2805,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "C.D. Castellón": {
+    "tm_slug": "cd-castellon",
+    "tm_id": 2502,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Pau FC": {
+    "tm_slug": "pau-fc",
+    "tm_id": 3166,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "USL Dunkerque": {
+    "tm_slug": "usl-dunkerque",
+    "tm_id": 9202,
+    "league": "French Ligue 2",
+    "ok": true
+  },
+  "UD Ibiza": {
+    "tm_slug": "ud-ibiza",
+    "tm_id": 13241,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Adana Demirspor": {
+    "tm_slug": "adana-demirspor",
+    "tm_id": 3840,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Austin FC": {
+    "tm_slug": "austin-fc",
+    "tm_id": 72309,
+    "league": "USA Major League Soccer",
+    "ok": true
+  },
+  "Al Tai": {
+    "tm_slug": "al-taee",
+    "tm_id": 40079,
+    "league": "Saudi Abdul L. Jameel League",
+    "ok": true
+  },
+  "FC Vizela": {
+    "tm_slug": "fc-vizela",
+    "tm_id": 6912,
+    "league": "Portuguese Liga ZON SAGRES",
+    "ok": true
+  },
+  "Platense": {
+    "tm_slug": "club-atletico-platense",
+    "tm_id": 928,
+    "league": "Argentina Primera División",
+    "ok": true
+  },
+  "SD Amorebieta": {
+    "tm_slug": "sd-amorebieta",
+    "tm_id": 16575,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Peterborough United": {
+    "tm_slug": "peterborough-united",
+    "tm_id": 1072,
+    "league": "English League Championship",
+    "ok": true
+  },
+  "Altay SK": {
+    "tm_slug": "altay-sk",
+    "tm_id": 2375,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "GZT Giresunspor": {
+    "tm_slug": "giresunspor",
+    "tm_id": 11688,
+    "league": "Turkish Süper Lig",
+    "ok": true
+  },
+  "Burgos CF": {
+    "tm_slug": "burgos-cf",
+    "tm_id": 1536,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "F.C. Hansa Rostock": {
+    "tm_slug": "fc-hansa-rostock",
+    "tm_id": 30,
+    "league": "German 2. Bundesliga",
+    "ok": true
+  },
+  "Real Sociedad B": {
+    "tm_slug": "real-sociedad-b",
+    "tm_id": 9899,
+    "league": "Spanish Segunda División",
+    "ok": true
+  },
+  "Tigres UANL": {
+    "tm_slug": "tigres-uanl",
+    "tm_id": 7055,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Sporting Clube de Braga": {
+    "tm_slug": "sc-braga",
+    "tm_id": 1075,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Atlas FC": {
+    "tm_slug": "atlas-guadalajara",
+    "tm_id": 8590,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Monterrey": {
+    "tm_slug": "cf-monterrey",
+    "tm_id": 2407,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Medipol Başakşehir FK": {
+    "tm_slug": "istanbul-basaksehir-fk",
+    "tm_id": 6890,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Inter Miami": {
+    "tm_slug": "inter-miami-cf",
+    "tm_id": 69261,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "Colón": {
+    "tm_slug": "club-atletico-colon",
+    "tm_id": 1070,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Pumas UNAM": {
+    "tm_slug": "unam-pumas",
+    "tm_id": 7633,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Independiente": {
+    "tm_slug": "club-atletico-independiente",
+    "tm_id": 1234,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Al Taawoun FC": {
+    "tm_slug": "al-taawoun-fc",
+    "tm_id": 28844,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Fatih Karagümrük": {
+    "tm_slug": "fatih-karagumruk",
+    "tm_id": 6646,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Guadalajara": {
+    "tm_slug": "deportivo-guadalajara",
+    "tm_id": 6711,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Chicago Fire": {
+    "tm_slug": "chicago-fire-fc",
+    "tm_id": 432,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "Atlético de San Luis": {
+    "tm_slug": "atletico-de-san-luis",
+    "tm_id": 40188,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Al Ahli SFC": {
+    "tm_slug": "al-ahli-dschidda",
+    "tm_id": 18487,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Al Ettifaq": {
+    "tm_slug": "al-ettifaq",
+    "tm_id": 7732,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Sivasspor": {
+    "tm_slug": "sivasspor",
+    "tm_id": 2381,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Vitória SC": {
+    "tm_slug": "vitoria-guimaraes-sc",
+    "tm_id": 2420,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Toluca": {
+    "tm_slug": "deportivo-toluca",
+    "tm_id": 1804,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Tijuana": {
+    "tm_slug": "club-tijuana",
+    "tm_id": 13353,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Huracán": {
+    "tm_slug": "club-atletico-huracan",
+    "tm_id": 2063,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Marítimo": {
+    "tm_slug": "cs-maritimo",
+    "tm_id": 1301,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "DC United": {
+    "tm_slug": "d-c-united",
+    "tm_id": 2440,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "CF Montréal": {
+    "tm_slug": "club-de-foot-montreal",
+    "tm_id": 4078,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "FC Juárez": {
+    "tm_slug": "fc-juarez",
+    "tm_id": 49283,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Alanyaspor": {
+    "tm_slug": "alanyaspor",
+    "tm_id": 11282,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Lanús": {
+    "tm_slug": "club-atletico-lanus",
+    "tm_id": 333,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Talleres": {
+    "tm_slug": "club-atletico-talleres",
+    "tm_id": 3938,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Reading FC": {
+    "tm_slug": "fc-reading",
+    "tm_id": 1032,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "Mazatlán FC": {
+    "tm_slug": "mazatlan-fc",
+    "tm_id": 82696,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Kayserispor": {
+    "tm_slug": "kayserispor",
+    "tm_id": 3205,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Middlesbrough FC": {
+    "tm_slug": "fc-middlesbrough",
+    "tm_id": 641,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "NEC Nijmegen": {
+    "tm_slug": "nec-nijmegen",
+    "tm_id": 467,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Gaziantep FK": {
+    "tm_slug": "gaziantep-fk",
+    "tm_id": 2832,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Millwall FC": {
+    "tm_slug": "fc-millwall",
+    "tm_id": 1028,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "Orlando City SC": {
+    "tm_slug": "orlando-city-sc",
+    "tm_id": 45604,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "Kasımpaşa SK": {
+    "tm_slug": "kasimpasa",
+    "tm_id": 10484,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "CA Aldosivi": {
+    "tm_slug": "club-atletico-aldosivi",
+    "tm_id": 12301,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Konyaspor": {
+    "tm_slug": "konyaspor",
+    "tm_id": 2293,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Famalicão": {
+    "tm_slug": "fc-famalicao",
+    "tm_id": 3329,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Hatayspor": {
+    "tm_slug": "hatayspor",
+    "tm_id": 7775,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Club Atlético Unión": {
+    "tm_slug": "club-atletico-union",
+    "tm_id": 7097,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Necaxa": {
+    "tm_slug": "club-necaxa",
+    "tm_id": 1146,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Giresunspor": {
+    "tm_slug": "giresunspor",
+    "tm_id": 11688,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "CA Banfield": {
+    "tm_slug": "club-atletico-banfield",
+    "tm_id": 830,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Querétaro": {
+    "tm_slug": "queretaro-fc",
+    "tm_id": 4961,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "B-SAD": {
+    "tm_slug": "belenenses-sad",
+    "tm_id": 2457,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Vizela": {
+    "tm_slug": "fc-vizela",
+    "tm_id": 6912,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Abha": {
+    "tm_slug": "abha-club",
+    "tm_id": 40039,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "GD Estoril Praia": {
+    "tm_slug": "gd-estoril-praia",
+    "tm_id": 1465,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Central Cordoba SdE": {
+    "tm_slug": "club-atletico-central-cordoba-sde-",
+    "tm_id": 31284,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Al Hazem FC": {
+    "tm_slug": "al-hazm",
+    "tm_id": 9131,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Altay": {
+    "tm_slug": "altay-sk",
+    "tm_id": 2375,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "En Avant Guingamp": {
+    "tm_slug": "ea-guingamp",
+    "tm_id": 855,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Hansa Rostock": {
+    "tm_slug": "fc-hansa-rostock",
+    "tm_id": 30,
+    "league": "2. Bundesliga (Germany)",
+    "ok": true
+  },
+  "Chamois Niortais FC": {
+    "tm_slug": "chamois-niortais-fc",
+    "tm_id": 1161,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Dynamo Dresden": {
+    "tm_slug": "sg-dynamo-dresden",
+    "tm_id": 129,
+    "league": "2. Bundesliga (Germany)",
+    "ok": true
+  },
+  "Blackpool FC": {
+    "tm_slug": "fc-blackpool",
+    "tm_id": 1181,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "Real Sociedad de Fútbol B": {
+    "tm_slug": "real-sociedad-b",
+    "tm_id": 9899,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "Arsenal de Sarandi": {
+    "tm_slug": "arsenal-futbol-club",
+    "tm_id": 4673,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Quevilly Rouen Métropole": {
+    "tm_slug": "quevilly-rouen-metropole",
+    "tm_id": 7124,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Tigre": {
+    "tm_slug": "club-atletico-tigre",
+    "tm_id": 11831,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Casa Pia": {
+    "tm_slug": "casa-pia-ac",
+    "tm_id": 3268,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Charlotte FC": {
+    "tm_slug": "charlotte-fc",
+    "tm_id": 78435,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "Palermo FC": {
+    "tm_slug": "us-palermo",
+    "tm_id": 480,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "SSC Bari": {
+    "tm_slug": "ssc-bari",
+    "tm_id": 332,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Al Adalah FC": {
+    "tm_slug": "al-adalah-fc",
+    "tm_id": 55544,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "İstanbulspor": {
+    "tm_slug": "istanbulspor",
+    "tm_id": 924,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "AS Reggina 1914": {
+    "tm_slug": "reggina-1914",
+    "tm_id": 1386,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "FC Volendam": {
+    "tm_slug": "fc-volendam",
+    "tm_id": 724,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "Villarreal CF B": {
+    "tm_slug": "fc-villarreal-b",
+    "tm_id": 11972,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "FC Andorra": {
+    "tm_slug": "fc-andorra",
+    "tm_id": 10718,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "FC Hansa Rostock": {
+    "tm_slug": "fc-hansa-rostock",
+    "tm_id": 30,
+    "league": "2. Bundesliga (Germany)",
+    "ok": true
+  },
+  "Barracas Central": {
+    "tm_slug": "club-atletico-barracas-central",
+    "tm_id": 25184,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Ümraniyespor": {
+    "tm_slug": "umraniyespor",
+    "tm_id": 24245,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Albacete Balompié": {
+    "tm_slug": "albacete-balompie",
+    "tm_id": 1532,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "Südtirol": {
+    "tm_slug": "fc-sudtirol",
+    "tm_id": 4554,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "FC Annecy": {
+    "tm_slug": "fc-annecy",
+    "tm_id": 30204,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Sporting Club Bastia": {
+    "tm_slug": "sc-bastia",
+    "tm_id": 595,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Reggina 1914": {
+    "tm_slug": "reggina-1914",
+    "tm_id": 1386,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Brescia Calcio": {
+    "tm_slug": "brescia-calcio",
+    "tm_id": 1393,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "AC Perugia Calcio": {
+    "tm_slug": "ac-perugia-calcio",
+    "tm_id": 839,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "St. Louis CITY SC": {
+    "tm_slug": "st-louis-city-sc",
+    "tm_id": 82686,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "Samsunspor": {
+    "tm_slug": "samsunspor",
+    "tm_id": 152,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Al Okhdood": {
+    "tm_slug": "al-akhdoud-club",
+    "tm_id": 71665,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Instituto Atlético Central Córdoba": {
+    "tm_slug": "instituto-ac-cordoba",
+    "tm_id": 1829,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Pendikspor": {
+    "tm_slug": "pendikspor",
+    "tm_id": 3209,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Al Riyadh": {
+    "tm_slug": "al-riyadh-sc",
+    "tm_id": 31008,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Farense": {
+    "tm_slug": "sc-farense",
+    "tm_id": 4294,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Reggiana": {
+    "tm_slug": "ac-reggiana-1919",
+    "tm_id": 5621,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Estrela da Amadora": {
+    "tm_slug": "cf-estrela-amadora-sad",
+    "tm_id": 2431,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Plymouth Argyle": {
+    "tm_slug": "plymouth-argyle",
+    "tm_id": 2262,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "Racing de Ferrol": {
+    "tm_slug": "racing-ferrol",
+    "tm_id": 1176,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "CD Eldense": {
+    "tm_slug": "cd-eldense",
+    "tm_id": 12567,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "Catanzaro": {
+    "tm_slug": "us-catanzaro",
+    "tm_id": 4097,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Lecco": {
+    "tm_slug": "calcio-lecco-1912",
+    "tm_id": 5514,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Almere City FC": {
+    "tm_slug": "almere-city-fc",
+    "tm_id": 723,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "FeralpiSalò": {
+    "tm_slug": "feralpisalo-giovanili",
+    "tm_id": 26785,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "US Concarneau": {
+    "tm_slug": "us-concarneau",
+    "tm_id": 21688,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Al Qadsiah FC": {
+    "tm_slug": "al-qadisiyah-fc",
+    "tm_id": 26069,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Al Orobah FC": {
+    "tm_slug": "al-orubah",
+    "tm_id": 39536,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Bodrumspor": {
+    "tm_slug": "bodrumspor",
+    "tm_id": 44006,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Independiente Rivadavia": {
+    "tm_slug": "independiente-rivadavia",
+    "tm_id": 12179,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "RC Deportivo de La Coruña": {
+    "tm_slug": "rc-deportivo",
+    "tm_id": 969,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "Eyüpspor": {
+    "tm_slug": "eyupspor",
+    "tm_id": 7160,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "AVS Futebol SAD": {
+    "tm_slug": "avs-futebol-sad",
+    "tm_id": 110302,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Al Kholood": {
+    "tm_slug": "al-kholood",
+    "tm_id": 91427,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Portsmouth": {
+    "tm_slug": "fc-portsmouth",
+    "tm_id": 1020,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "Cesena FC": {
+    "tm_slug": "cesena-fc",
+    "tm_id": 1429,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "SC Preußen Münster": {
+    "tm_slug": "preussen-munster",
+    "tm_id": 91,
+    "league": "2. Bundesliga (Germany)",
+    "ok": true
+  },
+  "Oxford United": {
+    "tm_slug": "oxford-united",
+    "tm_id": 988,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "CD Castellón": {
+    "tm_slug": "cd-castellon",
+    "tm_id": 2502,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "SS Juve Stabia": {
+    "tm_slug": "ss-juve-stabia",
+    "tm_id": 5587,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Deportivo Riestra": {
+    "tm_slug": "cd-riestra",
+    "tm_id": 19775,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Mantova": {
+    "tm_slug": "mantova-1911",
+    "tm_id": 2581,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Carrarese": {
+    "tm_slug": "carrarese-calcio-1908",
+    "tm_id": 4159,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "SSV Ulm 1846": {
+    "tm_slug": "ssv-ulm-1846",
+    "tm_id": 69,
+    "league": "2. Bundesliga (Germany)",
+    "ok": true
+  },
+  "FC Martigues": {
+    "tm_slug": "fc-martigues",
+    "tm_id": 1165,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "NEOM SC": {
+    "tm_slug": "al-suqoor",
+    "tm_id": 34911,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "San Diego FC": {
+    "tm_slug": "san-diego-fc",
+    "tm_id": 114977,
+    "league": "Major League Soccer (United States)",
+    "ok": true
+  },
+  "Kocaelispor": {
+    "tm_slug": "kocaelispor",
+    "tm_id": 120,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Calcio Padova": {
+    "tm_slug": "calcio-padova",
+    "tm_id": 3037,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Delfino Pescara 1936": {
+    "tm_slug": "delfino-pescara-1936",
+    "tm_id": 2921,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Alverca": {
+    "tm_slug": "fc-alverca",
+    "tm_id": 2521,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "Al Najma SC": {
+    "tm_slug": "al-najma",
+    "tm_id": 32328,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Wrexham": {
+    "tm_slug": "afc-wrexham",
+    "tm_id": 1112,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "AD Ceuta FC": {
+    "tm_slug": "ad-ceuta",
+    "tm_id": 8568,
+    "league": "La Liga 2 (Spain)",
+    "ok": true
+  },
+  "Telstar": {
+    "tm_slug": "sc-telstar",
+    "tm_id": 1434,
+    "league": "Holland Eredivisie",
+    "ok": true
+  },
+  "US Boulogne Cote d'Opale": {
+    "tm_slug": "us-boulogne",
+    "tm_id": 7042,
+    "league": "Ligue 2 (France)",
+    "ok": true
+  },
+  "Virtus Entella": {
+    "tm_slug": "virtus-entella",
+    "tm_id": 20519,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "Club Atlético San Martín": {
+    "tm_slug": "club-atletico-san-martin-sj-",
+    "tm_id": 10511,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Al Diriyah": {
+    "tm_slug": "al-diriyah",
+    "tm_id": 52358,
+    "league": "Pro League (Saudi Arabia)",
+    "ok": true
+  },
+  "Gimnasia y Esgrima de Mendoza": {
+    "tm_slug": "gimnasia-y-esgrima-de-mendoza",
+    "tm_id": 14687,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Çorum FK": {
+    "tm_slug": "corum-fk",
+    "tm_id": 37951,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Amed SK": {
+    "tm_slug": "amed-sk",
+    "tm_id": 12382,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Erzurumspor FK": {
+    "tm_slug": "buyuksehir-belediye-erzurumspor",
+    "tm_id": 39722,
+    "league": "Süper Lig (Türkiye)",
+    "ok": true
+  },
+  "Academico Viseu": {
+    "tm_slug": "academico-viseu-fc",
+    "tm_id": 7788,
+    "league": "Primeira Liga (Portugal)",
+    "ok": true
+  },
+  "FC Energie Cottbus": {
+    "tm_slug": "fc-energie-cottbus",
+    "tm_id": 25,
+    "league": "2. Bundesliga (Germany)",
+    "ok": true
+  },
+  "Atlante": {
+    "tm_slug": "cf-atlante",
+    "tm_id": 6709,
+    "league": "Liga BBVA MX (Mexico)",
+    "ok": true
+  },
+  "Estudiantes de Río Cuarto": {
+    "tm_slug": "aa-estudiantes-de-rio-cuarto",
+    "tm_id": 14602,
+    "league": "Liga Profesional de Fútbol (Argentina)",
+    "ok": true
+  },
+  "Lincoln City": {
+    "tm_slug": "lincoln-city",
+    "tm_id": 1198,
+    "league": "Championship (England)",
+    "ok": true
+  },
+  "Arezzo": {
+    "tm_slug": "ss-arezzo",
+    "tm_id": 4255,
+    "league": "Serie B (Italy)",
+    "ok": true
+  },
+  "RC Celta Fortuna": {
+    "tm_slug": "celta-vigo-b",
+    "tm_id": 8733,
+    "league": "La Liga 2 (Spain)",
     "ok": true
   }
 }
