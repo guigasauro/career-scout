@@ -2,7 +2,7 @@
 
 > Título de trabalho: **career-scout**. Ferramenta de scouting para o Modo Carreira do FIFA/EA FC.
 > Esta é a fonte de verdade do projeto. Leia tudo antes de escrever ou alterar código.
-> Status atual: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Overview do clube em painel enxuto + modal detalhado. Score de matching com normalização por eixos ativos, knob de potencial, desconto D2 e **modo reforço** (ancoragem no overall titular do elenco). Scraper SoFIFA (`sofifa_scraper.py`) cobre FIFA 23+/FC 24-26 via cookies manuais (Cloudflare bloqueia requests puro e soccerdata — ver §4 D6). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
+> **Pivô em andamento (2026-10): scouting por estatísticas avançadas — ver §18.** Status do modo FIFA: **Frontend operacional** — pipeline completo (estágios 1–3) exposto via FastAPI + interface web. 150 clubes das 5 grandes ligas mapeados TM ↔ SoFIFA. Limpeza de dados de chegadas implementada (dedup cross-season, filtro de retornos de empréstimo e promoções internas). Overview do clube em painel enxuto + modal detalhado. Score de matching com normalização por eixos ativos, knob de potencial, desconto D2 e **modo reforço** (ancoragem no overall titular do elenco). Scraper SoFIFA (`sofifa_scraper.py`) cobre FIFA 23+/FC 24-26 via cookies manuais (Cloudflare bloqueia requests puro e soccerdata — ver §4 D6). Próximo: seletor de versão de elenco (parâmetro `?r=` SoFIFA); expansão para mais ligas.
 
 ---
 
@@ -479,3 +479,46 @@ python seed_clubs.py
 
 ### Estado atual
 5 grandes ligas + Championship, La Liga 2, Serie B, 2. Bundesliga, Ligue 2, Portugal, Holanda, Argentina, MLS, Liga MX, Turquia e Arábia Saudita (Brasileirão de fora: não é licenciado no jogo). Todos os clubes dessas ligas em todas as edições (15–27, nas duas versões de elenco) mapeados. Mapeados à mão: `AC Arles Avignon` → `athletic-club-arlesien/11300` (o TM usa o nome original do clube) e `Al Riyadh` → `al-riyadh-sc/31008` (a busca do TM não acha). Nomes com patrocinador (ex.: "Yukatel Kayserispor") ou siglas pontuadas não são achados pela busca — foram mapeados à mão com buscas limpas e revisados.
+
+---
+
+## 18. Pivô: scouting por estatísticas avançadas (portfólio)
+
+> Decidido em 2026-10-13. O modo FIFA (§1–17) continua funcionando como módulo à parte. Objetivo do pivô: recomendar jogadores reais a partir das **deficiências estatísticas do clube na temporada**, não do padrão histórico de contratação. Uso: **portfólio** (não comercial) — por isso dados abertos agora, e a camada de dados isolada para trocar por fonte licenciada depois.
+
+### 18.1 Fontes de dados (decisão)
+| Fonte | Status | Motivo |
+|---|---|---|
+| **StatsBomb Open Data** | ✅ **base do protótipo** | Dados de evento completos (xG por chute, passes, pressões, duelos), uso livre não comercial com crédito. Temporada **2015/16 completa das 5 grandes ligas** (`SEASONS` em `analytics/statsbomb.py`). Repositório: github.com/statsbomb/open-data |
+| Transfermarkt | ✅ reaproveitado | Valor de mercado, idade, contrato e transferências (já raspado em §6) |
+| FBref | ❌ | Perdeu xG e métricas avançadas em 20/01/2026 (Opta cortou o acesso e exigiu apagar o histórico). Só sobra estatística básica |
+| Understat | ❌ | `robots.txt` com `Disallow: /` para todos (conferido em 2026-10-13) |
+| Sofascore | ❌ | Sem API pública; termos proíbem coleta automática; anti-bot |
+| Opta / StatsBomb / Wyscout pagos | futuro | O que clubes usam. Wyscout ~€15–30 mil/ano por clube; StatsBomb e Opta sob contrato, dezenas de milhares de euros/ano (estimativas públicas, sem preço oficial) |
+
+**Limite assumido:** só 2015/16 (dados antigos). Vantagem: dá para **validar** — deficiências de 2015/16 × contratações reais do verão de 2016 (TM).
+
+### 18.2 Método
+1. **Estatísticas da temporada** (`analytics/statsbomb.py`): jogo a jogo → somas por jogador (minutos pela escalação) e por time (a favor e contra). CSVs em `data/processed/sb_{temporada}_{players|teams}.csv`.
+2. **Deficiências do time:** métricas por 90 (defensivas ajustadas pela posse) em **percentil da liga** e comparadas com os times do **patamar-alvo** (ex.: 4º–7º para quem mira Europa), não com o campeão.
+3. **Deficiência → posição/função:** ex.: xG contra alto → zaga/volante; pouco xA/passes na área → meias/pontas.
+4. **Perfil-alvo da função:** métricas por 90 que importam nela (pesos por função).
+5. **Ranking de candidatos:** semelhança ao perfil (mesma estrutura do `rank_candidates`: eixos ponderados, score [0,1], detalhe por eixo), com mínimo de minutos e ajuste pela força da liga.
+6. **Filtros de realidade (TM):** idade, valor de mercado, contrato.
+7. **Validação:** casos conhecidos de 2015/16 → verão de 2016.
+
+### 18.3 Ordem do protótipo
+1. ✅ Carregador StatsBomb + agregação por jogador/time (Premier League 2015/16). Testes em `tests/test_statsbomb.py`.
+2. ✅ Relatório de deficiências (`analytics/deficiencies.py`): 16 métricas por jogo, percentil na liga e `gap` até a média do patamar-alvo (default top 4, `--target`), em desvios-padrão da liga; negativo = deficiência. Cada métrica aponta as linhas (DEF/MID/ATT) que mais pesam nela. CLI: `python -m career_scout.analytics.deficiencies premier-league-2015-16 Chelsea`.
+3. Recomendação por deficiência (10 candidatos), dentro da própria liga; depois as 5 ligas com ajuste de força.
+4. Valor de mercado/idade do TM nos candidatos.
+5. Validação com contratações reais do verão de 2016.
+6. Interface (aba nova no frontend atual).
+
+### 18.4 Notas do carregador
+- Cache cru em `data/raw/statsbomb/*.json.gz` (gzip: um jogo cru tem ~4MB; 380 jogos).
+- Passe: tiro de meta e saída de bola não contam. Completo = sem `outcome`. **Progressivo** = avança ≥10 jardas (simplificação, não a regra da Opta). xA = xG do chute que o passe gerou (`assisted_shot_id`).
+- `npxg` exclui pênaltis. Gols contra não entram em `goals`/`goals_against` (só chutes).
+- Posse aproximada por `passes_share` (fatia dos passes do jogo).
+- Jogador transferido no meio da temporada fica com o último clube.
+- Classificação (`points`, `goals_for`, `goals_conceded`, `rank`) vem do placar oficial dos jogos. Conferida contra a tabela real de 2015/16 (Leicester 81, Arsenal 71, Tottenham 70…; Kane 25 gols, Özil 19 assistências).
