@@ -18,6 +18,7 @@ class Metric:
     label: str
     better: int          # +1 = maior é melhor; −1 = menor é melhor (números "contra")
     lines: tuple[str, ...]  # linhas que mais influenciam a métrica (deficiência → posição)
+    group: str = ""      # attack / creation / defense — só agrupa a tabela na tela
 
 
 def _per_match(t: dict, k: str) -> float:
@@ -32,25 +33,25 @@ def _padj(t: dict, k: str) -> float:
 
 
 METRICS: list[tuple[Metric, callable]] = [
-    (Metric("npxg", "xG sem pênaltis", +1, ("ATT", "MID")), lambda t: _per_match(t, "npxg")),
-    (Metric("shots", "Chutes", +1, ("ATT",)), lambda t: _per_match(t, "shots")),
-    (Metric("xg_per_shot", "xG por chute (qualidade da chance)", +1, ("ATT", "MID")),
+    (Metric("npxg", "xG sem pênaltis", +1, ("ATT", "MID"), "attack"), lambda t: _per_match(t, "npxg")),
+    (Metric("shots", "Chutes", +1, ("ATT",), "attack"), lambda t: _per_match(t, "shots")),
+    (Metric("xg_per_shot", "xG por chute (qualidade da chance)", +1, ("ATT", "MID"), "attack"),
      lambda t: float(t["npxg"]) / float(t["shots"]) if float(t["shots"]) else 0.0),
-    (Metric("xa", "xA (chances criadas)", +1, ("MID", "ATT")), lambda t: _per_match(t, "xa")),
-    (Metric("passes_into_box", "Passes para a área", +1, ("MID", "ATT", "DEF")), lambda t: _per_match(t, "passes_into_box")),
-    (Metric("progressive_passes", "Passes progressivos", +1, ("MID", "DEF")), lambda t: _per_match(t, "progressive_passes")),
-    (Metric("pass_pct", "Passes certos (%)", +1, ("MID", "DEF")),
+    (Metric("xa", "xA (chances criadas)", +1, ("MID", "ATT"), "creation"), lambda t: _per_match(t, "xa")),
+    (Metric("passes_into_box", "Passes para a área", +1, ("MID", "ATT", "DEF"), "creation"), lambda t: _per_match(t, "passes_into_box")),
+    (Metric("progressive_passes", "Passes progressivos", +1, ("MID", "DEF"), "creation"), lambda t: _per_match(t, "progressive_passes")),
+    (Metric("pass_pct", "Passes certos (%)", +1, ("MID", "DEF"), "creation"),
      lambda t: 100 * float(t["passes_completed"]) / float(t["passes"]) if float(t["passes"]) else 0.0),
-    (Metric("dribbles_completed", "Dribles certos", +1, ("ATT",)), lambda t: _per_match(t, "dribbles_completed")),
-    (Metric("possession", "Posse (fatia dos passes, %)", +1, ("MID",)), lambda t: 100 * float(t["passes_share"])),
-    (Metric("npxg_against", "xG sofrido sem pênaltis", -1, ("DEF", "MID", "GK")), lambda t: _per_match(t, "npxg_against")),
-    (Metric("shots_against", "Chutes sofridos", -1, ("DEF", "MID")), lambda t: _per_match(t, "shots_against")),
-    (Metric("box_entries_against", "Passes do adversário para a área", -1, ("DEF",)), lambda t: _per_match(t, "passes_into_box_against")),
-    (Metric("prog_against", "Passes progressivos do adversário", -1, ("MID", "ATT")), lambda t: _per_match(t, "progressive_passes_against")),
-    (Metric("padj_pressures", "Pressões (ajust. posse)", +1, ("MID", "ATT")), lambda t: _padj(t, "pressures")),
-    (Metric("padj_tackles_int", "Desarmes + interceptações (ajust. posse)", +1, ("DEF", "MID")),
+    (Metric("dribbles_completed", "Dribles certos", +1, ("ATT",), "attack"), lambda t: _per_match(t, "dribbles_completed")),
+    (Metric("possession", "Posse (fatia dos passes, %)", +1, ("MID",), "creation"), lambda t: 100 * float(t["passes_share"])),
+    (Metric("npxg_against", "xG sofrido sem pênaltis", -1, ("DEF", "MID", "GK"), "defense"), lambda t: _per_match(t, "npxg_against")),
+    (Metric("shots_against", "Chutes sofridos", -1, ("DEF", "MID"), "defense"), lambda t: _per_match(t, "shots_against")),
+    (Metric("box_entries_against", "Passes do adversário para a área", -1, ("DEF",), "defense"), lambda t: _per_match(t, "passes_into_box_against")),
+    (Metric("prog_against", "Passes progressivos do adversário", -1, ("MID", "ATT"), "defense"), lambda t: _per_match(t, "progressive_passes_against")),
+    (Metric("padj_pressures", "Pressões (ajust. posse)", +1, ("MID", "ATT"), "defense"), lambda t: _padj(t, "pressures")),
+    (Metric("padj_tackles_int", "Desarmes + interceptações (ajust. posse)", +1, ("DEF", "MID"), "defense"),
      lambda t: _padj(t, "tackles_won") + _padj(t, "interceptions")),
-    (Metric("aerials_won", "Duelos aéreos ganhos", +1, ("DEF", "ATT")), lambda t: _per_match(t, "aerials_won")),
+    (Metric("aerials_won", "Duelos aéreos ganhos", +1, ("DEF", "ATT"), "defense"), lambda t: _per_match(t, "aerials_won")),
 ]
 
 
@@ -76,7 +77,7 @@ def deficiencies(teams: list[dict], team: str, target: tuple[int, int] = (1, 4))
         # percentil: fração da liga que o time supera no sentido de "melhor"
         beats = sum(1 for v in vals if (mine - v) * m.better > 0)
         rows.append({
-            "metric": m.key, "label": m.label, "lines": m.lines, "better": m.better,
+            "metric": m.key, "label": m.label, "lines": m.lines, "better": m.better, "group": m.group,
             "value": mine, "target": tier_mean, "league_mean": mean,
             "pct": round(100 * beats / (len(vals) - 1)),
             "gap": round((mine - tier_mean) * m.better / std, 2),

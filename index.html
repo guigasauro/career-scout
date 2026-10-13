@@ -71,6 +71,7 @@
   #an-out:not(:empty) ~ .empty { display: none; }
   #an-out { display: grid; gap: 20px; }
   td.wrap { white-space: normal; }
+  .an-metrics tr.grp th { padding-top: 14px; font: 600 16px/1.2 var(--font-cond); color: var(--ink); background: var(--surface); border-bottom: 1px solid var(--line-strong); }
   .step label .info { margin-left: 6px; }
   .gap-neg { color: var(--danger); font-weight: 600; }
   .gap-pos { color: var(--pitch); font-weight: 600; }
@@ -488,6 +489,8 @@ const I18N = {
     th_metric: 'Métrica', th_team_val: 'Time', th_target_val: 'Alvo', th_pct: 'Percentil na liga', th_gap: 'Distância',
     an_gap_tip: 'Distância até a média do patamar, em desvios-padrão da liga. Negativo = abaixo do alvo; −0,5 ou menos conta como deficiência.',
     an_recs: 'Reforços sugeridos', an_fixes: 'Resolve', an_current: 'No elenco', an_none: 'Nenhuma deficiência clara em relação a esse patamar.',
+    th_league_avg: 'Média da liga', grp_attack: 'Ataque', grp_creation: 'Criação', grp_defense: 'Defesa',
+    ind_above: 'Acima da média da liga', ind_below: 'Abaixo da média da liga', ind_good: 'melhor que a média', ind_bad: 'pior que a média',
     an_team_opt: '{rank}º {team} · {pts} pts',
     an_scope: 'Buscar em', an_scope_all: 'Todas as ligas', an_scope_own: 'Mesma liga',
     an_league_tip: 'Em todas as ligas, o percentil é calculado dentro da liga de cada jogador e o score é multiplicado pela força da liga (coeficiente UEFA 2015/16).',
@@ -563,6 +566,8 @@ const I18N = {
     th_metric: 'Metric', th_team_val: 'Team', th_target_val: 'Target', th_pct: 'League percentile', th_gap: 'Gap',
     an_gap_tip: "Distance to the tier's average, in league standard deviations. Negative = below target; −0.5 or less counts as a weakness.",
     an_recs: 'Suggested signings', an_fixes: 'Addresses', an_current: 'In the squad', an_none: 'No clear weakness against this tier.',
+    th_league_avg: 'League average', grp_attack: 'Attack', grp_creation: 'Creation', grp_defense: 'Defence',
+    ind_above: 'Above the league average', ind_below: 'Below the league average', ind_good: 'better than average', ind_bad: 'worse than average',
     an_team_opt: '#{rank} {team} · {pts} pts',
     an_scope: 'Search in', an_scope_all: 'All leagues', an_scope_own: 'Same league',
     an_league_tip: "Across all leagues, the percentile is computed within each player's league and the score is multiplied by the league's strength (UEFA coefficient 2015/16).",
@@ -638,6 +643,8 @@ const I18N = {
     th_metric: 'Métrica', th_team_val: 'Equipo', th_target_val: 'Objetivo', th_pct: 'Percentil en la liga', th_gap: 'Distancia',
     an_gap_tip: 'Distancia a la media del nivel, en desviaciones estándar de la liga. Negativo = por debajo del objetivo; −0,5 o menos cuenta como carencia.',
     an_recs: 'Fichajes sugeridos', an_fixes: 'Resuelve', an_current: 'En la plantilla', an_none: 'Ninguna carencia clara frente a este nivel.',
+    th_league_avg: 'Media de la liga', grp_attack: 'Ataque', grp_creation: 'Creación', grp_defense: 'Defensa',
+    ind_above: 'Por encima de la media de la liga', ind_below: 'Por debajo de la media de la liga', ind_good: 'mejor que la media', ind_bad: 'peor que la media',
     an_team_opt: '{rank}º {team} · {pts} pts',
     an_scope: 'Buscar en', an_scope_all: 'Todas las ligas', an_scope_own: 'Misma liga',
     an_league_tip: 'En todas las ligas, el percentil se calcula dentro de la liga de cada jugador y el score se multiplica por la fuerza de la liga (coeficiente UEFA 2015/16).',
@@ -1427,17 +1434,28 @@ function anGap(g) { return `<span class="${g <= -0.5 ? 'gap-neg' : g >= 0.5 ? 'g
 function anRender() {
   const { team: d, recs, target } = _anData;
   const tname = t('an_t_' + target.replace('-', '_'));
-  const rows = d.deficiencies.map(r => `<tr>
+  // ▲/▼ = acima/abaixo da média da liga; a cor diz se isso é bom (nos números "contra", acima é ruim)
+  const vsAvg = r => {
+    const diff = r.value - r.league_mean;
+    if (anVal(r.metric, r.value) === anVal(r.metric, r.league_mean)) return '';  // iguais na precisão exibida
+    const good = diff * r.better > 0;
+    return ` <span class="${good ? 'gap-pos' : 'gap-neg'}" title="${tr(diff > 0 ? 'ind_above' : 'ind_below')} — ${tr(good ? 'ind_good' : 'ind_bad')}" aria-label="${tr(diff > 0 ? 'ind_above' : 'ind_below')}, ${tr(good ? 'ind_good' : 'ind_bad')}">${diff > 0 ? '▲' : '▼'}</span>`;
+  };
+  const row = r => `<tr>
       <td class="wrap">${tr('m_' + r.metric)}</td>
-      <td class="num">${anVal(r.metric, r.value)}</td>
+      <td class="num">${anVal(r.metric, r.value)}${vsAvg(r)}</td>
+      <td class="num muted hide-sm">${anVal(r.metric, r.league_mean)}</td>
       <td class="num muted hide-sm">${anVal(r.metric, r.target)}</td>
       <td class="num hide-sm"><div class="score-bar"><div class="bar"><div class="fill" style="width:${r.pct}%"></div></div><span class="val">${r.pct}</span></div></td>
       <td class="num">${anGap(r.gap)}</td>
-    </tr>`).join('');
+    </tr>`;
+  // um bloco por grupo; dentro dele a ordem do backend (maior deficiência → maior força)
+  const rows = ['attack', 'creation', 'defense'].map(g => `<tr class="grp"><th colspan="6">${tr('grp_' + g)}</th></tr>` +
+    d.deficiencies.filter(r => r.group === g).map(row).join('')).join('');
   const teamCard = `<section class="card">
     <div class="card-header">${esc(d.team)} <span class="muted" style="font:400 14px var(--font)">${tr('an_record', { rank: d.rank, pts: d.points, gf: d.goals_for, ga: d.goals_conceded })}</span></div>
-    <div class="table-wrap"><table class="sortable">
-      <thead>${thead('th_metric', '>th_team_val', `~>${t('th_target_val')} (${tname})`, '~>th_pct', '>th_gap')}</thead>
+    <div class="table-wrap"><table class="an-metrics">
+      <thead>${thead('th_metric', '>th_team_val', '~>th_league_avg', `~>${t('th_target_val')} (${tname})`, '~>th_pct', '>th_gap')}</thead>
       <tbody>${rows}</tbody>
     </table></div>
     <p class="hint card-body">${tr('an_gap_tip')} ${tr('an_src')}</p>

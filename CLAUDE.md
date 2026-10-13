@@ -523,7 +523,7 @@ python seed_clubs.py
    - Casamento por liga (2015/16): Premier League 548/550, La Liga 531/539, Serie A 550/551, Ligue 1 573/574. Nomes do StatsBomb que diferem do mapeamento ficam em `TEAM_ALIASES` (`market.py`).
    - Achado no caminho: o **Everton** estava com o id 45 (Hertha BSC II) no `club_mapping.json` desde o primeiro mapeamento — corrigido para 29 (afetava o modo FIFA).
 5. Validação com contratações reais do verão de 2016.
-6. ✅ Interface: modo **"Análise de dados"** no header (`setMode`, `#analise` na URL), ao lado do Modo Carreira. Seletores de temporada, time, patamar (Campeão / Top 4 / 5º–7º / 8º–12º), idade e valor máximos; tabela das 16 métricas com percentil e distância; um cartão por função com as deficiências que resolve, os jogadores atuais e os candidatos (idade, valor, minutos, score e as estatísticas por 90, com o percentil no tooltip). pt/en/es.
+6. ✅ Interface: modo **"Análise de dados"** no header (`setMode`, `#analise` na URL), ao lado do Modo Carreira. Seletores de temporada, time, patamar (Campeão / Top 4 / 5º–7º / 8º–12º), idade e valor máximos; tabela das 16 métricas agrupada em **Ataque / Criação / Defesa** (`Metric.group`), com valor do time + seta ▲/▼ contra a **média da liga** (cor = bom/ruim, já que nos números "contra" estar acima é ruim; sem seta quando iguais na precisão exibida), média da liga, alvo do patamar, percentil e distância; um cartão por função com as deficiências que resolve, os jogadores atuais e os candidatos (idade, valor, minutos, score e as estatísticas por 90, com o percentil no tooltip). pt/en/es.
 
 ### 18.4 Notas do carregador
 - Cache cru em `data/raw/statsbomb/*.json.gz` (gzip: um jogo cru tem ~4MB; 380 jogos).

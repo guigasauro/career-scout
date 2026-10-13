@@ -22,6 +22,10 @@ class TestDeficiencies(unittest.TestCase):
         self.assertLess(rows[0]["gap"], 0)
         self.assertEqual(rows[0]["pct"], 0)                    # pior da liga nisso
 
+    def test_every_metric_has_group(self):
+        rows = deficiencies(self.teams, "D", target=(1, 2))
+        self.assertEqual({r["group"] for r in rows}, {"attack", "creation", "defense"})
+
     def test_strength_has_positive_gap(self):
         teams = self.teams + [_team("E", 5, 40, npxg=60)]
         rows = deficiencies(teams, "E", target=(1, 2))
