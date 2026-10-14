@@ -118,7 +118,7 @@ def search_tm(club_name: str, nations: set[str] | None = None) -> tuple[str, int
 def main() -> None:
     filter_leagues = set(sys.argv[1:]) or None
 
-    mapping: dict = json.loads(MAPPING_PATH.read_text()) if MAPPING_PATH.exists() else {}
+    mapping: dict = json.loads(MAPPING_PATH.read_text(encoding="utf-8")) if MAPPING_PATH.exists() else {}
     all_clubs = collect_clubs(filter_leagues)
     todo = {name: league for name, league in all_clubs.items() if name not in mapping}
 
@@ -137,7 +137,7 @@ def main() -> None:
         if twin:
             mapping[name] = {**mapping[twin], "league": league}
             print(f"→ alias de {twin}")
-            MAPPING_PATH.write_text(json.dumps(mapping, ensure_ascii=False, indent=2))
+            MAPPING_PATH.write_text(json.dumps(mapping, ensure_ascii=False, indent=2), encoding="utf-8")
             continue
         slug, tid = search_tm(name, LEAGUE_NATIONS.get(league))
         if slug:
@@ -148,7 +148,7 @@ def main() -> None:
             print("→ não encontrado")
             mapping[name] = {"tm_slug": None, "tm_id": None, "league": league, "ok": False}
 
-        MAPPING_PATH.write_text(json.dumps(mapping, ensure_ascii=False, indent=2))
+        MAPPING_PATH.write_text(json.dumps(mapping, ensure_ascii=False, indent=2), encoding="utf-8")
         time.sleep(DELAY)
 
     ok = sum(1 for v in mapping.values() if v["ok"])

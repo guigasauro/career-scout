@@ -1,14 +1,17 @@
 """API FastAPI — career-scout."""
+import base64
 import csv
 import json
+import os
+import secrets
 from collections import Counter
 from dataclasses import asdict
 from pathlib import Path
 from statistics import mean, median
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
 from career_scout.analytics.budget import load_budgets as _load_budgets
@@ -140,7 +143,7 @@ def _load_clubs() -> list[dict]:
     if not path.exists():
         return _OVERRIDES
 
-    mapping: dict = json.loads(path.read_text())
+    mapping: dict = json.loads(path.read_text(encoding="utf-8"))
     by_sofifa = {c["sofifa_name"]: c for c in _OVERRIDES}
 
     clubs = list(_OVERRIDES)  # overrides primeiro
@@ -169,6 +172,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Senha para expor via túnel: só vale se SCOUT_PASSWORD estiver definida (qualquer usuário serve)
+_PASSWORD = os.environ.get("SCOUT_PASSWORD")
+
+
+@app.middleware("http")
+async def _basic_auth(request: Request, call_next):
+    if _PASSWORD:
+        try:
+            _, pw = base64.b64decode(request.headers["authorization"].removeprefix("Basic ")).decode().split(":", 1)
+        except Exception:
+            pw = ""
+        if not secrets.compare_digest(pw.encode(), _PASSWORD.encode()):
+            return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="career-scout"'})
+    return await call_next(request)
 
 
 @app.get("/")

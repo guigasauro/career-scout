@@ -372,7 +372,7 @@ def load_nat_map(data_dir: Path) -> dict[str, int]:
     p = data_dir / "raw" / "sofifa_lookups.json"
     if not p.exists():
         return {}
-    return json.load(open(p))["nationality"]
+    return json.loads(p.read_text(encoding="utf-8"))["nationality"]
 
 
 # --- Scraping paginado — modo COMPLETO ----------------------------------------
